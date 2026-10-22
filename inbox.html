@@ -1,0 +1,272 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#150a23">
+<title>Huka Voice Chat — Inbox</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#140920;--panel:#251535;--pink:#ff439d;--purple:#965cff;--muted:#bfaecc}
+body{font-family:Arial,sans-serif;background:var(--bg);color:white;padding-bottom:82px}
+button,input{font:inherit}
+button{cursor:pointer}
+header{padding:17px;display:flex;align-items:center;justify-content:space-between;background:#1c102b}
+header h1{font-size:21px}
+header button{border:0;border-radius:11px;background:#352043;color:white;padding:10px 13px}
+.search{margin:15px 13px;padding:12px 15px;border-radius:13px;background:#281837;display:flex;gap:10px;align-items:center}
+.search input{background:transparent;border:0;outline:none;color:white;width:100%;font-size:13px}
+.search input::placeholder{color:#a995b7}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:0 13px 16px;background:#21132e;padding:5px;border-radius:13px}
+.tabs button{background:transparent;border:0;border-radius:9px;padding:11px 3px;color:#c1adce;font-size:11px}
+.tabs button.active{background:linear-gradient(100deg,#8f4be8,#ec419c);color:white;font-weight:bold}
+.page-title{margin:0 15px 14px;display:flex;justify-content:space-between;align-items:center}
+.page-title h2{font-size:17px}
+.page-title span{font-size:11px;color:#d7b7f4}
+.list{margin:0 13px}
+.item{display:flex;align-items:center;gap:12px;padding:13px 10px;border-bottom:1px solid #33213f;min-width:0}
+.avatar{width:51px;height:51px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,#713ac4,#f044a1);position:relative}
+.avatar.online:after{content:"";position:absolute;right:1px;bottom:2px;width:10px;height:10px;background:#43e69a;border:2px solid var(--bg);border-radius:50%}
+.info{flex:1;min-width:0}
+.name-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.name{font-size:14px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:9px;color:#ffd5ec;background:#6c2b65;border-radius:5px;padding:3px 5px}
+.message{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.time{font-size:10px;color:#a995b7}
+.unread{min-width:18px;height:18px;padding:0 5px;border-radius:10px;display:grid;place-items:center;background:var(--pink);font-size:10px}
+.action{border:0;border-radius:9px;padding:9px 11px;font-size:11px;color:white;background:linear-gradient(100deg,#8950e9,#ed409b)}
+.action.secondary{background:#382448;border:1px solid #654277}
+.action.accept{background:#1b875c}
+.action:disabled{opacity:.6;cursor:default}
+.online-strip{display:flex;gap:15px;overflow-x:auto;padding:0 14px 18px}
+.online-person{flex-shrink:0;width:61px;text-align:center}
+.online-person .avatar{margin:0 auto 7px;width:48px;height:48px}
+.online-person p{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#d7c4e5}
+.empty{padding:48px 20px;text-align:center;color:var(--muted);line-height:1.8;font-size:13px}
+.empty div{font-size:43px;margin-bottom:12px}
+.notice-card{margin-bottom:10px;padding:15px;border-radius:14px;background:var(--panel);display:flex;gap:12px;align-items:flex-start}
+.notice-icon{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:22px;background:#49275f;flex-shrink:0}
+.notice-text{flex:1}
+.notice-text h3{font-size:13px;margin-bottom:7px}
+.notice-text p{font-size:11px;line-height:1.6;color:var(--muted)}
+.notice-text time{display:block;font-size:10px;color:#a995b7;margin-top:8px}
+.notice-card button{margin-top:10px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#1b1029;border-top:1px solid #40264f;display:flex;justify-content:space-around;padding:10px 4px max(10px,env(safe-area-inset-bottom));z-index:5}
+.bottom a{color:#ad9abb;text-decoration:none;text-align:center;font-size:10px}
+.bottom a span{display:block;font-size:21px;margin-bottom:4px}
+.bottom a.active{color:#ff62b4}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:#452456;padding:12px 18px;border-radius:12px;font-size:12px;display:none;z-index:10;box-shadow:0 5px 25px #0006;max-width:90%;text-align:center}
+.toast.show{display:block}
+@media(min-width:600px){body{max-width:560px;margin:auto}.bottom{max-width:560px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<header>
+<button onclick="location.href='index.html'">‹ Home</button>
+<h1>💌 Inbox</h1>
+<button onclick="markAllRead()">✓ Read</button>
+</header>
+
+<div class="search">
+<span>🔍</span>
+<input id="searchInput" type="search" placeholder="Search messages, friends..." oninput="render()">
+</div>
+
+<div class="tabs" id="tabs">
+<button class="active" data-tab="messages" onclick="switchTab('messages',this)">💬 Chats</button>
+<button data-tab="friends" onclick="switchTab('friends',this)">👥 Friends</button>
+<button data-tab="requests" onclick="switchTab('requests',this)">🤝 Requests</button>
+<button data-tab="notifications" onclick="switchTab('notifications',this)">🔔 Alerts</button>
+</div>
+
+<div class="page-title">
+<h2 id="pageTitle">Recent Messages</h2>
+<span id="pageCount">3 chats</span>
+</div>
+
+<section id="onlineSection" style="display:none">
+<div class="page-title"><h2>🟢 Online Friends</h2><span>Active now</span></div>
+<div class="online-strip" id="onlineStrip"></div>
+</section>
+
+<main class="list" id="list"></main>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom">
+<a href="index.html"><span>🏠</span>Home</a>
+<a class="active" href="inbox.html"><span>💌</span>Inbox</a>
+<a href="room.html?room=200001"><span>🎙️</span>Room</a>
+<a href="games.html"><span>🎮</span>Games</a>
+<a href="profile.html"><span>👤</span>Profile</a>
+</nav>
+
+<script>
+const defaultChats=[
+{id:1,name:'Riya Sharma',avatar:'👩🏻',badge:'VIP 3',message:'Hey! Come to my room 🎙️',time:'2 min',unread:2,online:true},
+{id:2,name:'Aman King',avatar:'😎',badge:'VIP 5',message:'Thanks for the gift! 🎁',time:'15 min',unread:1,online:true},
+{id:3,name:'Priya Angel',avatar:'👸🏻',badge:'VIP 2',message:'See you tonight ❤️',time:'1 hr',unread:0,online:false},
+{id:4,name:'Rahul Star',avatar:'🧑🏻',badge:'LV 25',message:'Let’s play a game!',time:'Yesterday',unread:0,online:false},
+{id:5,name:'Neha Queen',avatar:'👩🏼',badge:'VIP 4',message:'Nice meeting you!',time:'Yesterday',unread:0,online:true}
+];
+const defaultFriends=[
+{id:11,name:'Riya Sharma',avatar:'👩🏻',badge:'VIP 3',online:true},
+{id:12,name:'Aman King',avatar:'😎',badge:'VIP 5',online:true},
+{id:13,name:'Priya Angel',avatar:'👸🏻',badge:'VIP 2',online:false},
+{id:14,name:'Rahul Star',avatar:'🧑🏻',badge:'LV 25',online:false},
+{id:15,name:'Neha Queen',avatar:'👩🏼',badge:'VIP 4',online:true}
+];
+const defaultRequests=[
+{id:21,name:'Simran Rose',avatar:'🌹',badge:'LV 12',message:'Wants to be your friend'},
+{id:22,name:'Vicky Boss',avatar:'🕶️',badge:'VIP 1',message:'Wants to be your friend'},
+{id:23,name:'Anjali Moon',avatar:'🌙',badge:'LV 18',message:'Wants to be your friend'}
+];
+const defaultNotifications=[
+{id:31,icon:'🎁',title:'Gift Received',message:'Someone sent you a gift. Open your room to see more.',time:'5 min ago'},
+{id:32,icon:'🏆',title:'Ranking Update',message:'Check the latest Huka weekly rankings.',time:'1 hr ago'},
+{id:33,icon:'🎉',title:'Welcome to Huka!',message:'Explore voice rooms, games and meet new friends.',time:'Today'},
+{id:34,icon:'🎙️',title:'Popular Room',message:'Join a voice room and start chatting.',time:'Today'}
+];
+function load(key,fallback){
+ try{const data=JSON.parse(localStorage.getItem(key));return Array.isArray(data)?data:fallback}
+ catch(e){return fallback}
+}
+let chats=load('huka_inbox_chats',defaultChats);
+let friends=load('huka_inbox_friends',defaultFriends);
+let requests=load('huka_inbox_requests',defaultRequests);
+let notifications=load('huka_inbox_notifications',defaultNotifications);
+let currentTab='messages';
+function save(){
+ localStorage.setItem('huka_inbox_chats',JSON.stringify(chats));
+ localStorage.setItem('huka_inbox_friends',JSON.stringify(friends));
+ localStorage.setItem('huka_inbox_requests',JSON.stringify(requests));
+ localStorage.setItem('huka_inbox_notifications',JSON.stringify(notifications));
+}
+function switchTab(tab,button){
+ currentTab=tab;
+ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ render();
+}
+function showToast(message){
+ const toast=document.getElementById('toast');
+ toast.textContent=message;toast.classList.add('show');
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>toast.classList.remove('show'),2300);
+}
+function markAllRead(){
+ if(currentTab==='messages')chats.forEach(c=>c.unread=0);
+ else if(currentTab==='notifications')notifications.forEach(n=>n.read=true);
+ else{showToast('Choose Chats or Alerts to mark as read.');return}
+ save();render();showToast('All items marked as read.');
+}
+function makeAvatar(person){
+ const el=document.createElement('div');
+ el.className='avatar'+(person.online?' online':'');
+ el.textContent=person.avatar||'🙂';
+ return el;
+}
+function makeAction(label,handler,extra=''){
+ const b=document.createElement('button');
+ b.className='action '+extra;b.textContent=label;
+ b.onclick=handler;return b;
+}
+function render(){
+ const list=document.getElementById('list');
+ const q=document.getElementById('searchInput').value.toLowerCase().trim();
+ list.innerHTML='';
+ const titles={messages:'Recent Messages',friends:'My Friends',requests:'Friend Requests',notifications:'Notifications'};
+ document.getElementById('pageTitle').textContent=titles[currentTab];
+ document.getElementById('onlineSection').style.display=currentTab==='friends'?'block':'none';
+ let data=[];
+ if(currentTab==='messages'){
+  data=chats.filter(x=>(x.name+' '+x.message).toLowerCase().includes(q));
+  document.getElementById('pageCount').textContent=data.length+' chats';
+  data.forEach(person=>{
+   const row=document.createElement('div');row.className='item';
+   row.appendChild(makeAvatar(person));
+   const info=document.createElement('div');info.className='info';
+   const nameRow=document.createElement('div');nameRow.className='name-row';
+   const name=document.createElement('span');name.className='name';name.textContent=person.name;
+   const badge=document.createElement('span');badge.className='badge';badge.textContent=person.badge||'Member';
+   nameRow.append(name,badge);
+   const msg=document.createElement('div');msg.className='message';msg.textContent=person.message;
+   info.append(nameRow,msg);
+   const meta=document.createElement('div');meta.className='meta';
+   const time=document.createElement('span');time.className='time';time.textContent=person.time||'Now';
+   meta.appendChild(time);
+   if(person.unread){const unread=document.createElement('span');unread.className='unread';unread.textContent=person.unread;meta.appendChild(unread)}
+   row.append(info,meta);
+   row.onclick=()=>{person.unread=0;save();render();showToast('Demo chat with '+person.name+'. Live messaging needs a connected server.')}
+   list.appendChild(row);
+  });
+ }
+ if(currentTab==='friends'){
+  const onlineStrip=document.getElementById('onlineStrip');onlineStrip.innerHTML='';
+  friends.filter(x=>x.online).forEach(person=>{
+   const el=document.createElement('div');el.className='online-person';
+   el.appendChild(makeAvatar(person));
+   const name=document.createElement('p');name.textContent=person.name;
+   el.appendChild(name);onlineStrip.appendChild(el);
+  });
+  data=friends.filter(x=>x.name.toLowerCase().includes(q));
+  document.getElementById('pageCount').textContent=data.length+' friends';
+  data.forEach(person=>{
+   const row=document.createElement('div');row.className='item';row.appendChild(makeAvatar(person));
+   const info=document.createElement('div');info.className='info';
+   const name=document.createElement('div');name.className='name';name.textContent=person.name;
+   const msg=document.createElement('div');msg.className='message';msg.textContent=person.online?'🟢 Online now':'Offline';
+   info.append(name,msg);
+   row.append(info,makeAction('Message',()=>{const found=chats.find(c=>c.name===person.name);if(found){switchTab('messages',document.querySelector('[data-tab="messages"]'));document.getElementById('searchInput').value=person.name;render()}else showToast('Demo: messaging will work after server integration.')}));
+   list.appendChild(row);
+  });
+ }
+ if(currentTab==='requests'){
+  data=requests.filter(x=>x.name.toLowerCase().includes(q));
+  document.getElementById('pageCount').textContent=data.length+' requests';
+  data.forEach(person=>{
+   const row=document.createElement('div');row.className='item';row.appendChild(makeAvatar(person));
+   const info=document.createElement('div');info.className='info';
+   const name=document.createElement('div');name.className='name';name.textContent=person.name;
+   const msg=document.createElement('div');msg.className='message';msg.textContent=person.message;
+   info.append(name,msg);row.appendChild(info);
+   const actions=document.createElement('div');actions.style.display='flex';actions.style.flexDirection='column';actions.style.gap='6px';
+   actions.append(
+    makeAction('Accept',()=>{friends.push({...person,online:false});requests=requests.filter(x=>x.id!==person.id);save();render();showToast(person.name+' added to demo friends.')},'accept'),
+    makeAction('Decline',()=>{requests=requests.filter(x=>x.id!==person.id);save();render();showToast('Request declined.')},'secondary')
+   );
+   row.appendChild(actions);list.appendChild(row);
+  });
+ }
+ if(currentTab==='notifications'){
+  data=notifications.filter(x=>(x.title+' '+x.message).toLowerCase().includes(q));
+  document.getElementById('pageCount').textContent=data.length+' alerts';
+  data.forEach(note=>{
+   const card=document.createElement('div');card.className='notice-card';
+   const icon=document.createElement('div');icon.className='notice-icon';icon.textContent=note.icon;
+   const textBox=document.createElement('div');textBox.className='notice-text';
+   const title=document.createElement('h3');title.textContent=note.title+(note.read?'':' •');
+   const msg=document.createElement('p');msg.textContent=note.message;
+   const time=document.createElement('time');time.textContent=note.time;
+   textBox.append(title,msg,time);
+   if(note.title==='Popular Room'){
+    textBox.appendChild(makeAction('Open Rooms',()=>location.href='rooms.html'));
+   }
+   card.append(icon,textBox);list.appendChild(card);
+  });
+ }
+ if(!data.length){
+  const empty=document.createElement('div');empty.className='empty';
+  const icon=document.createElement('div');
+  icon.textContent={messages:'💬',friends:'👥',requests:'🤝',notifications:'🔔'}[currentTab];
+  const msg=document.createElement('p');
+  msg.textContent=q?'No matching items found.':({messages:'Your conversations will appear here.',friends:'Friends you add will appear here.',requests:'You have no pending friend requests.',notifications:'You’re all caught up!'})[currentTab];
+  empty.append(icon,msg);list.appendChild(empty);
+ }
+}
+render();
+</script>
+</body>
+</html>
+```
