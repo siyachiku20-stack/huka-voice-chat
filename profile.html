@@ -1,0 +1,259 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#150a23">
+<title>Huka Voice Chat — Profile</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#140920;--panel:#251535;--pink:#ff439d;--purple:#965cff;--muted:#c2afD2}
+body{font-family:Arial,sans-serif;background:var(--bg);color:white;padding-bottom:80px}
+button,input{font:inherit}
+button{cursor:pointer}
+header{display:flex;justify-content:space-between;align-items:center;padding:17px;background:#1c102b}
+header h1{font-size:20px}
+header button{background:#352043;color:white;border:0;border-radius:11px;padding:10px}
+.cover{height:150px;background:linear-gradient(125deg,#51217c,#bd328e,#ff8cae);position:relative}
+.cover:after{content:"✨ HUKA VOICE ✨";position:absolute;right:17px;bottom:17px;font-weight:bold;letter-spacing:3px;font-size:13px}
+.profile-card{margin:-45px 13px 16px;position:relative;background:var(--panel);border:1px solid #412951;border-radius:20px;padding:0 15px 17px}
+.profile-top{display:flex;align-items:flex-end;gap:13px}
+.avatar-wrap{width:100px;height:100px;margin-top:-28px;border-radius:29px;padding:5px;background:linear-gradient(135deg,#ffca70,#ff45ad,#9661ff);flex-shrink:0}
+.avatar{width:100%;height:100%;border-radius:24px;background:#362045;display:grid;place-items:center;font-size:47px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.identity{padding:12px 0 6px;min-width:0}
+.identity h2{font-size:19px;overflow-wrap:anywhere}
+.identity p{font-size:11px;color:var(--muted);margin-top:6px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.badge{font-size:10px;padding:5px 8px;border-radius:8px;background:linear-gradient(100deg,#8743e7,#e73d9d)}
+.profile-bio{font-size:12px;color:#d6c7e2;line-height:1.5;margin-top:14px}
+.actions{display:flex;gap:9px;margin-top:15px}
+.actions button{flex:1;border:0;border-radius:12px;padding:12px 5px;color:white;background:linear-gradient(100deg,#8e4ae9,#ed3f9a);font-size:12px;font-weight:bold}
+.actions button.secondary{background:#3b274c}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:0 13px 20px}
+.stat{background:var(--panel);border:1px solid #382247;border-radius:15px;text-align:center;padding:15px 4px}
+.stat .icon{font-size:22px}
+.stat strong{display:block;font-size:16px;margin:8px 0 5px}
+.stat small{font-size:10px;color:var(--muted)}
+.level-card{margin:0 13px 20px;background:linear-gradient(120deg,#38205d,#6a2871);border-radius:18px;padding:17px}
+.level-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.level-head h3{font-size:15px}
+.level-head span{font-size:12px;color:#ffe18a;font-weight:bold}
+.level-info{display:flex;justify-content:space-between;font-size:11px;color:#e1cfea;margin-bottom:9px}
+.progress{height:9px;border-radius:20px;background:#ffffff30;overflow:hidden}
+.progress div{height:100%;width:45%;background:linear-gradient(90deg,#ffbd54,#ff64bd);border-radius:20px}
+.level-note{font-size:10px;color:#eadcf5;margin-top:10px}
+.section{margin:0 13px 21px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.section-head h3{font-size:17px}
+.section-head span{font-size:11px;color:#c6b2d9}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menu button{display:flex;align-items:center;gap:10px;text-align:left;padding:14px 11px;border-radius:14px;border:1px solid #3b284a;background:var(--panel);color:white}
+.menu .menu-icon{font-size:24px}
+.menu strong{display:block;font-size:12px}
+.menu small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+.frame-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.frame-card{background:var(--panel);border:1px solid #3d294e;border-radius:15px;padding:11px 5px;text-align:center;min-width:0}
+.frame-preview{width:61px;height:61px;margin:0 auto 10px;border-radius:21px;background:#352047;display:grid;place-items:center;font-size:30px;position:relative}
+.frame-preview:before{content:"";position:absolute;inset:-4px;border-radius:24px;border:3px solid var(--frame,#9c6cff)}
+.frame-card strong{font-size:10px;display:block;min-height:24px}
+.frame-card button{margin-top:9px;border:0;border-radius:9px;padding:7px 5px;width:100%;font-size:10px;background:#49305f;color:white}
+.frame-card button.applied{background:#168e68}
+.gold{--frame:#ffd15c}.silver{--frame:#d8e2f5}.diamond{--frame:#60eaff}.fire{--frame:#ff613d}.neon{--frame:#ff43de}.emerald{--frame:#3df4a0}.ruby{--frame:#ff426b}.galaxy{--frame:#7b83ff}.rainbow{--frame:#ff67cc}.rose{--frame:#ff8aaf}.ice{--frame:#b3f1ff}.royal{--frame:#e8b8ff}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:5;background:#1b1029;border-top:1px solid #40264f;display:flex;justify-content:space-around;padding:10px 4px max(10px,env(safe-area-inset-bottom))}
+.bottom a{color:#ad9abb;text-decoration:none;text-align:center;font-size:10px}
+.bottom a span{display:block;font-size:21px;margin-bottom:4px}
+.bottom a.active{color:#ff62b4}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#3a244a;padding:12px 17px;border-radius:12px;font-size:12px;display:none;z-index:10;max-width:90%;text-align:center}
+@media(min-width:600px){body{max-width:560px;margin:auto}.bottom{max-width:560px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+
+<header>
+<button onclick="location.href='index.html'">‹ Home</button>
+<h1>My Profile</h1>
+<button onclick="editProfile()">✏️ Edit</button>
+</header>
+
+<div class="cover"></div>
+
+<section class="profile-card">
+<div class="profile-top">
+<div class="avatar-wrap" id="avatarWrap">
+<div class="avatar" id="avatar">🎭</div>
+</div>
+<div class="identity">
+<h2 id="displayName">Huka User</h2>
+<p>User ID: <b id="userId">100052</b></p>
+<div class="badges">
+<span class="badge" id="vipBadge">👑 VIP 1</span>
+<span class="badge" id="levelBadge">⭐ Lv. 1</span>
+</div>
+</div>
+</div>
+<p class="profile-bio" id="bio">Making friends and sharing happy moments on Huka Voice Chat 💜</p>
+<div class="actions">
+<button onclick="editProfile()">✏️ Edit Profile</button>
+<button class="secondary" onclick="document.getElementById('photoInput').click()">📷 Change DP</button>
+<input type="file" id="photoInput" accept="image/*" hidden onchange="changePhoto(event)">
+</div>
+</section>
+
+<section class="stats">
+<div class="stat"><div class="icon">🪙</div><strong id="coins">100,000</strong><small>Coins</small></div>
+<div class="stat"><div class="icon">💎</div><strong id="diamonds">0</strong><small>Diamonds</small></div>
+<div class="stat"><div class="icon">❤️</div><strong id="followers">0</strong><small>Followers</small></div>
+</section>
+
+<section class="level-card">
+<div class="level-head"><h3>⭐ Huka Level</h3><span id="levelTitle">Bronze Member</span></div>
+<div class="level-info"><span id="levelText">Level 1</span><span id="expText">450 / 1,000 EXP</span></div>
+<div class="progress"><div id="expBar"></div></div>
+<p class="level-note">Keep participating in rooms to progress. EXP is demo data until connected to the server.</p>
+</section>
+
+<section class="section">
+<div class="section-head"><h3>👑 My Huka Space</h3><span>Explore</span></div>
+<div class="menu">
+<button onclick="location.href='vip.html'"><span class="menu-icon">👑</span><span><strong>VIP Club</strong><small>VIP privileges</small></span></button>
+<button onclick="location.href='rankings.html'"><span class="menu-icon">🏆</span><span><strong>Rankings</strong><small>Rich King & more</small></span></button>
+<button onclick="location.href='family.html'"><span class="menu-icon">👨‍👩‍👧</span><span><strong>My Family</strong><small>Friends together</small></span></button>
+<button onclick="showToast('CP Space will be connected in a future update.')"><span class="menu-icon">💞</span><span><strong>CP Space</strong><small>Special connection</small></span></button>
+<button onclick="location.href='games.html'"><span class="menu-icon">🎮</span><span><strong>Games</strong><small>Play with friends</small></span></button>
+<button onclick="location.href='inbox.html'"><span class="menu-icon">💌</span><span><strong>Inbox</strong><small>Chats & messages</small></span></button>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><h3>🖼️ Profile Frame Gallery</h3><span>35 Frames</span></div>
+<div class="frame-grid" id="frameGrid"></div>
+</section>
+
+<nav class="bottom">
+<a href="index.html"><span>🏠</span>Home</a>
+<a href="inbox.html"><span>💌</span>Inbox</a>
+<a href="room.html?room=200001"><span>🎙️</span>Room</a>
+<a href="games.html"><span>🎮</span>Games</a>
+<a class="active" href="profile.html"><span>👤</span>Profile</a>
+</nav>
+<div id="toast"></div>
+
+<script>
+const params=new URLSearchParams(location.search);
+const userId=params.get('userid')||localStorage.getItem('huka_user_id')||'100052';
+document.getElementById('userId').textContent=userId;
+
+const frames=[
+['Default',''],['Bronze',''],['Silver','silver'],['Gold VIP','gold'],['Diamond VIP','diamond'],
+['Royal King','royal'],['Neon Blue','ice'],['Neon Purple','neon'],['Fire Frame','fire'],['Ice Crystal','ice'],
+['Emerald','emerald'],['Ruby','ruby'],['Sapphire','diamond'],['Galaxy','galaxy'],['Starry Night','galaxy'],
+['Rainbow Glow','rainbow'],['Butterfly','neon'],['Rose','rose'],['Cherry','ruby'],['Lotus','rose'],
+['Peacock','emerald'],['Dragon','fire'],['Phoenix','fire'],['Angel','silver'],['Shadow',''],
+['Cyber','neon'],['Luxury','gold'],['Heart','rose'],['Music','galaxy'],['Clover','emerald'],
+['Ocean','ice'],['Sunburst','gold'],['Moon','silver'],['Diwali','gold'],['Legendary','rainbow']
+];
+
+let currentFrame=localStorage.getItem('huka_frame_'+userId)||'Default';
+function getItem(key,fallback=''){try{return localStorage.getItem('huka_'+key+'_'+userId)||fallback}catch(e){return fallback}}
+function setItem(key,value){try{localStorage.setItem('huka_'+key+'_'+userId,value)}catch(e){}}
+
+function renderFrames(){
+ const grid=document.getElementById('frameGrid');
+ grid.innerHTML='';
+ frames.forEach(([name,style])=>{
+  const card=document.createElement('div');
+  card.className='frame-card';
+  const preview=document.createElement('div');
+  preview.className='frame-preview '+style;
+  preview.textContent='🎭';
+  const label=document.createElement('strong');
+  label.textContent=name;
+  const button=document.createElement('button');
+  button.textContent=currentFrame===name?'✓ Applied':'Apply Frame';
+  if(currentFrame===name)button.classList.add('applied');
+  button.onclick=()=>applyFrame(name,style);
+  card.append(preview,label,button);
+  grid.appendChild(card);
+ });
+ applyFrameStyle();
+}
+function applyFrame(name,style){
+ currentFrame=name;
+ localStorage.setItem('huka_frame_'+userId,name);
+ localStorage.setItem('huka_frame_style_'+userId,style);
+ renderFrames();
+ showToast(name+' frame applied on this browser.');
+}
+function applyFrameStyle(){
+ const selected=frames.find(f=>f[0]===currentFrame)||frames[0];
+ const style=selected[1];
+ const wrap=document.getElementById('avatarWrap');
+ const colors={gold:'#ffd15c',silver:'#d8e2f5',diamond:'#60eaff',fire:'#ff613d',neon:'#ff43de',emerald:'#3df4a0',ruby:'#ff426b',galaxy:'#7b83ff',rainbow:'#ff67cc',rose:'#ff8aaf',ice:'#b3f1ff',royal:'#e8b8ff'};
+ wrap.style.background=colors[style]||'linear-gradient(135deg,#ffca70,#ff45ad,#9661ff)';
+}
+function changePhoto(event){
+ const file=event.target.files&&event.target.files[0];
+ if(!file)return;
+ if(!file.type.startsWith('image/')){showToast('Please select an image.');return}
+ if(file.size>2*1024*1024){showToast('Choose an image under 2 MB.');return}
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const avatar=document.getElementById('avatar');
+  avatar.innerHTML='';
+  const img=document.createElement('img');
+  img.src=reader.result;
+  avatar.appendChild(img);
+  setItem('photo',reader.result);
+  showToast('Profile photo saved in this browser.');
+ };
+ reader.readAsDataURL(file);
+}
+function editProfile(){
+ const oldName=document.getElementById('displayName').textContent;
+ const name=prompt('Enter your display name:',oldName);
+ if(name===null)return;
+ if(!name.trim()){showToast('Name cannot be empty.');return}
+ const oldBio=document.getElementById('bio').textContent;
+ const bio=prompt('Enter your profile bio:',oldBio);
+ document.getElementById('displayName').textContent=name.trim();
+ setItem('name',name.trim());
+ if(bio!==null){document.getElementById('bio').textContent=bio.trim();setItem('bio',bio.trim())}
+ showToast('Profile updated on this browser.');
+}
+function showToast(message){
+ const el=document.getElementById('toast');
+ el.textContent=message;el.style.display='block';
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>el.style.display='none',2600);
+}
+function loadProfile(){
+ document.getElementById('displayName').textContent=getItem('name','Huka User');
+ document.getElementById('bio').textContent=getItem('bio','Making friends and sharing happy moments on Huka Voice Chat 💜');
+ const photo=getItem('photo');
+ if(photo){
+  const img=document.createElement('img');img.src=photo;
+  document.getElementById('avatar').innerHTML='';document.getElementById('avatar').appendChild(img);
+ }
+ document.getElementById('coins').textContent=Number(getItem('coins','100000')).toLocaleString('en-IN');
+ document.getElementById('diamonds').textContent=Number(getItem('diamonds','0')).toLocaleString('en-IN');
+ document.getElementById('followers').textContent=getItem('followers','0');
+ const level=Number(getItem('level','1'))||1;
+ const exp=Number(getItem('exp','450'))||0;
+ const required=Math.max(1000,level*1000);
+ document.getElementById('levelBadge').textContent='⭐ Lv. '+level;
+ document.getElementById('levelText').textContent='Level '+level;
+ document.getElementById('expText').textContent=exp.toLocaleString('en-IN')+' / '+required.toLocaleString('en-IN')+' EXP';
+ document.getElementById('expBar').style.width=Math.min(100,exp/required*100)+'%';
+ document.getElementById('levelTitle').textContent=level>=100?'Legendary Member':level>=50?'Royal Member':level>=20?'Gold Member':level>=10?'Silver Member':'Bronze Member';
+ const vip=Number(getItem('vip','1'))||1;
+ document.getElementById('vipBadge').textContent='👑 VIP '+vip;
+ currentFrame=localStorage.getItem('huka_frame_'+userId)||'Default';
+}
+loadProfile();
+renderFrames();
+</script>
+</body>
+</html>
+```
