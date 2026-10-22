@@ -1,0 +1,211 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#150a23">
+<title>Huka Voice Chat — Games</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#140920;--panel:#251535;--pink:#ff439d;--purple:#965cff;--muted:#c2afd2}
+body{font-family:Arial,sans-serif;background:var(--bg);color:white;padding-bottom:85px}
+button{font:inherit;cursor:pointer}
+header{padding:17px;display:flex;align-items:center;justify-content:space-between;background:#1c102b}
+header h1{font-size:21px}
+header button{background:#352043;color:white;border:0;border-radius:11px;padding:10px 13px}
+.balance{margin:15px 13px;padding:16px;border-radius:17px;background:linear-gradient(120deg,#4c2479,#b62d83);display:flex;align-items:center;justify-content:space-between}
+.balance small{font-size:11px;color:#f2dff9}
+.balance strong{display:block;font-size:23px;margin-top:6px}
+.balance .coin{font-size:36px}
+.hero{margin:0 13px 20px;padding:22px;border-radius:19px;background:linear-gradient(120deg,#4b267e,#8235b7,#df3e9c);position:relative;overflow:hidden}
+.hero h2{font-size:22px;margin-bottom:9px}
+.hero p{font-size:12px;line-height:1.6;max-width:240px;color:#f2defc}
+.hero .hero-emoji{position:absolute;right:14px;bottom:14px;font-size:55px}
+.section{margin:0 13px 22px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.section-head h2{font-size:17px}
+.section-head span{font-size:11px;color:#c9b3db}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.game-card{border-radius:17px;background:var(--panel);border:1px solid #42294f;overflow:hidden}
+.game-art{height:115px;display:grid;place-items:center;font-size:54px;background:linear-gradient(135deg,#6b2b91,#d13d91)}
+.game-card:nth-child(2) .game-art{background:linear-gradient(135deg,#175c4c,#4a9a70)}
+.game-card:nth-child(3) .game-art{background:linear-gradient(135deg,#7d3828,#e69b36)}
+.game-card .content{padding:12px}
+.game-card h3{font-size:14px;margin-bottom:7px}
+.game-card p{font-size:10px;color:var(--muted);line-height:1.5;min-height:30px}
+.game-card button{width:100%;margin-top:10px;padding:10px;border:0;border-radius:11px;color:white;background:linear-gradient(100deg,#9250ec,#ef429c);font-weight:bold;font-size:12px}
+.game-area{margin:0 13px 20px;background:var(--panel);border:1px solid #432a51;border-radius:19px;padding:16px}
+.game-area h2{font-size:18px;margin-bottom:8px}
+.game-description{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:15px}
+.bet-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:15px}
+.bet-options button{background:#382348;color:white;border:1px solid #68467c;border-radius:12px;padding:12px 3px;font-size:11px}
+.bet-options button.selected{background:linear-gradient(100deg,#8b5cf6,#e83e9b);border-color:transparent}
+.choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:15px}
+.choice{border:1px solid #4b315d;border-radius:12px;background:#301e40;color:white;padding:12px 2px;font-size:11px}
+.choice .emoji{display:block;font-size:27px;margin-bottom:7px}
+.choice.selected{border-color:#ff68b7;background:#63316c;box-shadow:0 0 10px #ff439d44}
+.play{width:100%;padding:14px;border:0;border-radius:13px;background:linear-gradient(100deg,#9150ee,#ff439d);color:white;font-weight:bold}
+.result{margin-top:14px;padding:16px;border-radius:14px;background:#1b1029;text-align:center;display:none}
+.result.show{display:block}
+.result .result-emoji{font-size:45px;margin-bottom:8px}
+.result h3{font-size:17px;margin-bottom:8px}
+.result p{font-size:12px;color:#dbc8eb;line-height:1.6}
+.history{margin:0 13px 20px;padding:15px;background:var(--panel);border-radius:17px}
+.history h2{font-size:16px;margin-bottom:12px}
+.history-list{font-size:12px;color:#d8c6e6;line-height:2}
+.warning{font-size:11px;color:#d7c5e6;line-height:1.7;padding:0 15px 20px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#1b1029;border-top:1px solid #40264f;display:flex;justify-content:space-around;padding:10px 4px max(10px,env(safe-area-inset-bottom));z-index:5}
+.bottom a{color:#ad9abb;text-decoration:none;text-align:center;font-size:10px}
+.bottom a span{display:block;font-size:21px;margin-bottom:4px}
+.bottom a.active{color:#ff62b4}
+@media(min-width:600px){body{max-width:560px;margin:auto}.bottom{max-width:560px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<header>
+<button onclick="location.href='index.html'">‹ Home</button>
+<h1>🎮 Huka Games</h1>
+<button onclick="location.href='rankings.html'">🏆</button>
+</header>
+
+<section class="balance">
+<div><small>🪙 Demo Coin Balance</small><strong id="balance">1,000,000</strong></div>
+<div class="coin">🪙</div>
+</section>
+
+<section class="hero">
+<h2>Game Zone 🎉</h2>
+<p>Choose a game, select your demo bet and play. Have fun with Huka!</p>
+<div class="hero-emoji">🎮</div>
+</section>
+
+<section class="section">
+<div class="section-head"><h2>🔥 Choose Your Game</h2><span>3 Games</span></div>
+<div class="games">
+<article class="game-card">
+<div class="game-art">🐣</div>
+<div class="content"><h3>Greedy Baby</h3><p>Pick your lucky items and reveal the result.</p><button onclick="selectGame('greedy')">Play Now</button></div>
+</article>
+<article class="game-card">
+<div class="game-art">🐯</div>
+<div class="content"><h3>Animal Party</h3><p>Choose an animal and try your luck.</p><button onclick="selectGame('animal')">Play Now</button></div>
+</article>
+<article class="game-card">
+<div class="game-art">🎡</div>
+<div class="content"><h3>Lucky Spin</h3><p>Spin the wheel to reveal a demo reward.</p><button onclick="selectGame('spin')">Play Now</button></div>
+</article>
+</div>
+</section>
+
+<section class="game-area" id="gameArea">
+<h2 id="gameTitle">🐣 Greedy Baby</h2>
+<p class="game-description" id="gameDescription">Choose one or more items, then play using demo coins.</p>
+<div class="section-head"><h2>🪙 Select Bet</h2><span>Demo only</span></div>
+<div class="bet-options">
+<button class="selected" data-bet="100000" onclick="selectBet(this)">1 Lakh</button>
+<button data-bet="200000" onclick="selectBet(this)">2 Lakh</button>
+<button data-bet="500000" onclick="selectBet(this)">5 Lakh</button>
+</div>
+<div class="section-head"><h2 id="choiceTitle">Choose Items</h2><span id="choiceCount">0 selected</span></div>
+<div class="choice-grid" id="choiceGrid"></div>
+<button class="play" id="playButton" onclick="playGame()">🎮 Play Game</button>
+<div class="result" id="result">
+<div class="result-emoji" id="resultEmoji">🎉</div>
+<h3 id="resultTitle">Game Result</h3>
+<p id="resultText"></p>
+</div>
+</section>
+
+<section class="history">
+<h2>📜 Recent Results</h2>
+<div class="history-list" id="historyList">No games played yet.</div>
+</section>
+
+<p class="warning">⚠️ Demo mode: This page uses sample local data. Bets and results are simulated in your browser; they are not shared with other players. No real-money betting or real prizes are provided. A server is required for synchronized multiplayer games and secure coin transactions.</p>
+
+<nav class="bottom">
+<a href="index.html"><span>🏠</span>Home</a>
+<a href="inbox.html"><span>💌</span>Inbox</a>
+<a href="room.html?room=200001"><span>🎙️</span>Room</a>
+<a class="active" href="games.html"><span>🎮</span>Games</a>
+<a href="profile.html"><span>👤</span>Profile</a>
+</nav>
+
+<script>
+const games={
+ greedy:{title:'🐣 Greedy Baby',description:'Select one or more items. This is a simple demo selection game.',choices:[['🐣','Baby'],['🥚','Egg'],['🍎','Apple'],['💎','Gem'],['⭐','Star'],['🎁','Gift'],['👑','Crown'],['🍀','Clover']]},
+ animal:{title:'🐯 Animal Party',description:'Choose your favourite animal for a simulated result.',choices:[['🐯','Tiger'],['🐼','Panda'],['🐰','Rabbit'],['🦊','Fox'],['🐸','Frog'],['🐵','Monkey'],['🦁','Lion'],['🐻','Bear']]},
+ spin:{title:'🎡 Lucky Spin',description:'Pick a wheel symbol and spin for a simulated result.',choices:[['🍀','Clover'],['💎','Diamond'],['🌟','Star'],['🎁','Gift'],['👑','Crown'],['🪙','Coin'],['❤️','Heart'],['🚀','Rocket']]}
+};
+let currentGame='greedy';
+let selectedBet=100000;
+let selectedChoices=new Set();
+let balance=Number(localStorage.getItem('huka_demo_coins')||1000000);
+const fmt=n=>Number(n).toLocaleString('en-IN');
+function updateBalance(){document.getElementById('balance').textContent=fmt(balance)}
+function selectGame(key){
+ currentGame=key;selectedChoices.clear();
+ document.getElementById('gameTitle').textContent=games[key].title;
+ document.getElementById('gameDescription').textContent=games[key].description;
+ document.getElementById('result').classList.remove('show');
+ renderChoices();
+ document.getElementById('gameArea').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function selectBet(button){
+ document.querySelectorAll('.bet-options button').forEach(b=>b.classList.remove('selected'));
+ button.classList.add('selected');
+ selectedBet=Number(button.dataset.bet);
+}
+function renderChoices(){
+ const grid=document.getElementById('choiceGrid');
+ grid.innerHTML='';
+ games[currentGame].choices.forEach(([emoji,name],index)=>{
+  const button=document.createElement('button');
+  button.className='choice'+(selectedChoices.has(index)?' selected':'');
+  const icon=document.createElement('span');icon.className='emoji';icon.textContent=emoji;
+  const label=document.createElement('span');label.textContent=name;
+  button.append(icon,label);
+  button.onclick=()=>{
+   if(currentGame==='spin')selectedChoices.clear();
+   if(selectedChoices.has(index))selectedChoices.delete(index);
+   else selectedChoices.add(index);
+   renderChoices();
+  };
+  grid.appendChild(button);
+ });
+ document.getElementById('choiceCount').textContent=selectedChoices.size+' selected';
+}
+function playGame(){
+ if(selectedChoices.size===0){alert('Please select at least one item first.');return}
+ if(balance<selectedBet){alert('Not enough demo coins for this bet.');return}
+ balance-=selectedBet;
+ const choiceList=games[currentGame].choices;
+ const resultIndex=Math.floor(Math.random()*choiceList.length);
+ const result=choiceList[resultIndex];
+ const won=selectedChoices.has(resultIndex);
+ // Demo payout: winning selections return twice the bet.
+ const payout=won?selectedBet*2:0;
+ balance+=payout;
+ localStorage.setItem('huka_demo_coins',String(balance));
+ updateBalance();
+ document.getElementById('resultEmoji').textContent=result[0];
+ document.getElementById('resultTitle').textContent=won?'🎉 You Won!':'Try Again!';
+ document.getElementById('resultText').textContent='Result: '+result[1]+'. '+(won?'Demo payout: '+fmt(payout)+' coins.':'No payout this round.')+' Your demo balance: '+fmt(balance)+'.';
+ document.getElementById('result').classList.add('show');
+ addHistory(games[currentGame].title,result[0],won,payout);
+}
+function addHistory(title,emoji,won,payout){
+ const list=document.getElementById('historyList');
+ if(list.textContent==='No games played yet.')list.innerHTML='';
+ const row=document.createElement('div');
+ row.textContent=title+' — '+emoji+' — '+(won?'Won '+fmt(payout):'No payout');
+ list.prepend(row);
+ while(list.children.length>8)list.lastElementChild.remove();
+}
+updateBalance();
+renderChoices();
+</script>
+</body>
+</html>
+```
