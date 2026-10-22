@@ -1,0 +1,213 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#150a23">
+<title>Huka Voice Chat — Rankings</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#140920;--panel:#251535;--pink:#ff439d;--purple:#965cff;--muted:#c2afd2}
+body{font-family:Arial,sans-serif;background:var(--bg);color:#fff;padding-bottom:85px}
+button{font:inherit;cursor:pointer}
+header{padding:17px;display:flex;align-items:center;justify-content:space-between;background:#1c102b}
+header h1{font-size:20px}
+header button{background:#352043;color:white;border:0;border-radius:10px;padding:10px 13px}
+.hero{margin:15px 13px;padding:20px;border-radius:18px;background:linear-gradient(120deg,#54258c,#a32d91,#ed459f);position:relative;overflow:hidden}
+.hero h2{font-size:23px;margin-bottom:8px}
+.hero p{font-size:12px;color:#f3dffb;line-height:1.6;max-width:240px}
+.hero .crown{position:absolute;right:15px;top:17px;font-size:56px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:0 13px 17px;background:#21132e;padding:5px;border-radius:13px}
+.tabs button{border:0;border-radius:9px;background:transparent;color:#c1adce;padding:12px 2px;font-size:11px}
+.tabs button.active{background:linear-gradient(100deg,#8f4be8,#ec419c);color:white;font-weight:bold}
+.category{display:flex;gap:9px;margin:0 13px 18px}
+.category button{flex:1;padding:11px 3px;border-radius:11px;border:1px solid #4b315d;background:#281837;color:#d3c0e1;font-size:11px}
+.category button.active{border-color:#ff62b4;color:#fff;background:#63316c}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:0 15px 15px}
+.section-title h2{font-size:17px}
+.section-title span{font-size:11px;color:#c9b4d9}
+.podium{margin:0 13px 20px;padding:22px 10px 15px;border-radius:18px;background:linear-gradient(150deg,#30203f,#21132e);display:flex;align-items:flex-end;justify-content:center;gap:9px;min-height:210px}
+.winner{flex:1;text-align:center;min-width:0}
+.winner .avatar{margin:0 auto 9px;display:grid;place-items:center;border-radius:50%;width:59px;height:59px;font-size:30px;border:3px solid #a87bf1;background:linear-gradient(135deg,#7038a4,#ef459e);position:relative}
+.winner.first .avatar{width:75px;height:75px;font-size:37px;border-color:#ffd66b}
+.winner.third .avatar{border-color:#c78d64}
+.medal{font-size:21px;margin-bottom:7px}
+.winner .name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}
+.winner .amount{font-size:10px;color:#ffd477;white-space:nowrap}
+.podium-base{margin-top:11px;border-radius:9px 9px 0 0;padding:10px 2px;font-size:17px;font-weight:bold;background:#65418a}
+.winner.first .podium-base{height:61px;background:linear-gradient(#d89a38,#9860b8)}
+.winner.second .podium-base{height:43px;background:linear-gradient(#867aa7,#4d3c70)}
+.winner.third .podium-base{height:32px;background:linear-gradient(#b7764b,#6d3e58)}
+.list{margin:0 13px}
+.rank-row{display:flex;align-items:center;gap:10px;padding:13px 10px;border-bottom:1px solid #342140}
+.rank-number{width:25px;text-align:center;font-size:14px;color:#c8b4d6;font-weight:bold;flex-shrink:0}
+.rank-avatar{width:45px;height:45px;display:grid;place-items:center;flex-shrink:0;border-radius:50%;font-size:24px;background:linear-gradient(135deg,#6335a2,#e4409a)}
+.user-info{flex:1;min-width:0}
+.user-info strong{display:block;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-info small{font-size:10px;color:#bda8ce}
+.score{text-align:right;flex-shrink:0}
+.score strong{display:block;font-size:12px;color:#ffd477}
+.score small{display:block;margin-top:5px;font-size:10px;color:#bda8ce}
+.my-rank{margin:19px 13px;padding:15px;border:1px solid #7741a0;border-radius:15px;background:#30203e;display:flex;align-items:center;gap:11px}
+.my-rank .rank-avatar{border:2px solid #ff62b4}
+.my-rank .user-info strong{font-size:13px}
+.my-rank .score strong{color:#ff83c2}
+.note{margin:15px 15px 22px;font-size:11px;color:#bda8ce;line-height:1.7}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#1b1029;border-top:1px solid #40264f;display:flex;justify-content:space-around;padding:10px 4px max(10px,env(safe-area-inset-bottom));z-index:5}
+.bottom a{color:#ad9abb;text-decoration:none;text-align:center;font-size:10px}
+.bottom a span{display:block;font-size:21px;margin-bottom:4px}
+.bottom a.active{color:#ff62b4}
+@media(min-width:600px){body{max-width:560px;margin:auto}.bottom{max-width:560px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<header>
+<button onclick="location.href='index.html'">‹ Home</button>
+<h1>🏆 Rankings</h1>
+<button onclick="location.href='profile.html'">👤</button>
+</header>
+
+<section class="hero">
+<h2 id="heroTitle">Daily Rich King</h2>
+<p id="heroDescription">Discover the top spenders and rising stars of Huka Voice Chat.</p>
+<div class="crown">👑</div>
+</section>
+
+<div class="tabs">
+<button class="active" onclick="changePeriod('daily',this)">☀️ Daily</button>
+<button onclick="changePeriod('weekly',this)">📅 Weekly</button>
+<button onclick="changePeriod('monthly',this)">🗓️ Monthly</button>
+<button onclick="changePeriod('rich',this)">👑 Rich King</button>
+</div>
+
+<div class="category">
+<button class="active" onclick="changeCategory('coins',this)">🪙 Coins</button>
+<button onclick="changeCategory('diamonds',this)">💎 Diamonds</button>
+<button onclick="changeCategory('level',this)">⭐ Level</button>
+</div>
+
+<div class="section-title">
+<h2 id="listTitle">👑 Top 3 Players</h2>
+<span id="periodLabel">Today</span>
+</div>
+
+<section class="podium" id="podium"></section>
+<section class="list" id="rankingList"></section>
+
+<section class="my-rank">
+<div class="rank-number" id="myRankNumber">—</div>
+<div class="rank-avatar">🧑🏻</div>
+<div class="user-info">
+<strong id="myName">Huka User</strong>
+<small>My demo ranking · ID 100052</small>
+</div>
+<div class="score">
+<strong id="myScore">100,000</strong>
+<small id="myScoreLabel">Coins</small>
+</div>
+</section>
+
+<p class="note">ℹ️ Demo rankings: These sample users and scores are for preview only. Real rankings across all users require a connected server and database. No real prizes are awarded by this demo page.</p>
+
+<nav class="bottom">
+<a href="index.html"><span>🏠</span>Home</a>
+<a href="inbox.html"><span>💌</span>Inbox</a>
+<a href="room.html?room=200001"><span>🎙️</span>Room</a>
+<a href="games.html"><span>🎮</span>Games</a>
+<a href="profile.html"><span>👤</span>Profile</a>
+</nav>
+
+<script>
+const sampleUsers=[
+ {name:'Riya Queen',avatar:'👸🏻',coins:98500000,diamonds:92000,level:88},
+ {name:'Aman King',avatar:'😎',coins:87600000,diamonds:85000,level:82},
+ {name:'Priya Angel',avatar:'👩🏻',coins:76500000,diamonds:78000,level:76},
+ {name:'Rahul Star',avatar:'🧑🏻',coins:65400000,diamonds:69000,level:69},
+ {name:'Neha Royal',avatar:'👩🏼',coins:54300000,diamonds:61000,level:63},
+ {name:'Vicky Boss',avatar:'🕶️',coins:43200000,diamonds:52000,level:57},
+ {name:'Simran Rose',avatar:'🌹',coins:32100000,diamonds:44000,level:49},
+ {name:'Arjun Hero',avatar:'🦸🏻',coins:21900000,diamonds:35000,level:41},
+ {name:'Anjali Moon',avatar:'🌙',coins:15800000,diamonds:27000,level:33},
+ {name:'Karan Legend',avatar:'🦁',coins:9800000,diamonds:18000,level:25}
+];
+let period='daily';
+let category='coins';
+const periods={daily:'Today',weekly:'This Week',monthly:'This Month',rich:'Rich King'};
+const titles={coins:'🪙 Top Coin Users',diamonds:'💎 Top Diamond Users',level:'⭐ Top Levels'};
+const labels={coins:'Coins',diamonds:'Diamonds',level:'Level'};
+const descriptions={
+ daily:'Discover today’s top spenders and rising stars of Huka Voice Chat.',
+ weekly:'See this week’s top-ranked Huka community members.',
+ monthly:'Celebrate this month’s leading Huka players.',
+ rich:'Meet the Rich Kings and Queens of the Huka community.'
+};
+function changePeriod(value,button){
+ period=value;
+ document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+ button.classList.add('active');
+ render();
+}
+function changeCategory(value,button){
+ category=value;
+ document.querySelectorAll('.category button').forEach(b=>b.classList.remove('active'));
+ button.classList.add('active');
+ render();
+}
+function formatScore(value){
+ return Number(value).toLocaleString('en-IN');
+}
+function render(){
+ document.getElementById('heroTitle').textContent=period==='rich'?'👑 Rich King Ranking':period.charAt(0).toUpperCase()+period.slice(1)+' Rankings';
+ document.getElementById('heroDescription').textContent=descriptions[period];
+ document.getElementById('periodLabel').textContent=periods[period];
+ document.getElementById('listTitle').textContent=titles[category];
+ document.getElementById('myScoreLabel').textContent=labels[category];
+ const key=category;
+ const sorted=[...sampleUsers].sort((a,b)=>b[key]-a[key]);
+ const podium=document.getElementById('podium');
+ podium.innerHTML='';
+ const order=[sorted[1],sorted[0],sorted[2]];
+ const classes=['second','first','third'];
+ const medals=['🥈','🥇','🥉'];
+ order.forEach((user,index)=>{
+  const card=document.createElement('div');
+  card.className='winner '+classes[index];
+  const medal=document.createElement('div');medal.className='medal';medal.textContent=medals[index];
+  const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent=user.avatar;
+  const name=document.createElement('div');name.className='name';name.textContent=user.name;
+  const amount=document.createElement('div');amount.className='amount';
+  amount.textContent=category==='level'?'LV '+user.level:formatScore(user[key]);
+  const base=document.createElement('div');base.className='podium-base';base.textContent=['2','1','3'][index];
+  card.append(medal,avatar,name,amount,base);podium.appendChild(card);
+ });
+ const list=document.getElementById('rankingList');
+ list.innerHTML='';
+ sorted.slice(3).forEach((user,index)=>{
+  const row=document.createElement('div');row.className='rank-row';
+  const number=document.createElement('div');number.className='rank-number';number.textContent=index+4;
+  const avatar=document.createElement('div');avatar.className='rank-avatar';avatar.textContent=user.avatar;
+  const info=document.createElement('div');info.className='user-info';
+  const name=document.createElement('strong');name.textContent=user.name;
+  const sub=document.createElement('small');sub.textContent='Huka Member · Level '+user.level;
+  info.append(name,sub);
+  const score=document.createElement('div');score.className='score';
+  const value=document.createElement('strong');value.textContent=category==='level'?'LV '+user.level:formatScore(user[key]);
+  const label=document.createElement('small');label.textContent=labels[category];
+  score.append(value,label);row.append(number,avatar,info,score);list.appendChild(row);
+ });
+ const myName=localStorage.getItem('huka_user_name')||'Huka User';
+ document.getElementById('myName').textContent=myName;
+ const myLevel=Number(localStorage.getItem('huka_level')||1);
+ const myCoins=Number(localStorage.getItem('huka_demo_coins')||1000000);
+ const myDiamonds=Number(localStorage.getItem('huka_diamonds')||0);
+ const myValues={coins:myCoins,diamonds:myDiamonds,level:myLevel};
+ document.getElementById('myScore').textContent=category==='level'?'LV '+myValues[key]:formatScore(myValues[key]);
+ const rank=sorted.findIndex(u=>u[key]<myValues[key])+1;
+ document.getElementById('myRankNumber').textContent=rank>0?rank:'—';
+}
+render();
+</script>
+</body>
+</html>
+```
