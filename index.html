@@ -1,0 +1,174 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#170b2d">
+<title>Huka Voice Chat</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#10091f;--panel:#211337;--pink:#ff3e9d;--purple:#8b5cf6;--text:#fff;--muted:#b9abc9}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:82px}
+header{padding:18px 16px;display:flex;align-items:center;justify-content:space-between;background:#190d2b;position:sticky;top:0;z-index:5}
+.logo{font-size:23px;font-weight:900;background:linear-gradient(90deg,#ff52ad,#a78bfa);background-clip:text;-webkit-background-clip:text;color:transparent}
+.header-icons{display:flex;gap:10px}
+.icon-btn{background:#302044;border:0;color:white;border-radius:14px;padding:10px;font-size:18px;cursor:pointer}
+.search{padding:12px 16px}
+.search input{width:100%;padding:13px 16px;background:#241735;border:1px solid #49305d;border-radius:15px;color:white;font-size:14px;outline:none}
+.hero{margin:4px 16px 20px;padding:23px 19px;border-radius:22px;background:linear-gradient(120deg,#6825a9,#d72e91 65%,#ff8b8b);min-height:160px;position:relative;overflow:hidden}
+.hero:after{content:"🎧";position:absolute;right:17px;bottom:10px;font-size:75px;opacity:.85}
+.hero small{font-weight:bold;letter-spacing:2px}
+.hero h1{font-size:25px;margin:12px 0 8px;max-width:220px}
+.hero p{font-size:12px;opacity:.9}
+.hero button{margin-top:15px;background:white;color:#8b277e;border:0;border-radius:20px;padding:10px 17px;font-weight:bold;cursor:pointer}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-bottom:23px}
+.quick a{text-decoration:none;color:white;text-align:center;background:var(--panel);border-radius:16px;padding:13px 3px;font-size:11px}
+.quick span{display:block;font-size:25px;margin-bottom:8px}
+.section{padding:0 16px;margin-bottom:24px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.section-head h2{font-size:18px}
+.section-head a{color:#ff72bb;text-decoration:none;font-size:12px}
+.tabs{display:flex;gap:9px;overflow:auto;margin-bottom:14px}
+.tabs button{white-space:nowrap;border:1px solid #49305d;background:#241735;color:#cbb8dc;padding:9px 15px;border-radius:20px}
+.tabs button.active{background:linear-gradient(90deg,#8b5cf6,#e83e9b);color:white;border:0}
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.room{background:var(--panel);border:1px solid #342248;border-radius:17px;overflow:hidden;cursor:pointer}
+.room-cover{height:105px;display:flex;align-items:center;justify-content:center;font-size:43px;position:relative;background:linear-gradient(135deg,#43216b,#a52d80)}
+.room:nth-child(2) .room-cover{background:linear-gradient(135deg,#153b65,#512c87)}
+.room:nth-child(3) .room-cover{background:linear-gradient(135deg,#762c46,#df7447)}
+.room:nth-child(4) .room-cover{background:linear-gradient(135deg,#164b48,#267f85)}
+.live{position:absolute;left:8px;top:8px;background:#ff376f;border-radius:6px;padding:4px 6px;font-size:9px;font-weight:bold}
+.people{position:absolute;right:7px;bottom:7px;background:#170b2dcc;padding:4px 7px;border-radius:9px;font-size:10px}
+.room-info{padding:11px}
+.room-info h3{font-size:13px;margin-bottom:7px}
+.room-info p{font-size:11px;color:var(--muted)}
+.host{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:#ddd}
+.avatar{width:25px;height:25px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ff69b4,#7c3aed);flex-shrink:0}
+.friends{display:flex;gap:15px;overflow:auto;padding-bottom:5px}
+.friend{min-width:65px;text-align:center;font-size:11px;color:#ddd}
+.friend .avatar{width:52px;height:52px;font-size:24px;margin:0 auto 8px;border:2px solid #ff5cae}
+.online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#35e59b;margin-left:3px}
+.event-list{display:grid;gap:10px}
+.event{display:flex;align-items:center;gap:13px;background:var(--panel);border-radius:16px;padding:14px}
+.event-icon{width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:26px}
+.event h3{font-size:13px;margin-bottom:5px}
+.event p{font-size:11px;color:var(--muted)}
+.event button{margin-left:auto;background:#fa4eaa;color:white;border:0;border-radius:15px;padding:8px 11px;font-size:11px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#190d2b;border-top:1px solid #352347;display:flex;justify-content:space-around;padding:10px 3px max(10px,env(safe-area-inset-bottom));z-index:10}
+.bottom-nav a{color:#a99ab9;text-decoration:none;text-align:center;font-size:10px;min-width:45px}
+.bottom-nav span{display:block;font-size:21px;margin-bottom:4px}
+.bottom-nav a.active{color:#ff62b4}
+.notice{margin:0 16px 20px;padding:13px;border-radius:13px;background:#29143c;color:#d9c8ed;font-size:12px;line-height:1.5}
+@media(min-width:650px){body{max-width:650px;margin:auto}.bottom-nav{max-width:650px;left:50%;transform:translateX(-50%)}.rooms{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🎙 Huka Voice</div>
+  <div class="header-icons">
+    <button class="icon-btn" onclick="showNotice('Notifications will appear here.')">🔔</button>
+    <button class="icon-btn" onclick="location.href='profile.html'">👤</button>
+  </div>
+</header>
+
+<div class="search">
+  <input id="searchInput" type="search" placeholder="🔍  Search rooms, people..." oninput="searchRooms()">
+</div>
+
+<section class="hero">
+  <small>WELCOME TO HUKA</small>
+  <h1>Your Voice, Your World!</h1>
+  <p>Meet friends · Join rooms · Share moments</p>
+  <button onclick="location.href='room.html?room=200001'">Explore Voice Rooms →</button>
+</section>
+
+<div class="quick">
+  <a href="rankings.html"><span>🏆</span>Rankings</a>
+  <a href="family.html"><span>👨‍👩‍👧</span>Family</a>
+  <a href="vip.html"><span>👑</span>VIP Club</a>
+  <a href="games.html"><span>🎮</span>Games</a>
+</div>
+
+<section class="section">
+  <div class="section-head"><h2>🔥 Popular Rooms</h2><a href="rooms.html">View All ›</a></div>
+  <div class="tabs">
+    <button class="active" onclick="setTab(this,'all')">Popular</button>
+    <button onclick="setTab(this,'music')">🎵 Music</button>
+    <button onclick="setTab(this,'chat')">💬 Chat</button>
+    <button onclick="setTab(this,'gaming')">🎮 Gaming</button>
+  </div>
+  <div class="rooms" id="rooms">
+    <article class="room" data-category="music" onclick="openRoom('200001')">
+      <div class="room-cover">🎤<span class="live">● LIVE</span><span class="people">👥 28</span></div>
+      <div class="room-info"><h3>🎵 Music Lovers</h3><p>Room ID: 200001</p><div class="host"><span class="avatar">👑</span>Music King</div></div>
+    </article>
+    <article class="room" data-category="chat" onclick="openRoom('200002')">
+      <div class="room-cover">🌙<span class="live">● LIVE</span><span class="people">👥 16</span></div>
+      <div class="room-info"><h3>🌙 Night Talks</h3><p>Room ID: 200002</p><div class="host"><span class="avatar">😊</span>Sweet Friend</div></div>
+    </article>
+    <article class="room" data-category="chat" onclick="openRoom('200003')">
+      <div class="room-cover">💖<span class="live">● LIVE</span><span class="people">👥 42</span></div>
+      <div class="room-info"><h3>💖 Friendship Hub</h3><p>Room ID: 200003</p><div class="host"><span class="avatar">🌸</span>Lovely Star</div></div>
+    </article>
+    <article class="room" data-category="gaming" onclick="openRoom('200004')">
+      <div class="room-cover">🎮<span class="live">● LIVE</span><span class="people">👥 12</span></div>
+      <div class="room-info"><h3>🎮 Game Zone</h3><p>Room ID: 200004</p><div class="host"><span class="avatar">⚡</span>Pro Gamer</div></div>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>🟢 Online Friends</h2><a href="inbox.html">See All ›</a></div>
+  <div class="friends">
+    <div class="friend"><div class="avatar">😎</div>Rocky <span class="online-dot"></span></div>
+    <div class="friend"><div class="avatar">🌷</div>Angel <span class="online-dot"></span></div>
+    <div class="friend"><div class="avatar">🦁</div>King <span class="online-dot"></span></div>
+    <div class="friend"><div class="avatar">🐼</div>Panda <span class="online-dot"></span></div>
+    <div class="friend"><div class="avatar">🦋</div>Butterfly <span class="online-dot"></span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>✨ Events & Rewards</h2><a href="events.html">View All ›</a></div>
+  <div class="event-list">
+    <div class="event"><div class="event-icon">🎁</div><div><h3>Daily Rewards</h3><p>Check in and collect your rewards</p></div><button onclick="showNotice('Daily rewards page is coming next.')">Claim</button></div>
+    <div class="event"><div class="event-icon">👑</div><div><h3>Rich King Ranking</h3><p>See who leads the leaderboard</p></div><button onclick="location.href='rankings.html'">View</button></div>
+    <div class="event"><div class="event-icon">🎡</div><div><h3>Lucky Spin</h3><p>Visit the games section</p></div><button onclick="location.href='games.html'">Play</button></div>
+  </div>
+</section>
+
+<div class="notice" id="notice">✨ Welcome to Huka Voice Chat! Room counts and friend profiles shown here are sample demo data.</div>
+
+<nav class="bottom-nav">
+  <a class="active" href="index.html"><span>🏠</span>Home</a>
+  <a href="inbox.html"><span>💌</span>Inbox</a>
+  <a href="rooms.html"><span>🎙</span>Rooms</a>
+  <a href="games.html"><span>🎮</span>Games</a>
+  <a href="profile.html"><span>👤</span>Profile</a>
+</nav>
+
+<script>
+function openRoom(id){location.href='room.html?room='+encodeURIComponent(id)}
+function showNotice(message){
+  const box=document.getElementById('notice');
+  box.textContent=message;
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function setTab(button,category){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  button.classList.add('active');
+  document.querySelectorAll('.room').forEach(room=>{
+    room.style.display=(category==='all'||room.dataset.category===category)?'':'none';
+  });
+}
+function searchRooms(){
+  const query=document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.room').forEach(room=>{
+    room.style.display=room.textContent.toLowerCase().includes(query)?'':'none';
+  });
+}
+</script>
+</body>
+</html>
+```
