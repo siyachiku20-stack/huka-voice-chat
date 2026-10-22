@@ -1,0 +1,273 @@
+```html
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#140920">
+<title>Huka Voice Chat — Voice Room</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#140920;--card:#251534;--pink:#ff439d;--purple:#9860ff;--muted:#c5b3d4}
+body{background:var(--bg);color:white;font-family:Arial,sans-serif;padding-bottom:85px;min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+.top{height:65px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:#1c102b}
+.back{border:0;background:#352043;color:white;border-radius:12px;padding:10px 13px}
+.room-head{display:flex;align-items:center;gap:9px;flex:1;margin-left:10px}
+.room-avatar{width:43px;height:43px;border-radius:13px;background:linear-gradient(135deg,#ff53a9,#7949ec);display:grid;place-items:center;font-size:23px}
+.room-head h1{font-size:15px;margin-bottom:5px}
+.room-head p{font-size:10px;color:var(--muted)}
+.head-actions{display:flex;gap:7px}
+.head-actions button{border:0;background:#352043;color:white;border-radius:10px;padding:10px}
+.banner{margin:13px;border-radius:18px;padding:17px;background:linear-gradient(120deg,#52227c,#b72d83,#e45b9c);position:relative;overflow:hidden}
+.banner:after{content:"🎵";position:absolute;right:15px;top:20px;font-size:52px;opacity:.7}
+.banner h2{font-size:20px;margin-bottom:7px}
+.banner p{font-size:12px;color:#ffe6f5}
+.room-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.pill{font-size:11px;background:#240d3c66;padding:7px 10px;border-radius:20px}
+.section-title{display:flex;justify-content:space-between;align-items:center;padding:10px 15px 14px}
+.section-title h2{font-size:16px}
+.section-title span{font-size:11px;color:#d6bce8}
+.seats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:21px 9px;padding:5px 15px 23px}
+.seat{text-align:center;min-width:0}
+.seat-avatar{width:65px;height:65px;margin:auto auto 8px;border-radius:23px;background:linear-gradient(145deg,#58347b,#322044);border:2px solid #694b81;display:grid;place-items:center;font-size:27px;position:relative}
+.seat.host .seat-avatar{border-color:#ffcf64;box-shadow:0 0 13px #f9b84c44}
+.seat-avatar.empty{background:#21132f;border:2px dashed #684a7d;color:#b69bc9}
+.seat-number{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#55326e;border-radius:8px;padding:3px 7px;font-size:9px;white-space:nowrap}
+.seat.host .seat-number{background:#c58b28;color:#fff}
+.seat-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat-level{font-size:10px;color:#c8a7f6;margin-top:5px}
+.room-tools{margin:0 13px 18px;padding:15px;background:linear-gradient(140deg,#29163d,#21112f);border:1px solid #3e2751;border-radius:18px}
+.tool-heading{font-size:14px;font-weight:bold;margin-bottom:14px}
+.tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 5px}
+.tool{text-align:center;border:0;background:transparent;color:white;font-size:10px}
+.tool-icon{width:45px;height:45px;margin:0 auto 7px;border-radius:15px;display:grid;place-items:center;font-size:22px;background:#3a2351}
+.tool:nth-child(2) .tool-icon{background:#65305c}
+.tool:nth-child(3) .tool-icon{background:#42307a}
+.tool:nth-child(4) .tool-icon{background:#6d3c39}
+.gift-strip{display:flex;gap:10px;overflow:auto;padding:0 14px 14px}
+.gift{flex:0 0 82px;border:1px solid #493052;background:#28183a;border-radius:15px;padding:11px 5px;text-align:center}
+.gift .emoji{font-size:28px;margin-bottom:7px}
+.gift p{font-size:11px}
+.gift small{display:block;font-size:10px;color:#ffca73;margin-top:5px}
+.chat-box{margin:0 13px 15px;border-radius:17px;background:#20122e;padding:13px}
+.chat-title{font-weight:bold;font-size:14px;margin-bottom:12px;display:flex;justify-content:space-between}
+.chat-title span{color:#c5afd9;font-size:11px;font-weight:normal}
+.messages{height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.message{font-size:12px;line-height:1.5;color:#eadcf5;overflow-wrap:anywhere}
+.message strong{color:#ff83c0;margin-right:5px}
+.message.system{color:#c7a6f2}
+.chat-send{display:flex;gap:8px;margin-top:12px}
+.chat-send input{width:100%;min-width:0;background:#342142;border:1px solid #4a3159;border-radius:12px;padding:12px;color:white;outline:none}
+.chat-send button{border:0;border-radius:12px;padding:0 15px;background:linear-gradient(100deg,#9148ed,#f13f9a);color:white;font-weight:bold}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:5;background:#1b1029;border-top:1px solid #40264f;display:flex;justify-content:space-around;align-items:center;padding:10px 5px max(10px,env(safe-area-inset-bottom))}
+.bottom button{background:transparent;color:#eee;border:0;min-width:48px;font-size:10px}
+.bottom button span{display:block;font-size:22px;margin-bottom:5px}
+.bottom .primary{background:linear-gradient(130deg,#a24cf2,#ff439d);border-radius:16px;padding:9px 13px;font-size:11px}
+.bottom .primary span{font-size:21px}
+.muted{color:#aaa}
+.overlay{display:none;position:fixed;inset:0;background:#000a;z-index:20;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{width:100%;max-width:560px;background:#28173a;border-radius:22px 22px 0 0;padding:22px 17px max(20px,env(safe-area-inset-bottom));max-height:80vh;overflow:auto}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.sheet-head h2{font-size:18px}
+.close{border:0;background:#43294f;color:white;border-radius:10px;padding:8px 12px}
+.sheet p{font-size:13px;color:#d8c6e7;line-height:1.7;margin:8px 0}
+.sheet-action{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(100deg,#8b5cf6,#ff439d);color:white;margin-top:12px}
+@media(min-width:600px){body{max-width:560px;margin:auto}.bottom{max-width:560px;left:50%;transform:translateX(-50%)}.overlay{align-items:center}.sheet{border-radius:22px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="back" onclick="location.href='index.html'">‹ Back</button>
+  <div class="room-head">
+    <div class="room-avatar">🎙️</div>
+    <div><h1 id="roomName">Huka Friends Room</h1><p>Room ID: <b id="roomId">200001</b></p></div>
+  </div>
+  <div class="head-actions">
+    <button onclick="openSheet('share')">↗</button>
+    <button onclick="openSheet('settings')">⚙</button>
+  </div>
+</header>
+
+<section class="banner">
+  <h2>🎉 Welcome to Huka!</h2>
+  <p>Meet new friends and enjoy together.</p>
+  <div class="room-stats">
+    <span class="pill">🟢 Room Open</span>
+    <span class="pill">🎤 9 Seats</span>
+    <span class="pill">👥 <b id="peopleCount">1</b> people here</span>
+  </div>
+</section>
+
+<div class="section-title">
+  <h2>🎙️ Voice Seats</h2>
+  <span>Host + 8 seats</span>
+</div>
+
+<section class="seats" id="seats"></section>
+
+<section class="room-tools">
+  <div class="tool-heading">✨ Room Features</div>
+  <div class="tool-grid">
+    <button class="tool" onclick="openSheet('members')"><span class="tool-icon">👥</span>Members</button>
+    <button class="tool" onclick="openSheet('invite')"><span class="tool-icon">💌</span>Invite</button>
+    <button class="tool" onclick="openSheet('follow')"><span class="tool-icon">❤️</span>Follow Host</button>
+    <button class="tool" onclick="openSheet('report')"><span class="tool-icon">🚩</span>Report</button>
+    <button class="tool" onclick="openSheet('ranking')"><span class="tool-icon">🏆</span>Ranking</button>
+    <button class="tool" onclick="openSheet('family')"><span class="tool-icon">👨‍👩‍👧</span>Family</button>
+    <button class="tool" onclick="openSheet('cp')"><span class="tool-icon">💞</span>CP Space</button>
+    <button class="tool" onclick="openSheet('games')"><span class="tool-icon">🎮</span>Games</button>
+  </div>
+</section>
+
+<div class="section-title">
+  <h2>🎁 Send a Gift</h2>
+  <span>Demo coins</span>
+</div>
+<div class="gift-strip">
+  <button class="gift" onclick="sendGift('Rose','🌹',100)"><div class="emoji">🌹</div><p>Rose</p><small>🪙 100</small></button>
+  <button class="gift" onclick="sendGift('Heart','💖',500)"><div class="emoji">💖</div><p>Heart</p><small>🪙 500</small></button>
+  <button class="gift" onclick="sendGift('Teddy','🧸',1000)"><div class="emoji">🧸</div><p>Teddy</p><small>🪙 1K</small></button>
+  <button class="gift" onclick="sendGift('Crown','👑',5000)"><div class="emoji">👑</div><p>Crown</p><small>🪙 5K</small></button>
+  <button class="gift" onclick="sendGift('Rocket','🚀',10000)"><div class="emoji">🚀</div><p>Rocket</p><small>🪙 10K</small></button>
+</div>
+
+<section class="chat-box">
+  <div class="chat-title">💬 Room Chat <span>Demo chat</span></div>
+  <div class="messages" id="messages">
+    <div class="message system">✨ Welcome to Huka Friends Room!</div>
+    <div class="message"><strong>Huka Host:</strong>Hello friends 👋</div>
+  </div>
+  <form class="chat-send" id="chatForm">
+    <input id="chatInput" maxlength="250" placeholder="Say something..." autocomplete="off">
+    <button type="submit">Send</button>
+  </form>
+</section>
+
+<nav class="bottom">
+  <button onclick="toggleMic()"><span id="micIcon">🎤</span><b id="micText">Mic Off</b></button>
+  <button onclick="toggleSpeaker()"><span id="speakerIcon">🔊</span><b id="speakerText">Speaker</b></button>
+  <button class="primary" onclick="openSheet('gifts')"><span>🎁</span>Gifts</button>
+  <button onclick="openSheet('emoji')"><span>😊</span>Emoji</button>
+  <button onclick="openSheet('more')"><span>☰</span>More</button>
+</nav>
+
+<div class="overlay" id="overlay" onclick="overlayClose(event)">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="sheetTitle">Room Menu</h2><button class="close" onclick="closeSheet()">✕</button></div>
+    <div id="sheetContent"></div>
+  </div>
+</div>
+
+<script>
+const params=new URLSearchParams(location.search);
+const roomId=params.get('room')||'200001';
+document.getElementById('roomId').textContent=roomId;
+document.getElementById('roomName').textContent=params.get('name')||'Huka Friends Room';
+
+const seatUsers=[
+ {name:'Huka Host',emoji:'👑',level:'Lv. 25',host:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true},
+ {name:'Open Seat',emoji:'＋',level:'Tap to request',empty:true}
+];
+const seatsElement=document.getElementById('seats');
+function renderSeats(){
+ seatsElement.innerHTML='';
+ seatUsers.forEach((user,index)=>{
+  const seat=document.createElement('div');
+  seat.className='seat'+(user.host?' host':'');
+  seat.innerHTML='<div class="seat-avatar '+(user.empty?'empty':'')+'">'+user.emoji+'<span class="seat-number">'+(index===0?'HOST':`SEAT ${index+1}`)+'</span></div><div class="seat-name"></div><div class="seat-level"></div>';
+  seat.querySelector('.seat-name').textContent=user.name;
+  seat.querySelector('.seat-level').textContent=user.level;
+  seat.onclick=()=>user.empty?requestSeat(index):openSheet('host');
+  seatsElement.appendChild(seat);
+ });
+ document.getElementById('peopleCount').textContent=1;
+}
+renderSeats();
+
+let micOn=false,speakerOn=true;
+function toggleMic(){
+ micOn=!micOn;
+ document.getElementById('micIcon').textContent=micOn?'🎙️':'🎤';
+ document.getElementById('micText').textContent=micOn?'Mic On':'Mic Off';
+ addMessage('System',micOn?'Mic button switched on (demo).':'Mic button switched off (demo).',true);
+}
+function toggleSpeaker(){
+ speakerOn=!speakerOn;
+ document.getElementById('speakerIcon').textContent=speakerOn?'🔊':'🔇';
+ document.getElementById('speakerText').textContent=speakerOn?'Speaker':'Muted';
+}
+function addMessage(name,text,isSystem=false){
+ const box=document.getElementById('messages');
+ const line=document.createElement('div');
+ line.className='message'+(isSystem?' system':'');
+ if(isSystem)line.textContent='✨ '+text;
+ else{
+  const strong=document.createElement('strong');
+  strong.textContent=name+':';
+  line.append(strong,document.createTextNode(text));
+ }
+ box.appendChild(line);
+ box.scrollTop=box.scrollHeight;
+}
+document.getElementById('chatForm').addEventListener('submit',function(event){
+ event.preventDefault();
+ const input=document.getElementById('chatInput');
+ const text=input.value.trim();
+ if(!text)return;
+ addMessage('You',text);
+ input.value='';
+});
+function sendGift(name,emoji,cost){
+ addMessage('System','You selected '+emoji+' '+name+' ('+cost+' demo coins).',true);
+ openSheet('giftSent');
+ document.getElementById('sheetContent').innerHTML='<p style="font-size:40px;text-align:center">'+emoji+'</p><p style="text-align:center">You selected <b>'+name+'</b>.</p><p style="text-align:center">Cost: 🪙 '+cost+' demo coins</p><p>Gift sending and coin deduction will work after connecting the backend.</p><button class="sheet-action" onclick="closeSheet()">OK</button>';
+}
+function requestSeat(index){
+ openSheet('seat');
+ document.getElementById('sheetContent').innerHTML='<p>Request to join seat '+(index+1)+'?</p><p>This demo only shows the request message. A real host approval system needs the server.</p><button class="sheet-action" onclick="addMessage(\'System\',\'Seat request sent (demo).\',true);closeSheet()">Request Seat</button>';
+}
+const sheetData={
+ settings:['Room Settings','<p>Room ID: '+roomId+'</p><p>Room name: Huka Friends Room</p><p>Room theme: Purple Galaxy</p><p>Host controls and persistent room settings will be connected to the backend later.</p>'],
+ share:['Share Room','<p>Invite friends to join this room.</p><p>Room ID: <b>'+roomId+'</b></p><button class="sheet-action" onclick="copyRoom()">Copy Room Link</button>'],
+ invite:['Invite Friends','<p>Share the room link with your friends.</p><button class="sheet-action" onclick="copyRoom()">Copy Room Link</button>'],
+ members:['Room Members','<p>👑 Huka Host — Host</p><p>Room members are demo data until a live server is connected.</p>'],
+ follow:['Follow Host','<p>Follow Host is a demo action. User accounts and following will be saved after backend integration.</p><button class="sheet-action" onclick="closeSheet()">OK</button>'],
+ report:['Report Room','<p>If you need to report an issue, a real report submission system must be connected before this can be sent.</p>'],
+ ranking:['Room Ranking','<p>🏆 Room gifts ranking will appear here after connecting gift transactions and a ranking backend.</p>'],
+ family:['Family','<p>👨‍👩‍👧 Family rooms, members and family rankings will be added in a later page.</p>'],
+ cp:['CP Space','<p>💞 CP profiles and CP points will be added with user accounts and backend storage.</p>'],
+ games:['Room Games','<p>🎮 Open the Huka games page.</p><button class="sheet-action" onclick="location.href=\'games.html\'">Open Games</button>'],
+ emoji:['Emoji','<p style="font-size:27px">😀 😍 😂 🥰 😎 🎉 ❤️ 🌹 🔥 👑</p><button class="sheet-action" onclick="addMessage(\'You\', ' + "'😀'" + ');closeSheet()">Send 😀 to Chat</button>'],
+ more:['More Features','<p>🎁 Gifts</p><p>🏆 Rankings</p><p>👑 VIP Club</p><p>🎮 Games</p><p>⚙️ Room Settings</p>'],
+ host:['Room Host','<p>👑 Huka Host — Room owner (demo).</p>'],
+ seat:['Request Seat','<p>Seat request.</p>'],
+ giftSent:['Gift Selected','<p>Gift selected (demo).</p>']
+};
+function openSheet(key){
+ const data=sheetData[key]||['Huka Voice Chat','<p>This feature will be added to the next version.</p>'];
+ document.getElementById('sheetTitle').textContent=data[0];
+ document.getElementById('sheetContent').innerHTML=data[1];
+ document.getElementById('overlay').classList.add('show');
+}
+function closeSheet(){document.getElementById('overlay').classList.remove('show')}
+function overlayClose(event){if(event.target.id==='overlay')closeSheet()}
+async function copyRoom(){
+ const link=location.origin+location.pathname+'?room='+encodeURIComponent(roomId);
+ try{await navigator.clipboard.writeText(link);alert('Room link copied!');}
+ catch(e){prompt('Copy this room link:',link)}
+}
+</script>
+</body>
+</html>
+```
