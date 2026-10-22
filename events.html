@@ -1,0 +1,259 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#150920">
+<title>Huka Voice Chat — Events & Rewards</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#150920;--panel:#251535;--pink:#ff439d;--purple:#965cff;--muted:#c4b1d2}
+body{font-family:Arial,sans-serif;background:var(--bg);color:#fff;padding-bottom:85px}
+button{font:inherit;cursor:pointer}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px;background:#1d102b}
+header h1{font-size:19px}
+header button{background:#382347;border:0;color:white;padding:10px 13px;border-radius:10px}
+.hero{margin:14px;padding:21px;border-radius:18px;background:linear-gradient(125deg,#51258c,#a333a6,#f0449d);position:relative;overflow:hidden}
+.hero h2{font-size:23px;margin-bottom:8px}
+.hero p{font-size:12px;color:#f6e4ff;line-height:1.7;max-width:240px}
+.hero .art{position:absolute;right:15px;top:21px;font-size:53px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:0 13px 16px;padding:5px;background:#21132e;border-radius:12px}
+.tabs button{border:0;border-radius:9px;padding:11px 3px;background:transparent;color:#c2aecf;font-size:11px}
+.tabs button.active{background:linear-gradient(100deg,#8d4ce8,#ed419b);color:white;font-weight:bold}
+.panel{margin:0 13px 16px;padding:16px;background:var(--panel);border:1px solid #41274f;border-radius:16px}
+.panel h2{font-size:16px;margin-bottom:13px}
+.daily{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.day{background:#1b1028;border:1px solid #493057;border-radius:11px;padding:12px 3px;text-align:center}
+.day.done{border-color:#e34b9f;background:#432044}
+.day .icon{font-size:23px;margin-bottom:7px}
+.day strong{display:block;font-size:10px;margin-bottom:6px}
+.day small{font-size:10px;color:#e2c5ef}
+.btn{border:0;border-radius:11px;background:linear-gradient(100deg,#8f4de9,#ed419c);padding:12px 14px;color:white;font-size:12px;font-weight:bold}
+.btn.full{width:100%;margin-top:13px}
+.btn.secondary{background:#392447;border:1px solid #69437c}
+.wheel-wrap{text-align:center;padding:8px 0}
+.wheel{width:210px;height:210px;border-radius:50%;margin:0 auto 17px;border:7px solid #ed8bc8;box-shadow:0 0 22px #d83baf55;background:conic-gradient(#ff6dba 0deg 45deg,#7135b0 45deg 90deg,#ffca65 90deg 135deg,#7539b5 135deg 180deg,#ff6dba 180deg 225deg,#7135b0 225deg 270deg,#ffca65 270deg 315deg,#7539b5 315deg 360deg);display:grid;place-items:center;position:relative;transition:transform 3s cubic-bezier(.12,.7,.2,1)}
+.wheel:before{content:"🎁";position:absolute;inset:0;display:grid;place-items:center;font-size:38px}
+.wheel-pointer{font-size:25px;margin-bottom:-7px;position:relative;z-index:2}
+.small{font-size:11px;color:var(--muted);line-height:1.7}
+.task{display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid #3b2747}
+.task:last-child{border-bottom:0}
+.task-icon{width:42px;height:42px;border-radius:12px;background:#40234f;display:grid;place-items:center;font-size:23px;flex-shrink:0}
+.task-info{flex:1;min-width:0}
+.task-info strong{display:block;font-size:12px;margin-bottom:6px}
+.task-info small{font-size:10px;color:var(--muted)}
+.task-action{min-width:67px;text-align:center}
+.task-action button{padding:8px 9px;font-size:10px}
+.progress{height:5px;background:#493354;border-radius:9px;margin-top:8px;overflow:hidden}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,#a45aff,#ff55ac);width:0}
+.event-card{overflow:hidden;border-radius:14px;margin-bottom:13px;background:#1b1028;border:1px solid #4a2c59}
+.event-art{padding:22px 16px;background:linear-gradient(120deg,#7728a0,#ed438d);display:flex;align-items:center;justify-content:space-between}
+.event-art h3{font-size:18px;margin-bottom:7px}
+.event-art p{font-size:10px;color:#ffe1f5}
+.event-art span{font-size:42px}
+.event-body{padding:13px}
+.event-body p{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:12px}
+.reward{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #392545}
+.reward:last-child{border:0}
+.reward span{font-size:12px}
+.reward strong{font-size:12px;color:#ffca72;text-align:right}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);display:none;z-index:10;max-width:90%;background:#492456;padding:12px 16px;border-radius:11px;font-size:12px;text-align:center}
+.toast.show{display:block}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#1b1029;border-top:1px solid #40264f;display:flex;justify-content:space-around;padding:10px 4px max(10px,env(safe-area-inset-bottom));z-index:5}
+.bottom a{color:#ad9abb;text-decoration:none;text-align:center;font-size:10px}
+.bottom a span{display:block;font-size:21px;margin-bottom:4px}
+.bottom a.active{color:#ff62b4}
+.notice{margin:0 15px 20px;font-size:10px;line-height:1.7;color:#a993ba}
+@media(min-width:600px){body{max-width:560px;margin:auto}.bottom{max-width:560px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<header>
+<button onclick="location.href='index.html'">‹ Home</button>
+<h1>🎁 Events & Rewards</h1>
+<button onclick="showTab('tasks')">✓ Tasks</button>
+</header>
+
+<section class="hero">
+<h2>Rewards Center ✨</h2>
+<p>Complete daily activities, collect demo rewards and explore special Huka events.</p>
+<div class="art">🎊</div>
+</section>
+
+<div class="tabs">
+<button class="active" data-tab="daily" onclick="showTab('daily')">🎁 Daily</button>
+<button data-tab="tasks" onclick="showTab('tasks')">✅ Tasks</button>
+<button data-tab="events" onclick="showTab('events')">🎉 Events</button>
+</div>
+
+<main id="main"></main>
+
+<p class="notice">Demo mode: rewards and task progress are stored in this browser only. Coins are virtual demo points, not money. Shared rewards and real account balances require server/database integration.</p>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom">
+<a href="index.html"><span>🏠</span>Home</a>
+<a href="inbox.html"><span>💌</span>Inbox</a>
+<a href="room.html?room=200001"><span>🎙️</span>Room</a>
+<a href="games.html"><span>🎮</span>Games</a>
+<a href="profile.html"><span>👤</span>Profile</a>
+</nav>
+
+<script>
+const KEY='huka_events_demo_v1';
+const defaults=()=>({
+ lastLogin:'',
+ loginStreak:0,
+ claimedDays:[],
+ wheelDate:'',
+ coins:0,
+ tasks:{}
+});
+function loadState(){
+ try{return {...defaults(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}
+ catch(e){return defaults()}
+}
+let state=loadState();
+let activeTab='daily';
+let spinning=false;
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function dateKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function showToast(msg){
+ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+ clearTimeout(window.hukaToastTimer);window.hukaToastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+function showTab(tab){
+ activeTab=tab;
+ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ render();
+}
+function format(n){return Number(n).toLocaleString('en-IN')}
+function claimLogin(){
+ const today=dateKey();
+ if(state.lastLogin===today){showToast('Daily login reward already claimed today.');return}
+ state.loginStreak=state.lastLogin===yesterdayKey()?Math.min(7,state.loginStreak+1):1;
+ state.lastLogin=today;
+ const reward=state.loginStreak===7?700000:state.loginStreak*100000;
+ state.coins+=reward;state.claimedDays.push(today);save();render();
+ showToast('Demo reward claimed: '+format(reward)+' coins!');
+}
+function claimDay(day){
+ const today=dateKey();
+ if(state.claimedDays.includes(today+'-day'+day)){showToast('This demo reward is already claimed.');return}
+ if(day>state.loginStreak){showToast('Claim daily login rewards first to unlock this day.');return}
+ const reward=day===7?700000:day*100000;
+ state.claimedDays.push(today+'-day'+day);state.coins+=reward;save();render();
+ showToast('Demo reward: '+format(reward)+' coins!');
+}
+function renderDaily(main){
+ const p=document.createElement('section');p.className='panel';
+ p.innerHTML='<h2>🎁 Daily Login Rewards</h2><p class="small">Come back every day to build your demo login streak. Your streak is saved in this browser.</p>';
+ const grid=document.createElement('div');grid.className='daily';grid.style.marginTop='14px';
+ for(let day=1;day<=7;day++){
+  const el=document.createElement('div');el.className='day'+(day<=state.loginStreak?' done':'');
+  const icon=document.createElement('div');icon.className='icon';icon.textContent=day===7?'👑':day>=5?'💎':'🪙';
+  const strong=document.createElement('strong');strong.textContent='Day '+day;
+  const small=document.createElement('small');small.textContent=day===7?'VIP Demo':day+'00K';
+  el.append(icon,strong,small);
+  if(day<=state.loginStreak){
+   const label=document.createElement('div');label.style.cssText='font-size:9px;color:#ff92c9;margin-top:6px';label.textContent='Unlocked';el.appendChild(label)
+  }
+  grid.appendChild(el);
+ }
+ p.appendChild(grid);
+ const info=document.createElement('div');info.className='reward';
+ info.innerHTML='<span>🪙 Demo Coins Balance</span><strong>'+format(state.coins)+'</strong>';p.appendChild(info);
+ const b=document.createElement('button');b.className='btn full';b.textContent=state.lastLogin===dateKey()?'✓ Login Reward Claimed':'🎁 Claim Daily Login Reward';b.disabled=state.lastLogin===dateKey();if(b.disabled)b.style.opacity='.6';b.onclick=claimLogin;p.appendChild(b);
+ main.appendChild(p);
+ const wheel=document.createElement('section');wheel.className='panel';
+ wheel.innerHTML='<h2>🎡 Lucky Wheel</h2><p class="small">Spin once per day for a random virtual demo reward.</p><div class="wheel-wrap"><div class="wheel-pointer">▼</div><div class="wheel" id="wheel"></div><p class="small" id="wheelMessage">Ready for today’s spin?</p></div>';
+ const spin=document.createElement('button');spin.className='btn full';spin.id='spinBtn';spin.textContent=state.wheelDate===dateKey()?'✓ Already Spun Today':'🎡 Spin the Wheel';spin.disabled=state.wheelDate===dateKey();if(spin.disabled)spin.style.opacity='.6';spin.onclick=spinWheel;wheel.appendChild(spin);main.appendChild(wheel);
+}
+function spinWheel(){
+ if(spinning)return;
+ if(state.wheelDate===dateKey()){showToast('You have already spun today.');return}
+ spinning=true;
+ const btn=document.getElementById('spinBtn');btn.disabled=true;btn.textContent='Spinning...';
+ const wheel=document.getElementById('wheel');
+ const rewards=[10000,25000,50000,100000,200000,5000,75000,150000];
+ const idx=Math.floor(Math.random()*rewards.length);
+ wheel.style.transform='rotate('+(1440+idx*45+Math.random()*25)+'deg)';
+ setTimeout(()=>{
+  const reward=rewards[idx];state.wheelDate=dateKey();state.coins+=reward;save();spinning=false;render();
+  showToast('Lucky Wheel demo reward: '+format(reward)+' coins!');
+ },3100);
+}
+const tasks=[
+{id:'room',icon:'🎙️',name:'Visit a Voice Room',desc:'Open a room page',reward:10000,progress:0,target:1},
+{id:'games',icon:'🎮',name:'Visit Games',desc:'Explore the games page',reward:15000,progress:0,target:1},
+{id:'profile',icon:'👤',name:'View Your Profile',desc:'Open your profile page',reward:10000,progress:0,target:1},
+{id:'family',icon:'💜',name:'Explore Families',desc:'Visit the family page',reward:20000,progress:0,target:1},
+{id:'inbox',icon:'💌',name:'Check Your Inbox',desc:'Open your inbox page',reward:10000,progress:0,target:1}
+];
+function taskClaimed(id){return !!state.tasks[id+'_'+dateKey()]}
+function claimTask(id,reward){
+ const key=id+'_'+dateKey();
+ if(state.tasks[key]){showToast('Task already completed today.');return}
+ state.tasks[key]=true;state.coins+=reward;save();render();showToast('Task reward: '+format(reward)+' demo coins!');
+}
+function renderTasks(main){
+ const p=document.createElement('section');p.className='panel';
+ p.innerHTML='<h2>✅ Daily Tasks</h2><p class="small">Explore Huka pages and collect demo rewards. Each task can be claimed once per day.</p>';
+ tasks.forEach(t=>{
+  const row=document.createElement('div');row.className='task';
+  const icon=document.createElement('div');icon.className='task-icon';icon.textContent=t.icon;
+  const info=document.createElement('div');info.className='task-info';
+  const name=document.createElement('strong');name.textContent=t.name;
+  const desc=document.createElement('small');desc.textContent=t.desc;
+  const progress=document.createElement('div');progress.className='progress';
+  const fill=document.createElement('span');fill.style.width=taskClaimed(t.id)?'100%':'0%';progress.appendChild(fill);
+  info.append(name,desc,progress);
+  const action=document.createElement('div');action.className='task-action';
+  const reward=document.createElement('div');reward.style.cssText='font-size:10px;color:#ffd477;margin-bottom:7px';reward.textContent='+'+format(t.reward);
+  const b=document.createElement('button');b.className='btn'+(taskClaimed(t.id)?' secondary':'');b.textContent=taskClaimed(t.id)?'Claimed':'Claim';
+  b.disabled=taskClaimed(t.id);if(b.disabled)b.style.opacity='.6';b.onclick=()=>claimTask(t.id,t.reward);
+  action.append(reward,b);row.append(icon,info,action);p.appendChild(row);
+ });
+ main.appendChild(p);
+ const allDone=tasks.every(t=>taskClaimed(t.id));
+ const total=tasks.reduce((sum,t)=>sum+t.reward,0);
+ const bonus=document.createElement('section');bonus.className='panel';
+ bonus.innerHTML='<h2>🌟 Daily Task Bonus</h2><p class="small">Complete all five daily demo tasks for an extra 50,000 coins.</p>';
+ const b=document.createElement('button');b.className='btn full';b.textContent=state.tasks['all_'+dateKey()]?'✓ Bonus Claimed':allDone?'🎁 Claim 50,000 Bonus':'🔒 Complete All Tasks';b.disabled=!allDone||!!state.tasks['all_'+dateKey()];if(b.disabled)b.style.opacity='.6';
+ b.onclick=()=>{state.tasks['all_'+dateKey()]=true;state.coins+=50000;save();render();showToast('Daily bonus: 50,000 demo coins!')};bonus.appendChild(b);main.appendChild(bonus);
+}
+function renderEvents(main){
+ const intro=document.createElement('section');intro.className='panel';
+ intro.innerHTML='<h2>🎉 Special Events</h2><p class="small">Explore themed Huka events. These cards are previews, not live competitions.</p>';main.appendChild(intro);
+ const events=[
+  {name:'Diwali Gift Festival',icon:'🪔',desc:'Celebrate the festival of lights with themed gifts, colorful effects and community activities.',rewards:['Festival gifts','Special profile frames','Event leaderboard'],color:'linear-gradient(120deg,#7833a6,#e84d8c)'},
+  {name:'Navratri Celebration',icon:'💃',desc:'Enjoy a festive theme, music-room activities and colorful seasonal decorations.',rewards:['Navratri themed gifts','Festival badges','Community points'],color:'linear-gradient(120deg,#6226a8,#d83b9e)'},
+  {name:'Rich King Challenge',icon:'👑',desc:'A preview of daily, weekly and monthly leaderboard competitions.',rewards:['Ranking badges','Demo points','Top-player showcase'],color:'linear-gradient(120deg,#4730a1,#ed9a48)'}
+ ];
+ events.forEach(ev=>{
+  const card=document.createElement('div');card.className='event-card';
+  const art=document.createElement('div');art.className='event-art';art.style.background=ev.color;
+  const left=document.createElement('div');const h=document.createElement('h3');h.textContent=ev.name;
+  const status=document.createElement('p');status.textContent='✨ Event Preview';left.append(h,status);
+  const emoji=document.createElement('span');emoji.textContent=ev.icon;art.append(left,emoji);
+  const body=document.createElement('div');body.className='event-body';
+  const desc=document.createElement('p');desc.textContent=ev.desc;body.appendChild(desc);
+  ev.rewards.forEach(r=>{const row=document.createElement('div');row.className='reward';const label=document.createElement('span');label.textContent='🎁 '+r;const value=document.createElement('strong');value.textContent='Coming Soon';row.append(label,value);body.appendChild(row)});
+  const b=document.createElement('button');b.className='btn full';b.textContent='View Event Preview';b.onclick=()=>showToast(ev.name+' — preview only; event server not connected.');
+  body.appendChild(b);card.append(art,body);main.appendChild(card);
+ });
+}
+function render(){
+ const main=document.getElementById('main');main.innerHTML='';
+ if(activeTab==='daily')renderDaily(main);
+ else if(activeTab==='tasks')renderTasks(main);
+ else renderEvents(main);
+}
+render();
+</script>
+</body>
+</html>
+```
