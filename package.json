@@ -1,8 +1,7 @@
 {
 "name": "huka-voice-chat",
 "version": "1.0.0",
-"private": true,
-"description": "Huka Voice Chat social app",
+"description": "Huka Voice Chat app",
 "main": "server.js",
 "scripts": {
 "start": "node server.js"
