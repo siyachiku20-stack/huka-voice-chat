@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huka Voice Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>🎙️ Huka</h1>
+    <span class="online">● Online Rooms</span>
+  </header>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="hero">
+        <h2>Apni Duniya, Apni Awaaz 💜</h2>
+        <p>Doston se milo, baatein karo aur masti karo!</p>
+        <button onclick="showPage('rooms')">🎤 Rooms Dekho</button>
+      </div>
+
+```
+  <h2>🔥 Popular Rooms</h2>
+  <div class="room-grid">
+    <button class="room-card" onclick="joinRoom('Dosti Room')">
+      🎉<h3>Dosti Room</h3><p>Friends aur fun</p>
+    </button>
+    <button class="room-card" onclick="joinRoom('Music Room')">
+      🎵<h3>Music Room</h3><p>Music lovers</p>
+    </button>
+    <button class="room-card" onclick="joinRoom('Masti Room')">
+      😂<h3>Masti Room</h3><p>Hasi-mazaak</p>
+    </button>
+    <button class="room-card" onclick="joinRoom('Love Room')">
+      💖<h3>Love Room</h3><p>Meet new friends</p>
+    </button>
+  </div>
+</section>
+
+<section id="rooms" class="page">
+  <h2>🎙️ Voice Rooms</h2>
+  <p>Kisi room ko chuno aur doston se chat karo.</p>
+  <div class="room-grid">
+    <button class="room-card" onclick="joinRoom('Dosti Room')">🎉 Dosti Room</button>
+    <button class="room-card" onclick="joinRoom('Music Room')">🎵 Music Room</button>
+    <button class="room-card" onclick="joinRoom('Masti Room')">😂 Masti Room</button>
+    <button class="room-card" onclick="joinRoom('Love Room')">💖 Love Room</button>
+  </div>
+</section>
+
+<section id="chat" class="page">
+  <button onclick="leaveRoom()">⬅️ Room Chhodo</button>
+  <h2 id="roomTitle">🎙️ Room</h2>
+  <h3>👥 Members (<span id="memberCount">0</span>)</h3>
+  <ul id="members"></ul>
+  <h3>💬 Messages</h3>
+  <div id="messages" class="messages"></div>
+  <form id="chatForm">
+    <input id="messageInput" placeholder="Message likho..." maxlength="300" autocomplete="off">
+    <button type="submit">Send ➤</button>
+  </form>
+  <p class="note">Note: Abhi text chat hai; live voice baad mein add karenge.</p>
+</section>
+
+<section id="games" class="page">
+  <div class="hero">
+    <h2>🎮 Mini Games</h2>
+    <p>Yahan jaldi hi games add karenge!</p>
+  </div>
+</section>
+
+<section id="profile" class="page">
+  <div class="hero">
+    <h2>👑 Huka Profile</h2>
+    <p>Apni profile aur VIP features ka section.</p>
+    <p>💎 Coins: Demo only</p>
+  </div>
+</section>
+```
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button onclick="showPage('home')">🏠<span>Home</span></button>
+    <button onclick="showPage('rooms')">🎙️<span>Rooms</span></button>
+    <button onclick="showPage('games')">🎮<span>Games</span></button>
+    <button onclick="showPage('profile')">👤<span>Profile</span></button>
+  </nav>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
