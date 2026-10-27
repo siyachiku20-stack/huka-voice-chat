@@ -1,0 +1,224 @@
+* {
+  box-sizing: border-box;
+  }
+
+:root {
+font-family: Arial, sans-serif;
+color: #29243e;
+background: #f7f5ff;
+}
+
+body {
+margin: 0 auto;
+max-width: 900px;
+padding: 16px;
+padding-bottom: 100px;
+}
+
+.topbar {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+padding: 22px;
+color: white;
+border-radius: 24px;
+background: linear-gradient(135deg, #7657e8, #c45de8);
+}
+
+.eyebrow {
+font-size: 11px;
+letter-spacing: 2px;
+}
+
+.topbar h1 {
+margin: 5px 0;
+font-size: 34px;
+}
+
+.topbar p {
+margin-bottom: 0;
+}
+
+.coin-box {
+padding: 12px;
+border-radius: 24px;
+background: #ffffff35;
+white-space: nowrap;
+}
+
+h2 {
+margin-top: 26px;
+font-size: 21px;
+}
+
+.room-grid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 12px;
+}
+
+.room-card {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 9px;
+min-height: 145px;
+padding: 16px;
+border: 0;
+border-radius: 20px;
+color: #342542;
+text-align: left;
+cursor: pointer;
+}
+
+.pink {
+background: linear-gradient(135deg, #ffe1ed, #ffc4dc);
+}
+
+.blue {
+background: linear-gradient(135deg, #dce9ff, #c3d8ff);
+}
+
+.yellow {
+background: linear-gradient(135deg, #fff1c7, #ffe1a1);
+}
+
+.room-icon {
+font-size: 30px;
+}
+
+.room-card small,
+.feature-card small {
+font-size: 12px;
+}
+
+.star-card,
+.feature-card,
+.profile-card {
+padding: 17px;
+margin: 10px 0;
+border-radius: 17px;
+background: white;
+border: 1px solid #ebe6fa;
+}
+
+.star-card span {
+float: right;
+color: #7657e8;
+font-size: 13px;
+}
+
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+display: flex;
+justify-content: space-around;
+gap: 5px;
+padding: 10px 5px;
+background: white;
+border-top: 1px solid #e8e1f6;
+}
+
+.bottom-nav button {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 4px;
+align-items: center;
+padding: 8px 2px;
+border: 0;
+background: transparent;
+color: #55477c;
+cursor: pointer;
+}
+
+.bottom-nav span {
+font-size: 12px;
+}
+
+.hidden {
+display: none !important;
+}
+
+.back-button,
+#chatForm button,
+.leave-button {
+padding: 11px 16px;
+border: 0;
+border-radius: 12px;
+background: #7657e8;
+color: white;
+cursor: pointer;
+}
+
+.muted {
+color: #776d8b;
+}
+
+.stage {
+text-align: center;
+padding: 22px;
+margin: 15px 0;
+border-radius: 22px;
+background: linear-gradient(135deg, #e8ddff, #ffe1ed);
+}
+
+.avatar,
+.profile-avatar {
+display: grid;
+place-items: center;
+width: 70px;
+height: 70px;
+margin: auto;
+border-radius: 50%;
+background: white;
+font-size: 35px;
+}
+
+#members {
+padding-left: 20px;
+}
+
+.chat-box {
+min-height: 70px;
+max-height: 220px;
+overflow-y: auto;
+padding: 12px;
+margin: 12px 0;
+border-radius: 14px;
+background: white;
+overflow-wrap: anywhere;
+}
+
+#chatForm {
+display: flex;
+gap: 8px;
+}
+
+#chatInput {
+flex: 1;
+min-width: 0;
+padding: 12px;
+border: 1px solid #ded6f1;
+border-radius: 12px;
+font-size: 16px;
+}
+
+.leave-button {
+margin-top: 15px;
+background: #e94c75;
+}
+
+.profile-card {
+text-align: center;
+padding: 28px 15px;
+}
+
+@media (min-width: 600px) {
+.room-grid {
+grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+}
