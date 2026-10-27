@@ -1,83 +1,95 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
 const rooms = {};
 
 io.on("connection", (socket) => {
 socket.on("joinRoom", ({ room, username }) => {
-if (typeof room !== "string" || typeof username !== "string") return;
+if (
+typeof room !== "string" ||
+typeof username !== "string" ||
+!room.trim() ||
+!username.trim()
+) {
+return;
+}
 
 ```
 room = room.trim().slice(0, 40);
-username = username.trim().slice(0, 24);
-
-if (!room || !username) return;
-
-if (socket.data.room) {
-  socket.leave(socket.data.room);
-  const oldRoom = rooms[socket.data.room];
-
-  if (oldRoom) {
-    oldRoom.delete(socket.id);
-    io.to(socket.data.room).emit("members", [...oldRoom.values()]);
-    if (oldRoom.size === 0) delete rooms[socket.data.room];
-  }
-}
-
-if (!rooms[room]) rooms[room] = new Map();
+username = username.trim().slice(0, 20);
 
 socket.data.room = room;
 socket.data.username = username;
-rooms[room].set(socket.id, username);
 
 socket.join(room);
-io.to(room).emit("members", [...rooms[room].values()]);
-socket.emit("joined", room);
+
+if (!rooms[room]) rooms[room] = {};
+rooms[room][socket.id] = username;
+
+io.to(room).emit("members", Object.values(rooms[room]));
+socket.to(room).emit("chatMessage", {
+  username: "Huka Bot",
+  message: `${username} room mein aa gaya!`
+});
 ```
 
 });
 
 socket.on("chatMessage", (message) => {
 const room = socket.data.room;
+const username = socket.data.username;
 
 ```
-if (!room || typeof message !== "string") return;
-
-const text = message.trim().slice(0, 500);
-if (!text) return;
+if (
+  !room ||
+  !username ||
+  typeof message !== "string" ||
+  !message.trim()
+) {
+  return;
+}
 
 io.to(room).emit("chatMessage", {
-  username: socket.data.username,
-  message: text
+  username,
+  message: message.trim().slice(0, 300)
 });
 ```
 
 });
 
-socket.on("disconnect", () => {
+function leaveRoom() {
 const room = socket.data.room;
-if (!room || !rooms[room]) return;
 
 ```
-rooms[room].delete(socket.id);
-io.to(room).emit("members", [...rooms[room].values()]);
+if (room && rooms[room]) {
+  delete rooms[room][socket.id];
+  socket.leave(room);
+  io.to(room).emit("members", Object.values(rooms[room]));
 
-if (rooms[room].size === 0) delete rooms[room];
+  if (Object.keys(rooms[room]).length === 0) {
+    delete rooms[room];
+  }
+}
+
+delete socket.data.room;
+delete socket.data.username;
 ```
 
+}
+
+socket.on("leaveRoom", leaveRoom);
+socket.on("disconnect", leaveRoom);
 });
-});
+
+const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, "0.0.0.0", () => {
-console.log(`Huka Voice Chat running on port ${PORT}`);
+console.log(`Huka Voice Chat server running on port ${PORT}`);
 });
