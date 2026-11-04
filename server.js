@@ -11,7 +11,7 @@ app.use(express.static("public"));
 const rooms = {};
 
 io.on("connection", (socket) => {
-socket.on("joinRoom", ({ room, username }) => {
+socket.on("joinRoom", ({ room, username } = {}) => {
 if (
 typeof room !== "string" ||
 typeof username !== "string" ||
@@ -25,15 +25,22 @@ return;
 room = room.trim().slice(0, 40);
 username = username.trim().slice(0, 20);
 
+// Leave previous room before joining another room
+leaveRoom();
+
 socket.data.room = room;
 socket.data.username = username;
 
 socket.join(room);
 
-if (!rooms[room]) rooms[room] = {};
+if (!rooms[room]) {
+  rooms[room] = {};
+}
+
 rooms[room][socket.id] = username;
 
 io.to(room).emit("members", Object.values(rooms[room]));
+
 socket.to(room).emit("chatMessage", {
   username: "Huka Bot",
   message: `${username} room mein aa gaya!`
@@ -70,7 +77,9 @@ const room = socket.data.room;
 ```
 if (room && rooms[room]) {
   delete rooms[room][socket.id];
+
   socket.leave(room);
+
   io.to(room).emit("members", Object.values(rooms[room]));
 
   if (Object.keys(rooms[room]).length === 0) {
