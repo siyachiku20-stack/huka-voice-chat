@@ -1,118 +1,39 @@
 <!DOCTYPE html>
-
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Huka Voice Chat</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-font-family:Arial,sans-serif;
-background:#100d20;
-color:white;
-padding-bottom:85px;
-}
-header{
-padding:22px 18px;
-background:linear-gradient(135deg,#7928ca,#ff3cac);
-border-radius:0 0 25px 25px;
-}
+body{font-family:Arial;background:#100d20;color:white;padding-bottom:80px}
+header{padding:22px;background:linear-gradient(135deg,#7928ca,#ff3cac);border-radius:0 0 24px 24px}
 header h2{font-size:25px}
-header p{margin-top:8px;font-size:14px}
-.container{padding:18px}
-.section-title{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin:22px 0 14px;
-}
-.section-title h3{font-size:19px}
-.section-title span{color:#d58cff;font-size:13px}
-.banner{
-background:linear-gradient(120deg,#6325a8,#c135a5);
-padding:20px;
-border-radius:18px;
-margin-top:18px;
-}
-.banner h2{font-size:21px}
-.banner p{margin-top:8px;font-size:13px}
-.rooms{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-}
-.card{
-background:#211a36;
-border:1px solid #392956;
-padding:17px 12px;
-border-radius:17px;
-text-align:center;
-}
-.card .icon{font-size:32px}
-.card h4{margin:10px 0 5px}
-.card p{font-size:12px;color:#c4b5d9}
-button{
-border:none;
-border-radius:20px;
-padding:10px 20px;
-background:#c13cff;
-color:white;
-font-weight:bold;
-cursor:pointer;
-margin-top:12px;
-}
-button:active{opacity:.7}
-.game-card{
-background:#211a36;
-padding:16px;
-border-radius:15px;
-margin-bottom:10px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-}
-.game-card span{font-size:28px}
-nav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#1b1530;
-display:flex;
-justify-content:space-around;
-padding:12px 3px;
-border-top:1px solid #49335e;
-}
-nav button{
-background:transparent;
-padding:5px;
-margin:0;
-font-size:12px;
-color:#cbb9e4;
-}
-nav button.active{color:#e45cff}
-nav div{text-align:center;font-size:21px}
-nav small{display:block;font-size:11px}
+header p{margin-top:8px}
+.container{padding:17px}
 .page{display:none}
 .page.active{display:block}
-input{
-width:100%;
-padding:13px;
-border:1px solid #594174;
-border-radius:12px;
-background:#211a36;
-color:white;
-margin:10px 0;
+.title{margin:22px 0 14px}
+.banner,.card,.game{
+background:#211a36;border:1px solid #49335e;
+padding:17px;border-radius:17px;margin-bottom:12px
 }
-.empty{
-text-align:center;
-padding:30px 10px;
-color:#cbb9e4;
-}
+.banner{background:linear-gradient(120deg,#6325a8,#c135a5)}
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{text-align:center}
+.icon{font-size:32px;margin-bottom:9px}
+.card p{font-size:13px;color:#cbb9e4;margin-top:7px}
+button{border:0;border-radius:20px;padding:11px 18px;background:#c13cff;color:white;font-weight:bold;margin-top:12px;cursor:pointer}
+input{width:100%;padding:13px;margin:8px 0;background:#211a36;border:1px solid #594174;border-radius:10px;color:white}
+nav{position:fixed;bottom:0;left:0;width:100%;background:#1b1530;display:flex;justify-content:space-around;padding:10px 2px;border-top:1px solid #49335e}
+nav button{background:transparent;margin:0;padding:5px;color:#cbb9e4;font-size:12px}
+nav button.active{color:#e45cff}
+nav small{display:block}
+#messages p,#members p{padding:8px;border-bottom:1px solid #49335e}
+.status{color:#cbb9e4;font-size:13px;margin:12px 0}
+.audio{display:none}
 </style>
-
 </head>
 
 <body>
@@ -125,285 +46,343 @@ color:#cbb9e4;
 
 <div class="container">
 
-<!-- HOME -->
-
 <section id="home" class="page active">
-
 <div class="banner">
-<h2>💜 Welcome to Huka!</h2>
+<h2>Welcome to Huka! 💜</h2>
 <p>Naye dost banao, voice rooms join karo aur games khelo.</p>
 <button onclick="showPage('rooms')">Explore Rooms 🎤</button>
 </div>
 
-<div class="section-title">
-<h3>🔥 Popular Rooms</h3>
-<span>See All</span>
-</div>
-
+<h3 class="title">🔥 Popular Rooms</h3>
 <div class="rooms">
-
-<div class="card">
-<div class="icon">🎉</div>
-<h4>Dosti Room</h4>
-<p>Friends aur fun</p>
-<button onclick="joinRoom('Dosti Room')">Join</button>
-</div>
-
-<div class="card">
-<div class="icon">🎵</div>
-<h4>Music Room</h4>
-<p>Music lovers</p>
-<button onclick="joinRoom('Music Room')">Join</button>
-</div>
-
-<div class="card">
-<div class="icon">😂</div>
-<h4>Masti Room</h4>
-<p>Hasi-mazaak</p>
-<button onclick="joinRoom('Masti Room')">Join</button>
-</div>
-
-<div class="card">
-<div class="icon">💖</div>
-<h4>Love Room</h4>
-<p>Meet new friends</p>
-<button onclick="joinRoom('Love Room')">Join</button>
-</div>
-
+<div class="card"><div class="icon">🎉</div><h4>Dosti Room</h4><p>Friends aur fun</p><button onclick="joinRoom('Dosti Room')">Join</button></div>
+<div class="card"><div class="icon">🎵</div><h4>Music Room</h4><p>Music lovers</p><button onclick="joinRoom('Music Room')">Join</button></div>
+<div class="card"><div class="icon">😂</div><h4>Masti Room</h4><p>Hasi-mazaak</p><button onclick="joinRoom('Masti Room')">Join</button></div>
+<div class="card"><div class="icon">💖</div><h4>Love Room</h4><p>Meet new friends</p><button onclick="joinRoom('Love Room')">Join</button></div>
 </div>
 </section>
-
-<!-- ROOMS -->
 
 <section id="rooms" class="page">
-<div class="section-title">
-<h3>🎙️ Voice Rooms</h3>
-</div>
+<h3 class="title">🎙️ Voice Rooms</h3>
 <div class="rooms">
-
-<div class="card">
-<div class="icon">🎉</div>
-<h4>Dosti Room</h4>
-<p>Friends aur fun</p>
-<button onclick="joinRoom('Dosti Room')">Join Room</button>
-</div>
-
-<div class="card">
-<div class="icon">🎵</div>
-<h4>Music Room</h4>
-<p>Music lovers</p>
-<button onclick="joinRoom('Music Room')">Join Room</button>
-</div>
-
-<div class="card">
-<div class="icon">😂</div>
-<h4>Masti Room</h4>
-<p>Hasi-mazaak</p>
-<button onclick="joinRoom('Masti Room')">Join Room</button>
-</div>
-
-<div class="card">
-<div class="icon">💖</div>
-<h4>Love Room</h4>
-<p>Meet new friends</p>
-<button onclick="joinRoom('Love Room')">Join Room</button>
-</div>
-
+<div class="card"><div class="icon">🎉</div><h4>Dosti Room</h4><button onclick="joinRoom('Dosti Room')">Join Room</button></div>
+<div class="card"><div class="icon">🎵</div><h4>Music Room</h4><button onclick="joinRoom('Music Room')">Join Room</button></div>
+<div class="card"><div class="icon">😂</div><h4>Masti Room</h4><button onclick="joinRoom('Masti Room')">Join Room</button></div>
+<div class="card"><div class="icon">💖</div><h4>Love Room</h4><button onclick="joinRoom('Love Room')">Join Room</button></div>
 </div>
 </section>
-
-<!-- GAMES -->
 
 <section id="games" class="page">
-<div class="section-title"><h3>🎮 Games Zone</h3></div>
-
-<div class="game-card">
-<div><span>🎲</span> Ludo Game</div>
-<button onclick="gameMessage('Ludo')">Play</button>
-</div>
-
-<div class="game-card">
-<div><span>🧠</span> Quiz Game</div>
-<button onclick="gameMessage('Quiz')">Play</button>
-</div>
-
-<div class="game-card">
-<div><span>🎯</span> Fun Challenge</div>
-<button onclick="gameMessage('Fun Challenge')">Play</button>
-</div>
-
-<div class="empty">More exciting games coming soon! 💜</div>
+<h3 class="title">🎮 Games Zone</h3>
+<div class="game">🎲 Ludo Game — Coming Soon</div>
+<div class="game">🧠 Quiz Game — Coming Soon</div>
+<div class="game">🎯 Fun Challenge — Coming Soon</div>
 </section>
-
-<!-- FRIENDS -->
 
 <section id="friends" class="page">
-<div class="section-title"><h3>👥 Friends</h3></div>
-<input id="friendName" placeholder="Friend ka username">
-<button onclick="addFriend()">Add Friend</button>
-<div id="friendList" class="empty">Abhi koi friend nahi hai.</div>
+<h3 class="title">👥 Friends</h3>
+<p>Friends feature coming soon! 💜</p>
 </section>
 
-<!-- PROFILE -->
-
 <section id="profile" class="page">
-<div class="section-title"><h3>👤 My Profile</h3></div>
+<h3 class="title">👤 My Profile</h3>
 <div class="card">
 <div class="icon">👤</div>
 <h3 id="profileName">Huka User</h3>
-<p>Welcome to Huka Voice Chat</p>
 </div>
 <input id="username" placeholder="Apna username likho">
 <button onclick="saveProfile()">Save Profile</button>
-
-<div class="section-title"><h3>🎁 Gifts</h3></div>
-<div class="rooms">
-<div class="card"><div class="icon">🌹</div><p>Rose</p></div>
-<div class="card"><div class="icon">💎</div><p>Diamond</p></div>
-<div class="card"><div class="icon">❤️</div><p>Heart</p></div>
-<div class="card"><div class="icon">👑</div><p>Crown</p></div>
-</div>
 </section>
 
-<!-- ROOM DETAIL -->
-
 <section id="roomDetail" class="page">
-<div class="section-title">
-<h3 id="roomTitle">🎙️ Room</h3>
-</div>
+<h3 class="title" id="roomTitle">🎙️ Room</h3>
+
 <div class="card">
 <div class="icon">🎤</div>
-<h3>Welcome to Huka Room</h3>
-<p id="roomStatus">Room mein aapka swagat hai!</p>
+<h3>Live Voice Room</h3>
+<p id="roomStatus" class="status">Connecting...</p>
+<button id="micButton" onclick="toggleMic()">🎙️ Mic ON</button>
+<button onclick="leaveRoom()" style="background:#e94367">Leave Room</button>
 </div>
-<div class="section-title"><h3>👥 Room Members</h3></div>
-<div id="members" class="empty">Connecting...</div>
-<div class="section-title"><h3>💬 Room Chat</h3></div>
-<div id="messages" class="empty">Chat messages yahan dikhenge.</div>
+
+<h3 class="title">👥 Room Members</h3>
+<div class="card" id="members">Connecting...</div>
+
+<h3 class="title">💬 Room Chat</h3>
+<div class="card" id="messages"></div>
 <input id="chatInput" placeholder="Message likho...">
 <button onclick="sendMessage()">Send 💬</button>
-<button onclick="leaveRoom()" style="background:#e94367">Leave Room</button>
 </section>
 
 </div>
 
 <nav>
-<button class="active" onclick="showPage('home',this)">
-<div>🏠</div><small>Home</small>
-</button>
-<button onclick="showPage('rooms',this)">
-<div>🎙️</div><small>Rooms</small>
-</button>
-<button onclick="showPage('games',this)">
-<div>🎮</div><small>Games</small>
-</button>
-<button onclick="showPage('friends',this)">
-<div>👥</div><small>Friends</small>
-</button>
-<button onclick="showPage('profile',this)">
-<div>👤</div><small>Profile</small>
-</button>
+<button class="active" onclick="showPage('home',this)">🏠<small>Home</small></button>
+<button onclick="showPage('rooms',this)">🎙️<small>Rooms</small></button>
+<button onclick="showPage('games',this)">🎮<small>Games</small></button>
+<button onclick="showPage('friends',this)">👥<small>Friends</small></button>
+<button onclick="showPage('profile',this)">👤<small>Profile</small></button>
 </nav>
 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-let socket = null;
+const socket = io();
+
 let currentRoom = "";
+let localStream = null;
+let peers = {};
+let pendingCandidates = {};
 
-function showPage(page,btn){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(page).classList.add('active');
-document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-if(btn) btn.classList.add('active');
+const rtcConfig = {
+  iceServers: [
+    {urls:"stun:stun.l.google.com:19302"}
+  ]
+};
+
+function showPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
 }
 
-function joinRoom(room){
-let username=localStorage.getItem('hukaUsername');
-if(!username){
-username=prompt("Apna username likho:");
-if(!username)return;
-localStorage.setItem('hukaUsername',username);
+async function joinRoom(room){
+  let username = localStorage.getItem("hukaUsername");
+
+  if(!username){
+    username = prompt("Apna username likho:");
+    if(!username || !username.trim()) return;
+    username = username.trim().slice(0,20);
+    localStorage.setItem("hukaUsername",username);
+  }
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio:true,
+      video:false
+    });
+  }catch(error){
+    alert("Mic permission nahi mili. Browser settings mein microphone allow karo.");
+    return;
+  }
+
+  currentRoom = room;
+  document.getElementById("roomTitle").textContent = "🎙️ "+room;
+  document.getElementById("roomStatus").textContent = "Voice room connected";
+  document.getElementById("messages").innerHTML = "";
+  document.getElementById("members").textContent = "Connecting...";
+
+  document.getElementById("micButton").textContent = "🎙️ Mic ON";
+
+  showPage("roomDetail");
+  socket.emit("joinRoom",{room,username});
 }
-currentRoom=room;
-document.getElementById('roomTitle').innerText="🎙️ "+room;
-document.getElementById('messages').innerHTML="";
-document.getElementById('members').innerHTML="Connecting...";
-showPage('roomDetail');
 
-if(!socket) socket=io();
+function createPeer(id){
+  if(peers[id]) return peers[id];
 
-socket.emit('joinRoom',{room:room,username:username});
+  const pc = new RTCPeerConnection(rtcConfig);
+  peers[id] = pc;
+
+  localStream.getTracks().forEach(track=>{
+    pc.addTrack(track,localStream);
+  });
+
+  pc.onicecandidate = event=>{
+    if(event.candidate){
+      socket.emit("voice-ice",{
+        target:id,
+        candidate:event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event=>{
+    let audio = document.getElementById("audio-"+id);
+
+    if(!audio){
+      audio = document.createElement("audio");
+      audio.id = "audio-"+id;
+      audio.autoplay = true;
+      audio.playsInline = true;
+      audio.className = "audio";
+      document.body.appendChild(audio);
+    }
+
+    audio.srcObject = event.streams[0];
+    audio.play().catch(()=>{});
+  };
+
+  pc.onconnectionstatechange = ()=>{
+    if(pc.connectionState === "failed"){
+      document.getElementById("roomStatus").textContent =
+        "Voice connection failed. Network check karo.";
+    }
+  };
+
+  return pc;
 }
 
-function leaveRoom(){
-if(socket && currentRoom) socket.emit('leaveRoom');
-currentRoom="";
-showPage('rooms');
+async function makeOffer(id){
+  const pc = createPeer(id);
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  socket.emit("voice-offer",{
+    target:id,
+    offer:pc.localDescription
+  });
+}
+
+async function addPendingCandidates(id,pc){
+  const list = pendingCandidates[id] || [];
+  for(const candidate of list){
+    try{
+      await pc.addIceCandidate(candidate);
+    }catch(e){}
+  }
+  delete pendingCandidates[id];
+}
+
+socket.on("roomUsers",users=>{
+  users.forEach(user=>{
+    makeOffer(user.id).catch(console.error);
+  });
+});
+
+socket.on("user-joined",user=>{
+  console.log(user.username+" joined");
+});
+
+socket.on("voice-offer",async data=>{
+  const pc = createPeer(data.from);
+
+  try{
+    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+    await addPendingCandidates(data.from,pc);
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    socket.emit("voice-answer",{
+      target:data.from,
+      answer:pc.localDescription
+    });
+  }catch(error){
+    console.error("Offer error:",error);
+  }
+});
+
+socket.on("voice-answer",async data=>{
+  const pc = peers[data.from];
+  if(!pc) return;
+
+  try{
+    await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+    await addPendingCandidates(data.from,pc);
+  }catch(error){
+    console.error("Answer error:",error);
+  }
+});
+
+socket.on("voice-ice",async data=>{
+  const pc = peers[data.from];
+
+  if(pc && pc.remoteDescription){
+    try{
+      await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }catch(error){}
+  }else{
+    if(!pendingCandidates[data.from]) pendingCandidates[data.from]=[];
+    pendingCandidates[data.from].push(data.candidate);
+  }
+});
+
+socket.on("user-left",data=>{
+  closePeer(data.id);
+});
+
+socket.on("members",members=>{
+  document.getElementById("members").innerHTML =
+    members.map(name=>{
+      const p = document.createElement("p");
+      p.textContent = "👤 "+name;
+      return p.outerHTML;
+    }).join("") || "Abhi koi member nahi.";
+});
+
+socket.on("chatMessage",data=>{
+  const box = document.getElementById("messages");
+  const p = document.createElement("p");
+  p.textContent = data.username+": "+data.message;
+  box.appendChild(p);
+});
+
+function closePeer(id){
+  if(peers[id]){
+    peers[id].close();
+    delete peers[id];
+  }
+
+  const audio = document.getElementById("audio-"+id);
+  if(audio) audio.remove();
+
+  delete pendingCandidates[id];
+}
+
+function toggleMic(){
+  if(!localStream) return;
+
+  const track = localStream.getAudioTracks()[0];
+  if(!track) return;
+
+  track.enabled = !track.enabled;
+
+  document.getElementById("micButton").textContent =
+    track.enabled ? "🎙️ Mic ON" : "🔇 Mic OFF";
 }
 
 function sendMessage(){
-let input=document.getElementById('chatInput');
-let message=input.value.trim();
-if(!message)return;
-if(!socket){alert("Pehle room join karo.");return;}
-socket.emit('chatMessage',message);
-input.value="";
+  const input = document.getElementById("chatInput");
+  const message = input.value.trim();
+
+  if(!message || !currentRoom) return;
+
+  socket.emit("chatMessage",message);
+  input.value = "";
 }
 
-if(!socket) socket=io();
+function leaveRoom(){
+  socket.emit("leaveRoom");
 
-socket.on('connect',()=>{
-console.log("Huka connected");
-});
+  Object.keys(peers).forEach(closePeer);
 
-socket.on('members',members=>{
-document.getElementById('members').innerHTML=members.length?
-members.map(m=>"<p>👤 "+escapeHTML(m)+"</p>").join(""):"Abhi koi member nahi.";
-});
+  if(localStream){
+    localStream.getTracks().forEach(track=>track.stop());
+    localStream = null;
+  }
 
-socket.on('chatMessage',data=>{
-let box=document.getElementById('messages');
-if(box.querySelector('.empty'))box.innerHTML="";
-let p=document.createElement('p');
-p.style.padding="8px";
-p.textContent=data.username+": "+data.message;
-box.appendChild(p);
-});
+  document.querySelectorAll("audio[id^='audio-']").forEach(a=>a.remove());
 
-function escapeHTML(text){
-let div=document.createElement('div');
-div.textContent=text;
-return div.innerHTML;
+  currentRoom = "";
+  showPage("rooms");
 }
 
 function saveProfile(){
-let name=document.getElementById('username').value.trim();
-if(!name)return alert("Username likho");
-localStorage.setItem('hukaUsername',name);
-document.getElementById('profileName').innerText=name;
-alert("Profile saved!");
+  const name = document.getElementById("username").value.trim();
+
+  if(!name) return alert("Username likho");
+
+  localStorage.setItem("hukaUsername",name);
+  document.getElementById("profileName").textContent = name;
+  alert("Profile saved!");
 }
 
-function addFriend(){
-let name=document.getElementById('friendName').value.trim();
-if(!name)return;
-let list=document.getElementById('friendList');
-if(list.classList.contains('empty'))list.innerHTML="";
-let p=document.createElement('p');
-p.textContent="👤 "+name;
-p.style.padding="10px";
-list.appendChild(p);
-document.getElementById('friendName').value="";
-}
-
-function gameMessage(game){
-alert(game+" game abhi development mein hai. Jaldi aa raha hai! 💜");
-}
-
-let savedName=localStorage.getItem('hukaUsername');
+const savedName = localStorage.getItem("hukaUsername");
 if(savedName){
-document.getElementById('profileName').innerText=savedName;
+  document.getElementById("profileName").textContent = savedName;
 }
 </script>
 
