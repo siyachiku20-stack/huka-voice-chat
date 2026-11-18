@@ -1,184 +1,634 @@
+html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#7938d5">
+<meta name="theme-color" content="#7835d5">
 <title>Huka Voice Chat</title>
-
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f7f3ff;color:#302044;font-family:Arial,sans-serif;padding-bottom:80px}
-header{background:linear-gradient(120deg,#7434d5,#f044a5);color:white;padding:17px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
-.logo{font-size:25px;font-weight:bold}
-.coin{background:#ffffff30;padding:9px 13px;border-radius:20px}
-.container{max-width:650px;margin:auto;padding:13px}
-.page{display:none}
-.page.active{display:block}
-.card{background:white;padding:15px;border-radius:17px;margin-bottom:14px;box-shadow:0 4px 15px #5a268b12}
-h2{font-size:18px;margin:5px 0 13px}
-.banner{background:linear-gradient(120deg,#6729cb,#ef3b9e);color:white;padding:24px 18px;border-radius:18px;margin-bottom:15px}
+body{margin:0;background:#f7f2fc;color:#302044;font-family:Arial,sans-serif;padding-bottom:75px}
+header{height:60px;background:linear-gradient(110deg,#7034d5,#ed43a5);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:5}
+.logo{font-size:24px;font-weight:bold}
+.balance{background:#ffffff30;padding:9px 13px;border-radius:20px}
+.container{max-width:650px;margin:auto;padding:12px}
+.page{display:none}.page.active{display:block}
+.card{background:white;border-radius:16px;padding:15px;margin-bottom:13px;box-shadow:0 3px 13px #4a176b0d}
+h2{font-size:18px;margin:4px 0 13px}
+p{line-height:1.4}
+.muted{font-size:12px;color:#9586a3}
+button{border:0;border-radius:10px;padding:11px 15px;color:white;background:linear-gradient(110deg,#7835d5,#e943a4);font-weight:bold;cursor:pointer}
+input,select{width:100%;padding:12px;border:1px solid #e7dcef;border-radius:10px;margin:5px 0 10px;font-size:14px;background:white}
+.row{display:flex;gap:8px;align-items:center}.row input{flex:1;min-width:0}
+.banner{background:linear-gradient(120deg,#642bc5,#f044a5);color:white;border-radius:17px;padding:22px;margin-bottom:13px}
 .banner h2{font-size:25px}
-button{border:0;background:linear-gradient(120deg,#7736d8,#ed43a5);color:white;border-radius:10px;padding:11px 15px;font-weight:bold;cursor:pointer}
-input{width:100%;border:1px solid #e5d9f4;border-radius:10px;padding:13px;margin:5px 0 10px;font-size:14px}
-.row{display:flex;gap:8px;align-items:center}
-.row input{flex:1;min-width:0}
-.room{padding:14px;border-radius:13px;background:#f7f0ff;margin:9px 0;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.room small{color:#806c99}
-.online{display:inline-block;background:#e5fff0;color:#15934b;padding:5px 9px;border-radius:20px;font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.seat{background:#f0e7ff;padding:12px 3px;text-align:center;border-radius:12px;min-height:85px;font-size:13px;overflow-wrap:anywhere}
-.seat.occupied{background:#fce1f1;color:#a32672}
-.seat button{padding:6px;font-size:11px;margin-top:5px}
-.nav{position:fixed;bottom:0;left:0;width:100%;background:white;box-shadow:0 -3px 15px #0001;display:flex;justify-content:space-around;padding:8px 2px;z-index:10}
-.nav button{background:transparent;color:#806c99;padding:7px 4px;font-size:11px;flex:1}
-.nav button.selected{color:#a02bd0}
-.nav span{display:block;font-size:21px;margin-bottom:4px}
-.profile-head{background:linear-gradient(120deg,#7736d8,#ef43a5);color:white;text-align:center;padding:25px;border-radius:17px}
-.avatar{width:75px;height:75px;background:white;color:#9136ce;border-radius:50%;display:grid;place-items:center;font-size:32px;margin: auto auto 10px}
-.message{background:#f3eaff;padding:10px;border-radius:12px;margin:7px 0;overflow-wrap:anywhere}
-.muted{color:#9585a6;font-size:13px}
-.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:10px}
-.icon-grid div{background:#faf5ff;padding:14px 3px;border-radius:12px;font-size:13px;cursor:pointer}
-.icon-grid b{display:block;font-size:24px;margin-bottom:7px}
-#roomMessages{height:180px;overflow-y:auto;background:#faf7ff;padding:9px;border-radius:12px}
-.seat-actions{display:flex;gap:6px;flex-wrap:wrap}
-.small-btn{padding:7px 10px;font-size:12px}
-@media(max-width:380px){.grid{grid-template-columns:repeat(2,1fr)}.icon-grid{grid-template-columns:repeat(4,1fr)}}
+.room{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f6efff;padding:12px;border-radius:12px;margin:9px 0}
+.room-info{min-width:0;overflow-wrap:anywhere}
+.room small{display:block;color:#88759c;margin-top:5px}
+.profile-top{background:linear-gradient(120deg,#7132d1,#ed43a5);color:white;padding:17px;border-radius:17px;margin-bottom:13px}
+.profile-head{display:flex;align-items:center;gap:13px}
+.dp{height:78px;width:78px;min-width:78px;border:3px solid white;border-radius:50%;background:white;color:#8036cf;display:grid;place-items:center;font-size:32px;overflow:hidden}
+.dp img{width:100%;height:100%;object-fit:cover}
+.user-info{flex:1;min-width:0}.user-info h2{margin:0 0 7px;overflow-wrap:anywhere}
+.edit{background:#ffffff35;padding:6px 10px}
+.stats{display:flex;text-align:center;margin-top:18px;background:#ffffff25;border-radius:12px;padding:12px 0}
+.stats div{flex:1;font-size:12px;border-right:1px solid #ffffff30}
+.stats div:last-child{border:0}
+.stats b{display:block;font-size:18px;margin-bottom:5px}
+.level{background:#ffffff25;padding:12px;border-radius:12px;margin-top:13px}
+.progress{height:8px;background:#ffffff55;border-radius:20px;overflow:hidden;margin:9px 0}
+.progress div{height:100%;width:0;background:white}
+.menu-item{display:flex;align-items:center;justify-content:space-between;padding:13px 3px;border-bottom:1px solid #f0eaf5;cursor:pointer}
+.menu-item:last-child{border:0}
+.menu-left{display:flex;align-items:center;gap:12px}
+.menu-icon{height:34px;width:34px;border-radius:10px;background:#f3eaff;display:grid;place-items:center;font-size:18px}
+.arrow{font-size:20px;color:#aa9ab8}
+.nav{position:fixed;bottom:0;left:0;width:100%;height:65px;background:white;display:flex;justify-content:space-around;box-shadow:0 -3px 15px #0001;z-index:10}
+.nav button{flex:1;background:white;color:#88799b;border-radius:0;font-size:11px;padding:5px}
+.nav button.active{color:#9637d2}
+.nav span{display:block;font-size:22px;margin-bottom:3px}
+.grid,.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.seat{background:#f1e8ff;border-radius:12px;padding:12px 3px;text-align:center;font-size:12px;min-height:76px}
+.seat.occupied{background:#fce5f3}
+.seat button{padding:6px;font-size:10px;margin-top:5px}
+.icon-grid div{text-align:center;background:#faf5ff;padding:13px 2px;border-radius:12px;font-size:12px;cursor:pointer}
+.icon-grid b{display:block;font-size:23px;margin-bottom:6px}
+.message{background:#f3eaff;padding:10px;border-radius:10px;margin:7px 0;overflow-wrap:anywhere}
+#roomMessages{height:170px;overflow-y:auto;background:#faf7ff;padding:8px;border-radius:10px}
+.wallet-box{background:#f7efff;padding:17px;border-radius:13px;margin:10px 0}
+.back{margin-bottom:12px}
+@media(max-width:360px){.grid,.icon-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
-
 <body>
-
 <header>
-  <div class="logo">HUKA ♡</div>
-  <div class="coin">🪙 <b id="coins">100</b></div>
+<div class="logo">HUKA ♡</div>
+<div class="balance">🪙 <b id="headerCoins">100</b></div>
 </header>
 
-<div class="container">
+<main class="container">
 
-<!-- HOME -->
 <section id="home" class="page active">
-  <div class="banner">
-    <h2>Welcome to Huka ♡</h2>
-    <p>Meet Friends • Voice Chat • Play Games</p>
-    <button onclick="showPage('rooms')">Explore Rooms →</button>
-  </div>
-
-  <div class="card">
-    <h2>🟢 Online Community</h2>
-    <h1 id="onlineCount">0</h1>
-    <p class="muted">People online now</p>
-  </div>
-
-  <div class="card">
-    <h2>✨ Quick Access</h2>
-    <div class="icon-grid">
-      <div onclick="showPage('rooms')"><b>🎙️</b>Rooms</div>
-      <div onclick="showPage('inbox')"><b>💬</b>Inbox</div>
-      <div onclick="showPage('games')"><b>🎮</b>Games</div>
-      <div onclick="showPage('profile')"><b>👤</b>Profile</div>
-      <div onclick="showPage('ranking')"><b>🏆</b>Ranking</div>
-      <div onclick="showPage('vip')"><b>👑</b>VIP</div>
-      <div onclick="showPage('notifications')"><b>🔔</b>Notice</div>
-      <div onclick="showPage('settings')"><b>⚙️</b>Settings</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>🔥 Popular Voice Rooms</h2>
-    <div id="homeRooms">Loading rooms...</div>
-  </div>
+<div class="banner">
+<h2>Welcome to Huka ♡</h2>
+<p>Make Friends • Voice Chat • Play Games</p>
+<button onclick="go('rooms')">Explore Rooms →</button>
+</div>
+<div class="card">
+<h2>🏠 My Room</h2>
+<div id="myRoom">You have not created a room yet.</div>
+<button onclick="go('rooms')">＋ Create My Room</button>
+</div>
+<div class="card">
+<h2>🌍 All Rooms</h2>
+<div id="homeRooms">Loading rooms...</div>
+<button onclick="go('rooms')">See All Rooms →</button>
+</div>
+<div class="card">
+<h2>🟢 Online Users</h2>
+<h1 id="onlineCount">0</h1>
+</div>
+<div class="card">
+<h2>✨ Discover Huka</h2>
+<div class="icon-grid">
+<div onclick="go('games')"><b>🎮</b>Games</div>
+<div onclick="go('ranking')"><b>🏆</b>Ranking</div>
+<div onclick="go('vip')"><b>👑</b>SVIP</div>
+<div onclick="go('notifications')"><b>🔔</b>Notice</div>
+</div>
+</div>
 </section>
 
-<!-- ROOMS -->
 <section id="rooms" class="page">
-  <div class="card">
-    <h2>🎙️ Voice Rooms</h2>
-    <p class="muted">Meet new friends and join conversations.</p>
-    <input id="newRoomName" placeholder="Enter room name" maxlength="40">
-    <button onclick="createRoom()">＋ Create Room</button>
-  </div>
-
-  <div class="card">
-    <h2>🔥 All Rooms</h2>
-    <div id="allRooms">Loading rooms...</div>
-  </div>
+<div class="card">
+<h2>🎙️ Create Room</h2>
+<input id="newRoomName" placeholder="Enter room name" maxlength="40">
+<button onclick="createRoom()">Create Room</button>
+</div>
+<div class="card">
+<h2>🌍 All Voice Rooms</h2>
+<div id="allRooms">Loading...</div>
+</div>
 </section>
 
-<!-- ROOM DETAIL -->
 <section id="roomDetail" class="page">
-  <div class="card">
-    <h2 id="roomTitle">Huka Voice Room</h2>
-    <p id="roomInfo" class="muted"></p>
-    <button onclick="exitRoom()">Leave Room</button>
-  </div>
-
-  <div class="card">
-    <h2>💺 Voice Seats</h2>
-    <div class="grid" id="seats"></div>
-    <p class="muted">Tap an empty seat to join.</p>
-    <div class="seat-actions">
-      <button onclick="leaveSeat()">Leave Seat</button>
-      <button onclick="startVoice()">🎙️ Join Voice</button>
-      <button onclick="stopVoice()">🔇 Leave Voice</button>
-    </div>
-    <p id="voiceStatus" class="muted">Voice disconnected</p>
-  </div>
-
-  <div class="card">
-    <h2>💬 Room Chat</h2>
-    <div id="roomMessages"></div>
-    <div class="row">
-      <input id="roomInput" placeholder="Write a message">
-      <button onclick="sendRoomMessage()">Send</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>🎁 Gifts</h2>
-    <div class="icon-grid">
-      <div onclick="sendGift('Rose')"><b>🌹</b>Rose</div>
-      <div onclick="sendGift('Heart')"><b>❤️</b>Heart</div>
-      <div onclick="sendGift('Star')"><b>⭐</b>Star</div>
-      <div onclick="sendGift('Crown')"><b>👑</b>Crown</div>
-    </div>
-    <p class="muted">Demo gifts have no cash value.</p>
-  </div>
+<div class="card">
+<h2 id="roomTitle">Voice Room</h2>
+<p id="roomInfo" class="muted"></p>
+<button onclick="exitRoom()">Leave Room</button>
+</div>
+<div class="card">
+<h2>💺 Voice Seats</h2>
+<div class="grid" id="seats"></div>
+<p class="muted">Select an empty seat.</p>
+<button onclick="leaveSeat()">Leave Seat</button>
+<button onclick="startVoice()">🎙️ Microphone</button>
+<button onclick="stopVoice()">🔇 Stop</button>
+<p id="voiceStatus" class="muted">Voice disconnected</p>
+</div>
+<div class="card">
+<h2>💬 Room Chat</h2>
+<div id="roomMessages"></div>
+<div class="row">
+<input id="roomInput" placeholder="Write a message">
+<button onclick="sendRoomMessage()">Send</button>
+</div>
+</div>
+<div class="card">
+<h2>🎁 Gifts</h2>
+<div class="icon-grid">
+<div onclick="sendGift('Rose')"><b>🌹</b>Rose</div>
+<div onclick="sendGift('Heart')"><b>❤️</b>Heart</div>
+<div onclick="sendGift('Star')"><b>⭐</b>Star</div>
+<div onclick="sendGift('Crown')"><b>👑</b>Crown</div>
+</div>
+</div>
 </section>
 
-<!-- INBOX -->
 <section id="inbox" class="page">
-  <div class="card">
-    <h2>💬 Inbox</h2>
-    <p class="muted">Your private messages</p>
-    <div id="inboxMessages">No messages yet.</div>
-  </div>
-
-  <div class="card">
-    <h2>✉️ New Message</h2>
-    <input id="dmId" placeholder="Enter friend's Profile ID">
-    <input id="dmText" placeholder="Write your message">
-    <button onclick="sendDM()">Send Message</button>
-  </div>
+<div class="card">
+<h2>💬 Inbox</h2>
+<div id="inboxMessages">No messages yet.</div>
+</div>
+<div class="card">
+<h2>✉️ Send Message</h2>
+<input id="dmId" placeholder="Friend Profile ID">
+<input id="dmText" placeholder="Write message">
+<button onclick="sendDM()">Send</button>
+</div>
 </section>
 
-<!-- PROFILE -->
 <section id="profile" class="page">
-  <div class="profile-head">
-    <div class="avatar">👤</div>
-    <h2 id="profileName">Huka User</h2>
-    <p>ID: <b id="profileId">Not registered</b></p>
-    <span class="online">● Online</span>
-  </div>
+<div class="profile-top">
+<div class="profile-head">
+<div class="dp" id="profileDP">👤</div>
+<div class="user-info">
+<h2><span id="profileName">Huka User</span>
+<button class="edit" onclick="editName()">✏️</button></h2>
+<div>ID: <b id="profileId">Loading...</b></div>
+<p>⭐ Level <b id="userLevel">1</b> · 🎁 Gifting</p>
+<button class="edit" onclick="document.getElementById('dpFile').click()">Change DP</button>
+<input id="dpFile" type="file" accept="image/*" hidden onchange="changeDP(event)">
+</div>
+</div>
+<div class="level">
+<b>⭐ Level Progress</b>
+<span id="levelText">0 / 60 minutes</span>
+<div class="progress"><div id="levelBar"></div></div>
+<button onclick="claimReward()">🎁 Claim Level Reward</button>
+<p class="muted" style="color:white">Demo level progress.</p>
+</div>
+<div class="stats">
+<div onclick="showInfo('Following')"><b>0</b>Following</div>
+<div onclick="showInfo('Followers')"><b>0</b>Followers</div>
+<div onclick="showInfo('Visitors')"><b>0</b>Visitors</div>
+</div>
+</div>
+<div class="card">
+<div class="menu-item" onclick="go('vip')"><div class="menu-left"><div class="menu-icon">👑</div><b>SVIP</b></div><span>›</span></div>
+</div>
+<div class="card">
+<div class="menu-item" onclick="go('wallet')"><div class="menu-left"><div class="menu-icon">💰</div><b>Wallet</b></div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Invite Friend Huka')"><div class="menu-left"><div class="menu-icon">🤝</div>Invite Friend Huka</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('User Level')"><div class="menu-left"><div class="menu-icon">⭐</div>User Level</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Medal')"><div class="menu-left"><div class="menu-icon">🏅</div>Medal</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('CP Space')"><div class="menu-left"><div class="menu-icon">💞</div>CP Space</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Family')"><div class="menu-left"><div class="menu-icon">👨‍👩‍👧</div>Family</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Bag')"><div class="menu-left"><div class="menu-icon">🎒</div>Bag</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Dress')"><div class="menu-left"><div class="menu-icon">👕</div>Dress</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('CD Key')"><div class="menu-left"><div class="menu-icon">🎟️</div>CD Key</div><span>›</span></div>
+<div class="menu-item" onclick="go('language')"><div class="menu-left"><div class="menu-icon">🌐</div>Language</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Customer Service')"><div class="menu-left"><div class="menu-icon">🎧</div>Customer Service</div><span>›</span></div>
+<div class="menu-item" onclick="showInfo('Help & Feedback')"><div class="menu-left"><div class="menu-icon">❓</div>Help & Feedback</div><span>›</span></div>
+<div class="menu-item" onclick="go('settings')"><div class="menu-left"><div class="menu-icon">⚙️</div>Settings</div><span>›</span></div>
+</div>
+</section>
 
-  <div class="card">
-    <h2>My Profile</h2>
-    <p>⭐ Level: 1</p>
-    <p>🪙 Coins: <span id="profileCoins">100</span></p>
-    <p>👑 Membership: Normal</p>
-    <p>🎙️ Rooms: Huka Community</p>
-  </div>
+<section id="wallet" class="page">
+<button class="back" onclick="go('profile')">← Back</button>
+<div class="banner"><h2>💰 Huka Wallet</h2><p>Coins and Diamonds</p></div>
+<div class="card">
+<div class="wallet-box"><h2>🪙 Coins</h2><h1 id="walletCoins">100</h1><button onclick="showInfo('Get Coins')">Get Coins</button></div>
+<div class="wallet-box"><h2>💎 Diamonds</h2><h1 id="walletDiamonds">0</h1><button onclick="showInfo('Get Diamonds')">Get Diamonds</button></div>
+<p class="muted">Demo balances only. Real purchases are not enabled.</p>
+</div>
+</section>
 
-  <div class="card">
-    <
+<section id="language" class="page">
+<button class="back" onclick="go('profile')">← Back</button>
+<div class="card">
+<h2>🌐 Select Language</h2>
+<select id="languageSelect" onchange="saveLanguage()">
+<option>English</option><option>Hindi</option><option>Rajasthani</option>
+<option>Arabic</option><option>Gujarati</option><option>Marathi</option>
+<option>Assamese</option><option>Nepali</option><option>Urdu</option>
+<option>Punjabi</option><option>Bengali</option><option>Tamil</option>
+<option>Telugu</option><option>Kannada</option><option>Malayalam</option>
+<option>Odia</option><option>French</option><option>Spanish</option>
+<option>Turkish</option><option>Indonesian</option><option>German</option>
+</select>
+<p id="languageStatus" class="muted"></p>
+</div>
+</section>
+
+<section id="settings" class="page">
+<button class="back" onclick="go('profile')">← Back</button>
+<div class="card">
+<h2>⚙️ Settings</h2>
+<div class="menu-item" onclick="go('messageSettings')">🔔 Message Notifications <span>›</span></div>
+<div class="menu-item" onclick="go('blocklist')">🚫 Blocklist <span>›</span></div>
+<div class="menu-item" onclick="showInfo('About Huka')">ℹ️ About <span>›</span></div>
+<div class="menu-item" onclick="logout()">🚪 Logout <span>›</span></div>
+</div>
+</section>
+
+<section id="messageSettings" class="page">
+<button class="back" onclick="go('settings')">← Back</button>
+<div class="card">
+<h2>🔔 Message Notifications</h2>
+<label><input type="checkbox" id="notifyToggle" style="width:auto" onchange="saveNotify()"> Enable notifications</label>
+</div>
+</section>
+
+<section id="blocklist" class="page">
+<button class="back" onclick="go('settings')">← Back</button>
+<div class="card"><h2>🚫 Blocklist</h2><p>No blocked users yet.</p></div>
+</section>
+
+<section id="vip" class="page">
+<div class="banner"><h2>👑 Huka SVIP</h2><p>Special membership features</p></div>
+<div class="card">
+<h2>SVIP Benefits</h2>
+<p>👑 SVIP Badge</p><p>✨ Profile Decoration</p>
+<p>🎁 Special Gifts</p><p>🌟 Room Themes</p>
+<p class="muted">Membership purchase is not connected.</p>
+</div>
+</section>
+
+<section id="games" class="page">
+<div class="card">
+<h2>🎮 Mini Games</h2>
+<div class="icon-grid">
+<div onclick="game('number')"><b>🎯</b>Number</div>
+<div onclick="game('dice')"><b>🎲</b>Dice</div>
+<div onclick="game('coin')"><b>🪙</b>Coin Toss</div>
+<div onclick="go('rooms')"><b>🎙️</b>Rooms</div>
+</div>
+<p id="gameResult">Choose a game.</p>
+</div>
+</section>
+
+<section id="ranking" class="page">
+<div class="card"><h2>🏆 Ranking</h2><p>🥇 Top Player</p><p>🥈 Second Player</p><p>🥉 Third Player</p></div>
+</section>
+
+<section id="notifications" class="page">
+<div class="card"><h2>🔔 Notifications</h2><p id="notices">Welcome to Huka!</p></div>
+</section>
+
+</main>
+
+<nav class="nav">
+<button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
+<button onclick="go('inbox',this)"><span>💬</span>Inbox</button>
+<button onclick="go('profile',this)"><span>👤</span>Profile</button>
+</nav>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let myUser = null;
+let currentRoom = null;
+let voiceStream = null;
+
+let coins = Number(localStorage.getItem("hukaCoins") || 100);
+let diamonds = Number(localStorage.getItem("hukaDiamonds") || 0);
+let minutes = Number(localStorage.getItem("hukaMinutes") || 0);
+let claimedLevel = Number(localStorage.getItem("hukaClaimedLevel") || 0);
+let myRoomId = localStorage.getItem("hukaMyRoomId") || "";
+
+function go(id, btn) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  const page = document.getElementById(id);
+  if (page) page.classList.add("active");
+  document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  if (id === "rooms") socket.emit("get-rooms");
+  if (id === "inbox") socket.emit("get-inbox");
+}
+
+function updateWallet() {
+  document.getElementById("headerCoins").textContent = coins;
+  document.getElementById("walletCoins").textContent = coins;
+  document.getElementById("walletDiamonds").textContent = diamonds;
+  localStorage.setItem("hukaCoins", coins);
+  localStorage.setItem("hukaDiamonds", diamonds);
+}
+
+function register() {
+  let name = localStorage.getItem("hukaName");
+  if (!name) {
+    name = prompt("Welcome to Huka! Enter your name:");
+    if (!name || !name.trim()) name = "Huka User";
+    name = name.trim();
+    localStorage.setItem("hukaName", name);
+  }
+  socket.emit("register", { name }, result => {
+    if (!result || !result.ok) {
+      alert(result?.error || "Registration failed");
+      return;
+    }
+    myUser = result.user;
+    document.getElementById("profileName").textContent = myUser.name;
+    document.getElementById("profileId").textContent = myUser.profileId;
+    socket.emit("get-rooms");
+  });
+}
+socket.on("connect", register);
+socket.on("online-count", n => {
+  document.getElementById("onlineCount").textContent = n;
+});
+
+function safeText(value) { return String(value ?? ""); }
+
+function createRoom() {
+  const name = document.getElementById("newRoomName").value.trim();
+  if (!name) return alert("Enter room name");
+  socket.emit("create-room", { name }, result => {
+    if (!result || !result.ok) return alert(result?.error || "Could not create room");
+    myRoomId = String(result.id);
+    localStorage.setItem("hukaMyRoomId", myRoomId);
+    document.getElementById("newRoomName").value = "";
+    socket.emit("get-rooms");
+    joinRoom(result.id);
+  });
+}
+
+socket.on("room-list", list => {
+  const home = document.getElementById("homeRooms");
+  const all = document.getElementById("allRooms");
+  const mine = document.getElementById("myRoom");
+  home.innerHTML = "";
+  all.innerHTML = "";
+  mine.innerHTML = "";
+
+  if (!list || !list.length) {
+    home.textContent = "No rooms available.";
+    all.textContent = "No rooms yet. Create your first room!";
+    mine.textContent = "You have not created a room yet.";
+    return;
+  }
+
+  const own = list.find(r => String(r.id) === myRoomId);
+  if (own) mine.appendChild(roomElement(own, "Enter"));
+  else mine.textContent = "You have not created a room yet.";
+
+  list.forEach(r => {
+    home.appendChild(roomElement(r, "Join"));
+    all.appendChild(roomElement(r, "Join"));
+  });
+});
+
+function roomElement(room, label) {
+  const div = document.createElement("div");
+  div.className = "room";
+  const info = document.createElement("div");
+  info.className = "room-info";
+  const title = document.createElement("b");
+  title.textContent = "🎙️ " + safeText(room.name);
+  const small = document.createElement("small");
+  small.textContent = "Room ID: " + safeText(room.id) + " · " + safeText(room.count) + " members";
+  info.append(title, small);
+  const btn = document.createElement("button");
+  btn.textContent = label;
+  btn.onclick = () => joinRoom(room.id);
+  div.append(info, btn);
+  return div;
+}
+
+function joinRoom(id) {
+  socket.emit("join-room", { roomId: id }, result => {
+    if (!result || !result.ok) return alert(result?.error || "Could not join room");
+    currentRoom = result.room;
+    document.getElementById("roomTitle").textContent = currentRoom.name;
+    document.getElementById("roomInfo").textContent = "Room ID: " + currentRoom.id;
+    document.getElementById("roomMessages").innerHTML = "";
+    (result.messages || []).forEach(addMessage);
+    renderSeats(result.seats || []);
+    go("roomDetail");
+  });
+}
+
+function renderSeats(seats) {
+  const box = document.getElementById("seats");
+  box.innerHTML = "";
+  for (let i = 0; i < 8; i++) {
+    const user = seats[i];
+    const div = document.createElement("div");
+    div.className = "seat" + (user ? " occupied" : "");
+    const label = document.createElement("div");
+    label.textContent = user ? "🎤 " + safeText(user) : "💺 Seat " + (i + 1);
+    div.appendChild(label);
+    if (!user) {
+      const btn = document.createElement("button");
+      btn.textContent = "Join";
+      btn.onclick = () => socket.emit("take-seat", i, result => {
+        if (result && !result.ok) alert(result.error || "Seat unavailable");
+      });
+      div.appendChild(btn);
+    }
+    box.appendChild(div);
+  }
+}
+socket.on("seats-update", renderSeats);
+
+function leaveSeat() { socket.emit("leave-seat"); }
+
+function exitRoom() {
+  stopVoice();
+  socket.emit("leave-room");
+  currentRoom = null;
+  go("home");
+}
+
+function sendRoomMessage() {
+  const input = document.getElementById("roomInput");
+  const message = input.value.trim();
+  if (!message || !currentRoom) return;
+  socket.emit("room-message", message);
+  input.value = "";
+}
+
+function addMessage(item) {
+  const div = document.createElement("div");
+  div.className = "message";
+  div.textContent = safeText(item.name) + ": " + safeText(item.message);
+  const box = document.getElementById("roomMessages");
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+socket.on("room-message", addMessage);
+socket.on("system-message", message => addMessage({name:"Huka Bot",message}));
+socket.on("gift-event", gift => addMessage({
+  name:"Gift",
+  message:safeText(gift.from) + " sent " + safeText(gift.gift) + " to " + safeText(gift.to)
+}));
+
+function sendGift(gift) {
+  if (!currentRoom) return alert("Join a room first.");
+  const to = prompt("Receiver name:");
+  if (to) socket.emit("send-gift", {gift,to});
+}
+
+async function startVoice() {
+  try {
+    voiceStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    document.getElementById("voiceStatus").textContent =
+      "Microphone enabled. Live audio connection is not added yet.";
+  } catch (error) {
+    alert("Allow microphone permission. Open Huka using HTTPS.");
+  }
+}
+
+function stopVoice() {
+  if (voiceStream) {
+    voiceStream.getTracks().forEach(track => track.stop());
+    voiceStream = null;
+  }
+  const status = document.getElementById("voiceStatus");
+  if (status) status.textContent = "Voice disconnected";
+}
+
+function sendDM() {
+  const to = document.getElementById("dmId").value.trim();
+  const message = document.getElementById("dmText").value.trim();
+  if (!to || !message) return alert("Enter ID and message.");
+  socket.emit("send-dm", {to,message});
+}
+socket.on("dm-sent", () => {
+  document.getElementById("dmText").value = "";
+  alert("Message sent.");
+});
+socket.on("dm-error", message => alert(message));
+socket.on("new-dm", item => {
+  const div = document.createElement("div");
+  div.className = "message";
+  div.textContent = safeText(item.from) + ": " + safeText(item.message);
+  document.getElementById("inboxMessages").prepend(div);
+  document.getElementById("notices").textContent = "New message received!";
+});
+socket.on("inbox-data", list => {
+  const box = document.getElementById("inboxMessages");
+  box.innerHTML = "";
+  if (!list || !list.length) {
+    box.textContent = "No messages yet.";
+    return;
+  }
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "message";
+    div.textContent = safeText(item.from) + ": " + safeText(item.message);
+    box.appendChild(div);
+  });
+});
+
+function loadDP() {
+  const photo = localStorage.getItem("hukaDP");
+  const box = document.getElementById("profileDP");
+  box.innerHTML = "";
+  if (photo) {
+    const img = document.createElement("img");
+    img.src = photo;
+    box.appendChild(img);
+  } else {
+    box.textContent = "👤";
+  }
+}
+
+function changeDP(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) return alert("Select an image.");
+  if (file.size > 2 * 1024 * 1024) return alert("Choose a photo smaller than 2 MB.");
+  const reader = new FileReader();
+  reader.onload = () => {
+    localStorage.setItem("hukaDP", reader.result);
+    loadDP();
+  };
+  reader.readAsDataURL(file);
+}
+
+function editName() {
+  const name = prompt("Enter your new display name:", localStorage.getItem("hukaName") || "");
+  if (!name || !name.trim()) return;
+  localStorage.setItem("hukaName", name.trim());
+  document.getElementById("profileName").textContent = name.trim();
+  alert("Name changed on this device. Server profile sync is not added yet.");
+}
+
+function updateLevel() {
+  const level = Math.floor(minutes / 60) + 1;
+  const progress = minutes % 60;
+  document.getElementById("userLevel").textContent = level;
+  document.getElementById("levelText").textContent = progress + " / 60 minutes";
+  document.getElementById("levelBar").style.width = (progress / 60 * 100) + "%";
+}
+
+setInterval(() => {
+  minutes++;
+  localStorage.setItem("hukaMinutes", minutes);
+  updateLevel();
+}, 60000);
+
+function claimReward() {
+  const level = Math.floor(minutes / 60) + 1;
+  if (level <= claimedLevel) return alert("This level reward is already claimed.");
+  coins += 50;
+  claimedLevel = level;
+  localStorage.setItem("hukaClaimedLevel", claimedLevel);
+  updateWallet();
+  alert("You received 50 demo coins!");
+}
+
+function saveLanguage() {
+  const language = document.getElementById("languageSelect").value;
+  localStorage.setItem("hukaLanguage", language);
+  document.getElementById("languageStatus").textContent =
+    "Selected: " + language + ". Full translation is not added yet.";
+}
+
+function saveNotify() {
+  localStorage.setItem("hukaNotify", document.getElementById("notifyToggle").checked ? "on" : "off");
+}
+
+function showInfo(name) {
+  alert(name + " is a demo section. Its full feature needs additional development.");
+}
+
+function game(type) {
+  let result = "";
+  if (type === "number") result = "🎯 Your number: " + (Math.floor(Math.random() * 100) + 1);
+  if (type === "dice") result = "🎲 You rolled: " + (Math.floor(Math.random() * 6) + 1);
+  if (type === "coin") result = "🪙 " + (Math.random() > 0.5 ? "Heads" : "Tails");
+  document.getElementById("gameResult").textContent = result;
+}
+
+function logout() {
+  if (!confirm("Are you sure you want to logout?")) return;
+  stopVoice();
+  localStorage.removeItem("hukaName");
+  location.reload();
+}
+
+socket.on("disconnect", stopVoice);
+updateWallet();
+updateLevel();
+loadDP();
+
+const savedLanguage = localStorage.getItem("hukaLanguage");
+if (savedLanguage) document.getElementById("languageSelect").value = savedLanguage;
+document.getElementById("notifyToggle").checked = localStorage.getItem("hukaNotify") !== "off";
+</script>
+</body>
+</html>
