@@ -1,634 +1,773 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#7835d5">
 <title>Huka Voice Chat</title>
+<script src="/socket.io/socket.io.js"></script>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f7f2fc;color:#302044;font-family:Arial,sans-serif;padding-bottom:75px}
-header{height:60px;background:linear-gradient(110deg,#7034d5,#ed43a5);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:5}
-.logo{font-size:24px;font-weight:bold}
-.balance{background:#ffffff30;padding:9px 13px;border-radius:20px}
-.container{max-width:650px;margin:auto;padding:12px}
-.page{display:none}.page.active{display:block}
-.card{background:white;border-radius:16px;padding:15px;margin-bottom:13px;box-shadow:0 3px 13px #4a176b0d}
-h2{font-size:18px;margin:4px 0 13px}
-p{line-height:1.4}
-.muted{font-size:12px;color:#9586a3}
-button{border:0;border-radius:10px;padding:11px 15px;color:white;background:linear-gradient(110deg,#7835d5,#e943a4);font-weight:bold;cursor:pointer}
-input,select{width:100%;padding:12px;border:1px solid #e7dcef;border-radius:10px;margin:5px 0 10px;font-size:14px;background:white}
-.row{display:flex;gap:8px;align-items:center}.row input{flex:1;min-width:0}
-.banner{background:linear-gradient(120deg,#642bc5,#f044a5);color:white;border-radius:17px;padding:22px;margin-bottom:13px}
-.banner h2{font-size:25px}
-.room{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f6efff;padding:12px;border-radius:12px;margin:9px 0}
-.room-info{min-width:0;overflow-wrap:anywhere}
-.room small{display:block;color:#88759c;margin-top:5px}
-.profile-top{background:linear-gradient(120deg,#7132d1,#ed43a5);color:white;padding:17px;border-radius:17px;margin-bottom:13px}
-.profile-head{display:flex;align-items:center;gap:13px}
-.dp{height:78px;width:78px;min-width:78px;border:3px solid white;border-radius:50%;background:white;color:#8036cf;display:grid;place-items:center;font-size:32px;overflow:hidden}
-.dp img{width:100%;height:100%;object-fit:cover}
-.user-info{flex:1;min-width:0}.user-info h2{margin:0 0 7px;overflow-wrap:anywhere}
-.edit{background:#ffffff35;padding:6px 10px}
-.stats{display:flex;text-align:center;margin-top:18px;background:#ffffff25;border-radius:12px;padding:12px 0}
-.stats div{flex:1;font-size:12px;border-right:1px solid #ffffff30}
-.stats div:last-child{border:0}
-.stats b{display:block;font-size:18px;margin-bottom:5px}
-.level{background:#ffffff25;padding:12px;border-radius:12px;margin-top:13px}
-.progress{height:8px;background:#ffffff55;border-radius:20px;overflow:hidden;margin:9px 0}
-.progress div{height:100%;width:0;background:white}
-.menu-item{display:flex;align-items:center;justify-content:space-between;padding:13px 3px;border-bottom:1px solid #f0eaf5;cursor:pointer}
-.menu-item:last-child{border:0}
-.menu-left{display:flex;align-items:center;gap:12px}
-.menu-icon{height:34px;width:34px;border-radius:10px;background:#f3eaff;display:grid;place-items:center;font-size:18px}
-.arrow{font-size:20px;color:#aa9ab8}
-.nav{position:fixed;bottom:0;left:0;width:100%;height:65px;background:white;display:flex;justify-content:space-around;box-shadow:0 -3px 15px #0001;z-index:10}
-.nav button{flex:1;background:white;color:#88799b;border-radius:0;font-size:11px;padding:5px}
-.nav button.active{color:#9637d2}
-.nav span{display:block;font-size:22px;margin-bottom:3px}
-.grid,.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.seat{background:#f1e8ff;border-radius:12px;padding:12px 3px;text-align:center;font-size:12px;min-height:76px}
-.seat.occupied{background:#fce5f3}
-.seat button{padding:6px;font-size:10px;margin-top:5px}
-.icon-grid div{text-align:center;background:#faf5ff;padding:13px 2px;border-radius:12px;font-size:12px;cursor:pointer}
-.icon-grid b{display:block;font-size:23px;margin-bottom:6px}
-.message{background:#f3eaff;padding:10px;border-radius:10px;margin:7px 0;overflow-wrap:anywhere}
-#roomMessages{height:170px;overflow-y:auto;background:#faf7ff;padding:8px;border-radius:10px}
-.wallet-box{background:#f7efff;padding:17px;border-radius:13px;margin:10px 0}
-.back{margin-bottom:12px}
-@media(max-width:360px){.grid,.icon-grid{grid-template-columns:repeat(2,1fr)}}
+body{margin:0;background:#f7f3ff;color:#28203b;font-family:Arial,sans-serif}
+header{background:linear-gradient(120deg,#7027d9,#ed4ca7);color:white;padding:18px}
+header h2{margin:0}
+header small{opacity:.9}
+main{padding:14px;padding-bottom:85px;max-width:650px;margin:auto}
+.card{background:white;border-radius:18px;padding:15px;margin:12px 0;box-shadow:0 3px 14px #34205a12}
+h3{margin:5px 0 12px}
+button{border:0;border-radius:12px;padding:11px 14px;background:#812fdb;color:white;font-weight:bold;margin:4px;cursor:pointer}
+button.secondary{background:#f0e6ff;color:#6524b8}
+button.pink{background:#e943a0}
+button.red{background:#e34b62}
+button:disabled{opacity:.5}
+input,select{width:100%;padding:13px;border:1px solid #ded2ed;border-radius:12px;margin:6px 0;font-size:15px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+.hidden{display:none!important}
+.nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:10px 4px;box-shadow:0 -3px 15px #34205a18;z-index:10}
+.nav button{flex:1;background:white;color:#6427aa;margin:0;border-radius:0}
+.nav button.active{color:#e33c9a}
+.room-item{border:1px solid #eee4fb;border-radius:14px;padding:12px;margin:9px 0}
+.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.seat{background:#f3eaff;color:#6022a8;min-height:75px;border-radius:14px;padding:8px;font-size:12px}
+.seat.taken{background:#fce7f4;color:#a51d6a}
+.chatbox{height:190px;overflow:auto;background:#faf7ff;padding:10px;border-radius:12px}
+.msg{padding:7px;margin:5px 0;background:#eee6fa;border-radius:10px;overflow-wrap:anywhere}
+.msg b{color:#7729c5}
+.member{display:inline-block;background:#f1e8ff;border-radius:20px;padding:8px;margin:4px;font-size:13px}
+.profile-top{display:flex;align-items:center;gap:12px}
+.avatar{width:62px;height:62px;border-radius:50%;background:#eedcff;display:grid;place-items:center;font-size:28px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.stat{background:#f6efff;border-radius:12px;text-align:center;padding:12px}
+.stat b{display:block;font-size:20px;color:#792bc5}
+.gift{background:#fff0f8;color:#a51d6a}
+#toast{position:fixed;top:12px;left:10%;width:80%;background:#302044;color:white;padding:12px;border-radius:12px;text-align:center;display:none;z-index:30}
+audio{display:none}
 </style>
 </head>
+
 <body>
+<div id="toast"></div>
+
 <header>
-<div class="logo">HUKA ♡</div>
-<div class="balance">🪙 <b id="headerCoins">100</b></div>
+  <h2>HUKA♡</h2>
+  <small>Meet • Talk • Play • Make Friends</small>
+  <div style="margin-top:9px">🟢 Online: <b id="onlineCount">0</b></div>
 </header>
 
-<main class="container">
+<main>
+  <!-- HOME -->
+  <section id="homePage">
+    <div class="card" style="background:linear-gradient(120deg,#762cda,#ec4ca5);color:white">
+      <h2>Welcome to Huka Voice Chat 💜</h2>
+      <p>Meet new people, talk and enjoy together!</p>
+      <button class="secondary" onclick="showPage('profilePage')">My Profile</button>
+    </div>
 
-<section id="home" class="page active">
-<div class="banner">
-<h2>Welcome to Huka ♡</h2>
-<p>Make Friends • Voice Chat • Play Games</p>
-<button onclick="go('rooms')">Explore Rooms →</button>
-</div>
-<div class="card">
-<h2>🏠 My Room</h2>
-<div id="myRoom">You have not created a room yet.</div>
-<button onclick="go('rooms')">＋ Create My Room</button>
-</div>
-<div class="card">
-<h2>🌍 All Rooms</h2>
-<div id="homeRooms">Loading rooms...</div>
-<button onclick="go('rooms')">See All Rooms →</button>
-</div>
-<div class="card">
-<h2>🟢 Online Users</h2>
-<h1 id="onlineCount">0</h1>
-</div>
-<div class="card">
-<h2>✨ Discover Huka</h2>
-<div class="icon-grid">
-<div onclick="go('games')"><b>🎮</b>Games</div>
-<div onclick="go('ranking')"><b>🏆</b>Ranking</div>
-<div onclick="go('vip')"><b>👑</b>SVIP</div>
-<div onclick="go('notifications')"><b>🔔</b>Notice</div>
-</div>
-</div>
-</section>
+    <div class="card">
+      <h3>My Room</h3>
+      <div id="myRoomInfo">You haven't created a room yet.</div>
+      <button onclick="createRoom()">＋ Create My Room</button>
+    </div>
 
-<section id="rooms" class="page">
-<div class="card">
-<h2>🎙️ Create Room</h2>
-<input id="newRoomName" placeholder="Enter room name" maxlength="40">
-<button onclick="createRoom()">Create Room</button>
-</div>
-<div class="card">
-<h2>🌍 All Voice Rooms</h2>
-<div id="allRooms">Loading...</div>
-</div>
-</section>
+    <div class="card">
+      <h3>Join a Room</h3>
+      <input id="joinRoomId" placeholder="Enter Room ID">
+      <button onclick="joinRoom()">Join Room</button>
+    </div>
 
-<section id="roomDetail" class="page">
-<div class="card">
-<h2 id="roomTitle">Voice Room</h2>
-<p id="roomInfo" class="muted"></p>
-<button onclick="exitRoom()">Leave Room</button>
-</div>
-<div class="card">
-<h2>💺 Voice Seats</h2>
-<div class="grid" id="seats"></div>
-<p class="muted">Select an empty seat.</p>
-<button onclick="leaveSeat()">Leave Seat</button>
-<button onclick="startVoice()">🎙️ Microphone</button>
-<button onclick="stopVoice()">🔇 Stop</button>
-<p id="voiceStatus" class="muted">Voice disconnected</p>
-</div>
-<div class="card">
-<h2>💬 Room Chat</h2>
-<div id="roomMessages"></div>
-<div class="row">
-<input id="roomInput" placeholder="Write a message">
-<button onclick="sendRoomMessage()">Send</button>
-</div>
-</div>
-<div class="card">
-<h2>🎁 Gifts</h2>
-<div class="icon-grid">
-<div onclick="sendGift('Rose')"><b>🌹</b>Rose</div>
-<div onclick="sendGift('Heart')"><b>❤️</b>Heart</div>
-<div onclick="sendGift('Star')"><b>⭐</b>Star</div>
-<div onclick="sendGift('Crown')"><b>👑</b>Crown</div>
-</div>
-</div>
-</section>
+    <div class="card">
+      <h3>All Rooms</h3>
+      <button class="secondary" onclick="loadRooms()">↻ Refresh</button>
+      <div id="roomList">Loading rooms...</div>
+    </div>
+  </section>
 
-<section id="inbox" class="page">
-<div class="card">
-<h2>💬 Inbox</h2>
-<div id="inboxMessages">No messages yet.</div>
-</div>
-<div class="card">
-<h2>✉️ Send Message</h2>
-<input id="dmId" placeholder="Friend Profile ID">
-<input id="dmText" placeholder="Write message">
-<button onclick="sendDM()">Send</button>
-</div>
-</section>
+  <!-- ROOM -->
+  <section id="roomPage" class="hidden">
+    <div class="card">
+      <h3 id="roomTitle">Room</h3>
+      <p>Room ID: <b id="roomIdLabel"></b></p>
+      <div class="row">
+        <button onclick="startVoice()">🎙️ Join Voice</button>
+        <button class="red" onclick="stopVoice()">🔇 Leave Voice</button>
+      </div>
+      <div class="row">
+        <button class="secondary" onclick="toggleMic()" id="micBtn">🎤 Mic ON</button>
+        <button class="secondary" onclick="toggleSpeaker()" id="speakerBtn">🔊 Speaker ON</button>
+      </div>
+      <p id="voiceStatus">Voice disconnected</p>
+    </div>
 
-<section id="profile" class="page">
-<div class="profile-top">
-<div class="profile-head">
-<div class="dp" id="profileDP">👤</div>
-<div class="user-info">
-<h2><span id="profileName">Huka User</span>
-<button class="edit" onclick="editName()">✏️</button></h2>
-<div>ID: <b id="profileId">Loading...</b></div>
-<p>⭐ Level <b id="userLevel">1</b> · 🎁 Gifting</p>
-<button class="edit" onclick="document.getElementById('dpFile').click()">Change DP</button>
-<input id="dpFile" type="file" accept="image/*" hidden onchange="changeDP(event)">
-</div>
-</div>
-<div class="level">
-<b>⭐ Level Progress</b>
-<span id="levelText">0 / 60 minutes</span>
-<div class="progress"><div id="levelBar"></div></div>
-<button onclick="claimReward()">🎁 Claim Level Reward</button>
-<p class="muted" style="color:white">Demo level progress.</p>
-</div>
-<div class="stats">
-<div onclick="showInfo('Following')"><b>0</b>Following</div>
-<div onclick="showInfo('Followers')"><b>0</b>Followers</div>
-<div onclick="showInfo('Visitors')"><b>0</b>Visitors</div>
-</div>
-</div>
-<div class="card">
-<div class="menu-item" onclick="go('vip')"><div class="menu-left"><div class="menu-icon">👑</div><b>SVIP</b></div><span>›</span></div>
-</div>
-<div class="card">
-<div class="menu-item" onclick="go('wallet')"><div class="menu-left"><div class="menu-icon">💰</div><b>Wallet</b></div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Invite Friend Huka')"><div class="menu-left"><div class="menu-icon">🤝</div>Invite Friend Huka</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('User Level')"><div class="menu-left"><div class="menu-icon">⭐</div>User Level</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Medal')"><div class="menu-left"><div class="menu-icon">🏅</div>Medal</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('CP Space')"><div class="menu-left"><div class="menu-icon">💞</div>CP Space</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Family')"><div class="menu-left"><div class="menu-icon">👨‍👩‍👧</div>Family</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Bag')"><div class="menu-left"><div class="menu-icon">🎒</div>Bag</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Dress')"><div class="menu-left"><div class="menu-icon">👕</div>Dress</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('CD Key')"><div class="menu-left"><div class="menu-icon">🎟️</div>CD Key</div><span>›</span></div>
-<div class="menu-item" onclick="go('language')"><div class="menu-left"><div class="menu-icon">🌐</div>Language</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Customer Service')"><div class="menu-left"><div class="menu-icon">🎧</div>Customer Service</div><span>›</span></div>
-<div class="menu-item" onclick="showInfo('Help & Feedback')"><div class="menu-left"><div class="menu-icon">❓</div>Help & Feedback</div><span>›</span></div>
-<div class="menu-item" onclick="go('settings')"><div class="menu-left"><div class="menu-icon">⚙️</div>Settings</div><span>›</span></div>
-</div>
-</section>
+    <div class="card">
+      <h3>🎙️ Voice Seats</h3>
+      <p>Tap an empty seat to sit down.</p>
+      <div class="seats" id="seatList"></div>
+      <button class="secondary" onclick="leaveSeat()">Leave Seat</button>
+    </div>
 
-<section id="wallet" class="page">
-<button class="back" onclick="go('profile')">← Back</button>
-<div class="banner"><h2>💰 Huka Wallet</h2><p>Coins and Diamonds</p></div>
-<div class="card">
-<div class="wallet-box"><h2>🪙 Coins</h2><h1 id="walletCoins">100</h1><button onclick="showInfo('Get Coins')">Get Coins</button></div>
-<div class="wallet-box"><h2>💎 Diamonds</h2><h1 id="walletDiamonds">0</h1><button onclick="showInfo('Get Diamonds')">Get Diamonds</button></div>
-<p class="muted">Demo balances only. Real purchases are not enabled.</p>
-</div>
-</section>
+    <div class="card">
+      <h3>👥 Members</h3>
+      <div id="membersList"></div>
+    </div>
 
-<section id="language" class="page">
-<button class="back" onclick="go('profile')">← Back</button>
-<div class="card">
-<h2>🌐 Select Language</h2>
-<select id="languageSelect" onchange="saveLanguage()">
-<option>English</option><option>Hindi</option><option>Rajasthani</option>
-<option>Arabic</option><option>Gujarati</option><option>Marathi</option>
-<option>Assamese</option><option>Nepali</option><option>Urdu</option>
-<option>Punjabi</option><option>Bengali</option><option>Tamil</option>
-<option>Telugu</option><option>Kannada</option><option>Malayalam</option>
-<option>Odia</option><option>French</option><option>Spanish</option>
-<option>Turkish</option><option>Indonesian</option><option>German</option>
-</select>
-<p id="languageStatus" class="muted"></p>
-</div>
-</section>
+    <div class="card">
+      <h3>🎁 Send Gifts</h3>
+      <p>Your coins: <b id="roomCoins">1000</b></p>
+      <div class="row">
+        <button class="gift" onclick="sendGift('Rose')">🌹 Rose · 10</button>
+        <button class="gift" onclick="sendGift('Heart')">💗 Heart · 50</button>
+      </div>
+      <div class="row">
+        <button class="gift" onclick="sendGift('Crown')">👑 Crown · 100</button>
+        <button class="gift" onclick="sendGift('Diamond')">💎 Diamond · 500</button>
+      </div>
+      <button class="gift" onclick="sendGift('Rocket')">🚀 Rocket · 1000</button>
+      <div id="giftFeed"></div>
+    </div>
 
-<section id="settings" class="page">
-<button class="back" onclick="go('profile')">← Back</button>
-<div class="card">
-<h2>⚙️ Settings</h2>
-<div class="menu-item" onclick="go('messageSettings')">🔔 Message Notifications <span>›</span></div>
-<div class="menu-item" onclick="go('blocklist')">🚫 Blocklist <span>›</span></div>
-<div class="menu-item" onclick="showInfo('About Huka')">ℹ️ About <span>›</span></div>
-<div class="menu-item" onclick="logout()">🚪 Logout <span>›</span></div>
-</div>
-</section>
+    <div class="card">
+      <h3>💬 Room Chat</h3>
+      <div class="chatbox" id="roomChat"></div>
+      <div class="row">
+        <input id="roomMessage" placeholder="Write a message...">
+        <button onclick="sendRoomMessage()">Send</button>
+      </div>
+    </div>
 
-<section id="messageSettings" class="page">
-<button class="back" onclick="go('settings')">← Back</button>
-<div class="card">
-<h2>🔔 Message Notifications</h2>
-<label><input type="checkbox" id="notifyToggle" style="width:auto" onchange="saveNotify()"> Enable notifications</label>
-</div>
-</section>
+    <button class="red" style="width:100%" onclick="exitRoom()">Leave Room</button>
+  </section>
 
-<section id="blocklist" class="page">
-<button class="back" onclick="go('settings')">← Back</button>
-<div class="card"><h2>🚫 Blocklist</h2><p>No blocked users yet.</p></div>
-</section>
+  <!-- INBOX -->
+  <section id="inboxPage" class="hidden">
+    <div class="card">
+      <h3>💌 Inbox</h3>
+      <p>Your User ID: <b id="inboxMyId"></b></p>
+      <input id="dmUserId" placeholder="Friend's User ID">
+      <input id="dmText" placeholder="Write a message">
+      <button onclick="sendDM()">Send Message</button>
+      <div id="inboxMessages"></div>
+    </div>
+  </section>
 
-<section id="vip" class="page">
-<div class="banner"><h2>👑 Huka SVIP</h2><p>Special membership features</p></div>
-<div class="card">
-<h2>SVIP Benefits</h2>
-<p>👑 SVIP Badge</p><p>✨ Profile Decoration</p>
-<p>🎁 Special Gifts</p><p>🌟 Room Themes</p>
-<p class="muted">Membership purchase is not connected.</p>
-</div>
-</section>
+  <!-- PROFILE -->
+  <section id="profilePage" class="hidden">
+    <div class="card">
+      <div class="profile-top">
+        <div class="avatar" id="avatar">👤</div>
+        <div>
+          <h3 id="profileName">Huka User</h3>
+          <p>User ID: <b id="profileId"></b></p>
+          <p>Level: <b id="profileLevel">1</b></p>
+        </div>
+      </div>
+      <input id="nameInput" placeholder="Change username">
+      <button onclick="changeName()">Update Name</button>
+      <label>Change profile picture</label>
+      <input type="file" accept="image/*" onchange="changeDP(event)">
+    </div>
 
-<section id="games" class="page">
-<div class="card">
-<h2>🎮 Mini Games</h2>
-<div class="icon-grid">
-<div onclick="game('number')"><b>🎯</b>Number</div>
-<div onclick="game('dice')"><b>🎲</b>Dice</div>
-<div onclick="game('coin')"><b>🪙</b>Coin Toss</div>
-<div onclick="go('rooms')"><b>🎙️</b>Rooms</div>
-</div>
-<p id="gameResult">Choose a game.</p>
-</div>
-</section>
+    <div class="card">
+      <div class="row">
+        <div class="stat"><b>0</b>Following</div>
+        <div class="stat"><b>0</b>Followers</div>
+        <div class="stat"><b>0</b>Visitors</div>
+      </div>
+    </div>
 
-<section id="ranking" class="page">
-<div class="card"><h2>🏆 Ranking</h2><p>🥇 Top Player</p><p>🥈 Second Player</p><p>🥉 Third Player</p></div>
-</section>
+    <div class="card">
+      <h3>💰 Wallet</h3>
+      <p>🪙 Coins: <b id="walletCoins">1000</b></p>
+      <p>💎 Diamonds: <b id="walletDiamonds">0</b></p>
+      <button onclick="showToast('Wallet recharge will be added later.')">Recharge</button>
+    </div>
 
-<section id="notifications" class="page">
-<div class="card"><h2>🔔 Notifications</h2><p id="notices">Welcome to Huka!</p></div>
-</section>
+    <div class="card">
+      <h3>⭐ My Features</h3>
+      <button onclick="showToast('SVIP feature coming soon.')">SVIP</button>
+      <button onclick="showToast('Level rewards coming soon.')">User Level</button>
+      <button onclick="showToast('Medals coming soon.')">Medal</button>
+      <button onclick="showToast('CP Space coming soon.')">CP Space</button>
+      <button onclick="showToast('Family feature coming soon.')">Family</button>
+      <button onclick="showToast('Your bag is empty.')">Bag</button>
+      <button onclick="showToast('Dress feature coming soon.')">Dress</button>
+      <button onclick="showToast('Invite friends feature coming soon.')">Invite Friend</button>
+      <button onclick="showToast('CD Key feature coming soon.')">CD Key</button>
+    </div>
 
+    <div class="card">
+      <h3>🌐 Language</h3>
+      <select id="language">
+        <option>English</option><option>Hindi</option>
+        <option>Rajasthani</option><option>Arabic</option>
+        <option>Gujarati</option><option>Marathi</option>
+        <option>Assamese</option><option>Nepali</option>
+        <option>Urdu</option><option>Punjabi</option>
+        <option>Bengali</option><option>Tamil</option>
+        <option>Telugu</option><option>Kannada</option>
+        <option>Malayalam</option><option>Odia</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h3>⚙️ Settings</h3>
+      <button class="secondary" onclick="showToast('Notifications setting coming soon.')">Message Notifications</button>
+      <button class="secondary" onclick="showToast('Blocklist coming soon.')">Blocklist</button>
+      <button class="secondary" onclick="showToast('Huka Voice Chat version 1.0')">About</button>
+      <button class="secondary" onclick="showToast('Help and feedback coming soon.')">Help & Feedback</button>
+      <button class="secondary" onclick="showToast('Customer service coming soon.')">Customer Service</button>
+      <button class="red" onclick="logout()">Logout</button>
+    </div>
+  </section>
 </main>
 
 <nav class="nav">
-<button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
-<button onclick="go('inbox',this)"><span>💬</span>Inbox</button>
-<button onclick="go('profile',this)"><span>👤</span>Profile</button>
+  <button id="navHome" class="active" onclick="showPage('homePage')">🏠<br>Home</button>
+  <button id="navInbox" onclick="openInbox()">💌<br>Inbox</button>
+  <button id="navProfile" onclick="showPage('profilePage')">👤<br>Profile</button>
 </nav>
 
-<script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+
 let myUser = null;
 let currentRoom = null;
-let voiceStream = null;
+let localStream = null;
+let micEnabled = true;
+let speakerEnabled = true;
+let peerConnections = {};
+let knownPeers = [];
+let myRoomId = localStorage.getItem("hukaMyRoom") || "";
 
-let coins = Number(localStorage.getItem("hukaCoins") || 100);
-let diamonds = Number(localStorage.getItem("hukaDiamonds") || 0);
-let minutes = Number(localStorage.getItem("hukaMinutes") || 0);
-let claimedLevel = Number(localStorage.getItem("hukaClaimedLevel") || 0);
-let myRoomId = localStorage.getItem("hukaMyRoomId") || "";
+const ICE = {
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+};
 
-function go(id, btn) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  const page = document.getElementById(id);
-  if (page) page.classList.add("active");
-  document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
-  if (btn) btn.classList.add("active");
-  if (id === "rooms") socket.emit("get-rooms");
-  if (id === "inbox") socket.emit("get-inbox");
+function showToast(message) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 2500);
 }
 
-function updateWallet() {
-  document.getElementById("headerCoins").textContent = coins;
-  document.getElementById("walletCoins").textContent = coins;
-  document.getElementById("walletDiamonds").textContent = diamonds;
-  localStorage.setItem("hukaCoins", coins);
-  localStorage.setItem("hukaDiamonds", diamonds);
+function showPage(id) {
+  ["homePage","roomPage","inboxPage","profilePage"].forEach(page => {
+    document.getElementById(page).classList.add("hidden");
+  });
+  document.getElementById(id).classList.remove("hidden");
+
+  ["navHome","navInbox","navProfile"].forEach(n =>
+    document.getElementById(n).classList.remove("active")
+  );
+
+  if (id === "homePage") navHome.classList.add("active");
+  if (id === "inboxPage") navInbox.classList.add("active");
+  if (id === "profilePage") navProfile.classList.add("active");
+}
+
+function updateProfile() {
+  if (!myUser) return;
+  profileName.textContent = myUser.name;
+  profileId.textContent = myUser.id;
+  inboxMyId.textContent = myUser.id;
+  walletCoins.textContent = myUser.coins;
+  roomCoins.textContent = myUser.coins;
+  walletDiamonds.textContent = myUser.diamonds;
+  profileLevel.textContent = myUser.level;
+  nameInput.value = myUser.name;
 }
 
 function register() {
-  let name = localStorage.getItem("hukaName");
-  if (!name) {
-    name = prompt("Welcome to Huka! Enter your name:");
-    if (!name || !name.trim()) name = "Huka User";
-    name = name.trim();
-    localStorage.setItem("hukaName", name);
-  }
-  socket.emit("register", { name }, result => {
-    if (!result || !result.ok) {
-      alert(result?.error || "Registration failed");
+  const savedName = localStorage.getItem("hukaName") || "Huka User";
+  const savedId = localStorage.getItem("hukaUserId") || "";
+
+  socket.emit("register", {
+    name: savedName,
+    profileId: savedId
+  }, result => {
+    if (!result?.ok) {
+      showToast("Registration failed.");
       return;
     }
+
     myUser = result.user;
-    document.getElementById("profileName").textContent = myUser.name;
-    document.getElementById("profileId").textContent = myUser.profileId;
-    socket.emit("get-rooms");
+    localStorage.setItem("hukaUserId", myUser.id);
+    localStorage.setItem("hukaName", myUser.name);
+    updateProfile();
+    loadRooms();
+
+    if (myRoomId) {
+      myRoomInfo.innerHTML = `Your Room ID: <b>${myRoomId}</b>`;
+    }
   });
 }
-socket.on("connect", register);
-socket.on("online-count", n => {
-  document.getElementById("onlineCount").textContent = n;
-});
 
-function safeText(value) { return String(value ?? ""); }
+function loadRooms() {
+  socket.emit("get-rooms");
+}
 
 function createRoom() {
-  const name = document.getElementById("newRoomName").value.trim();
-  if (!name) return alert("Enter room name");
+  const name = prompt("Enter room name:");
+  if (!name) return;
+
   socket.emit("create-room", { name }, result => {
-    if (!result || !result.ok) return alert(result?.error || "Could not create room");
-    myRoomId = String(result.id);
-    localStorage.setItem("hukaMyRoomId", myRoomId);
-    document.getElementById("newRoomName").value = "";
-    socket.emit("get-rooms");
-    joinRoom(result.id);
-  });
-}
-
-socket.on("room-list", list => {
-  const home = document.getElementById("homeRooms");
-  const all = document.getElementById("allRooms");
-  const mine = document.getElementById("myRoom");
-  home.innerHTML = "";
-  all.innerHTML = "";
-  mine.innerHTML = "";
-
-  if (!list || !list.length) {
-    home.textContent = "No rooms available.";
-    all.textContent = "No rooms yet. Create your first room!";
-    mine.textContent = "You have not created a room yet.";
-    return;
-  }
-
-  const own = list.find(r => String(r.id) === myRoomId);
-  if (own) mine.appendChild(roomElement(own, "Enter"));
-  else mine.textContent = "You have not created a room yet.";
-
-  list.forEach(r => {
-    home.appendChild(roomElement(r, "Join"));
-    all.appendChild(roomElement(r, "Join"));
-  });
-});
-
-function roomElement(room, label) {
-  const div = document.createElement("div");
-  div.className = "room";
-  const info = document.createElement("div");
-  info.className = "room-info";
-  const title = document.createElement("b");
-  title.textContent = "🎙️ " + safeText(room.name);
-  const small = document.createElement("small");
-  small.textContent = "Room ID: " + safeText(room.id) + " · " + safeText(room.count) + " members";
-  info.append(title, small);
-  const btn = document.createElement("button");
-  btn.textContent = label;
-  btn.onclick = () => joinRoom(room.id);
-  div.append(info, btn);
-  return div;
-}
-
-function joinRoom(id) {
-  socket.emit("join-room", { roomId: id }, result => {
-    if (!result || !result.ok) return alert(result?.error || "Could not join room");
-    currentRoom = result.room;
-    document.getElementById("roomTitle").textContent = currentRoom.name;
-    document.getElementById("roomInfo").textContent = "Room ID: " + currentRoom.id;
-    document.getElementById("roomMessages").innerHTML = "";
-    (result.messages || []).forEach(addMessage);
-    renderSeats(result.seats || []);
-    go("roomDetail");
-  });
-}
-
-function renderSeats(seats) {
-  const box = document.getElementById("seats");
-  box.innerHTML = "";
-  for (let i = 0; i < 8; i++) {
-    const user = seats[i];
-    const div = document.createElement("div");
-    div.className = "seat" + (user ? " occupied" : "");
-    const label = document.createElement("div");
-    label.textContent = user ? "🎤 " + safeText(user) : "💺 Seat " + (i + 1);
-    div.appendChild(label);
-    if (!user) {
-      const btn = document.createElement("button");
-      btn.textContent = "Join";
-      btn.onclick = () => socket.emit("take-seat", i, result => {
-        if (result && !result.ok) alert(result.error || "Seat unavailable");
-      });
-      div.appendChild(btn);
+    if (!result?.ok) {
+      showToast(result?.error || "Room create failed.");
+      return;
     }
-    box.appendChild(div);
-  }
-}
-socket.on("seats-update", renderSeats);
 
-function leaveSeat() { socket.emit("leave-seat"); }
+    myRoomId = result.id;
+    localStorage.setItem("hukaMyRoom", myRoomId);
+    myRoomInfo.innerHTML = `Your Room ID: <b>${myRoomId}</b>`;
+    joinRoomById(myRoomId);
+  });
+}
+
+function joinRoom() {
+  const id = joinRoomId.value.trim();
+  if (!id) return showToast("Enter Room ID.");
+  joinRoomById(id);
+}
+
+function joinRoomById(id) {
+  socket.emit("join-room", { roomId: id }, result => {
+    if (!result?.ok) {
+      showToast(result?.error || "Could not join room.");
+      return;
+    }
+
+    currentRoom = result.room;
+    roomTitle.textContent = result.room.name;
+    roomIdLabel.textContent = result.room.id;
+    roomChat.innerHTML = "";
+    giftFeed.innerHTML = "";
+
+    (result.messages || []).forEach(addRoomMessage);
+    renderSeats(result.seats || Array(8).fill(null));
+
+    showPage("roomPage");
+  });
+}
 
 function exitRoom() {
   stopVoice();
+  socket.emit("leave-seat");
   socket.emit("leave-room");
   currentRoom = null;
-  go("home");
+  showPage("homePage");
+  loadRooms();
+}
+
+function renderSeats(seats) {
+  seatList.innerHTML = "";
+
+  seats.forEach((seat, index) => {
+    const button = document.createElement("button");
+    button.className = "seat" + (seat ? " taken" : "");
+    button.textContent = seat
+      ? `🎙️ ${seat.name}`
+      : `＋ Seat ${index + 1}`;
+
+    button.disabled = !!seat;
+
+    button.onclick = () => {
+      socket.emit("take-seat", index, result => {
+        if (!result?.ok) showToast(result?.error || "Seat unavailable.");
+      });
+    };
+
+    seatList.appendChild(button);
+  });
+}
+
+function leaveSeat() {
+  socket.emit("leave-seat");
+}
+
+function addRoomMessage(message) {
+  const div = document.createElement("div");
+  div.className = "msg";
+
+  const name = document.createElement("b");
+  name.textContent = (message.name || "User") + ": ";
+
+  const text = document.createElement("span");
+  text.textContent = message.text || "";
+
+  div.append(name, text);
+  roomChat.appendChild(div);
+  roomChat.scrollTop = roomChat.scrollHeight;
 }
 
 function sendRoomMessage() {
-  const input = document.getElementById("roomInput");
-  const message = input.value.trim();
-  if (!message || !currentRoom) return;
-  socket.emit("room-message", message);
-  input.value = "";
+  const text = roomMessage.value.trim();
+  if (!text) return;
+
+  socket.emit("room-message", { text });
+  roomMessage.value = "";
 }
 
-function addMessage(item) {
-  const div = document.createElement("div");
-  div.className = "message";
-  div.textContent = safeText(item.name) + ": " + safeText(item.message);
-  const box = document.getElementById("roomMessages");
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-socket.on("room-message", addMessage);
-socket.on("system-message", message => addMessage({name:"Huka Bot",message}));
-socket.on("gift-event", gift => addMessage({
-  name:"Gift",
-  message:safeText(gift.from) + " sent " + safeText(gift.gift) + " to " + safeText(gift.to)
-}));
+roomMessage.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendRoomMessage();
+});
 
 function sendGift(gift) {
-  if (!currentRoom) return alert("Join a room first.");
-  const to = prompt("Receiver name:");
-  if (to) socket.emit("send-gift", {gift,to});
+  socket.emit("send-gift", { gift, to: "Everyone" }, result => {
+    if (!result?.ok) {
+      showToast(result?.error || "Gift failed.");
+      return;
+    }
+
+    myUser.coins = result.coins;
+    updateProfile();
+    showToast("Gift sent successfully!");
+  });
+}
+
+function toggleMic() {
+  if (!localStream) {
+    showToast("Pehle Join Voice dabao.");
+    return;
+  }
+
+  micEnabled = !micEnabled;
+  localStream.getAudioTracks().forEach(track => {
+    track.enabled = micEnabled;
+  });
+
+  micBtn.textContent = micEnabled ? "🎤 Mic ON" : "🔇 Mic OFF";
+}
+
+function toggleSpeaker() {
+  speakerEnabled = !speakerEnabled;
+
+  document.querySelectorAll("audio.remoteAudio").forEach(audio => {
+    audio.muted = !speakerEnabled;
+  });
+
+  speakerBtn.textContent = speakerEnabled
+    ? "🔊 Speaker ON" : "🔇 Speaker OFF";
 }
 
 async function startVoice() {
+  if (localStream) return showToast("Voice already connected.");
+
   try {
-    voiceStream = await navigator.mediaDevices.getUserMedia({audio:true});
-    document.getElementById("voiceStatus").textContent =
-      "Microphone enabled. Live audio connection is not added yet.";
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false
+    });
+
+    micEnabled = true;
+    voiceStatus.textContent = "🟢 Microphone connected";
+    micBtn.textContent = "🎤 Mic ON";
+
+    knownPeers.forEach(id => makeOffer(id));
   } catch (error) {
-    alert("Allow microphone permission. Open Huka using HTTPS.");
+    voiceStatus.textContent = "Microphone permission denied";
+    showToast("Allow microphone permission in browser settings.");
   }
+}
+
+function createPeer(peerId) {
+  if (peerConnections[peerId]) return peerConnections[peerId];
+
+  const pc = new RTCPeerConnection(ICE);
+  peerConnections[peerId] = pc;
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => {
+      pc.addTrack(track, localStream);
+    });
+  }
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      socket.emit("voice-ice", {
+        to: peerId,
+        candidate: event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event => {
+    let audio = document.getElementById("audio-" + peerId);
+
+    if (!audio) {
+      audio = document.createElement("audio");
+      audio.id = "audio-" + peerId;
+      audio.className = "remoteAudio";
+      audio.autoplay = true;
+      audio.playsInline = true;
+      document.body.appendChild(audio);
+    }
+
+    audio.srcObject = event.streams[0];
+    audio.muted = !speakerEnabled;
+    audio.play().catch(() => {});
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === "failed" ||
+        pc.connectionState === "closed") {
+      closePeer(peerId);
+    }
+  };
+
+  return pc;
+}
+
+async function makeOffer(peerId) {
+  if (!localStream || peerId === socket.id) return;
+
+  try {
+    const pc = createPeer(peerId);
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    socket.emit("voice-offer", {
+      to: peerId,
+      offer: pc.localDescription
+    });
+  } catch (error) {
+    console.log("Voice offer error:", error);
+  }
+}
+
+socket.on("voice-existing-peers", peers => {
+  knownPeers = peers || [];
+  if (localStream) knownPeers.forEach(id => makeOffer(id));
+});
+
+socket.on("voice-peer-joined", data => {
+  if (data?.socketId && !knownPeers.includes(data.socketId)) {
+    knownPeers.push(data.socketId);
+  }
+});
+
+socket.on("voice-offer", async data => {
+  try {
+    const pc = createPeer(data.from);
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(data.offer)
+    );
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    socket.emit("voice-answer", {
+      to: data.from,
+      answer: pc.localDescription
+    });
+  } catch (error) {
+    console.log("Voice answer error:", error);
+  }
+});
+
+socket.on("voice-answer", async data => {
+  const pc = peerConnections[data.from];
+  if (!pc) return;
+
+  try {
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(data.answer)
+    );
+  } catch (error) {
+    console.log("Answer error:", error);
+  }
+});
+
+socket.on("voice-ice", async data => {
+  const pc = peerConnections[data.from];
+  if (!pc || !data.candidate) return;
+
+  try {
+    await pc.addIceCandidate(
+      new RTCIceCandidate(data.candidate)
+    );
+  } catch (error) {
+    console.log("ICE error:", error);
+  }
+});
+
+function closePeer(peerId) {
+  if (peerConnections[peerId]) {
+    peerConnections[peerId].close();
+    delete peerConnections[peerId];
+  }
+
+  const audio = document.getElementById("audio-" + peerId);
+  if (audio) audio.remove();
 }
 
 function stopVoice() {
-  if (voiceStream) {
-    voiceStream.getTracks().forEach(track => track.stop());
-    voiceStream = null;
+  Object.keys(peerConnections).forEach(closePeer);
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
   }
-  const status = document.getElementById("voiceStatus");
-  if (status) status.textContent = "Voice disconnected";
+
+  voiceStatus.textContent = "Voice disconnected";
+  micBtn.textContent = "🎤 Mic ON";
+  micEnabled = true;
 }
 
 function sendDM() {
-  const to = document.getElementById("dmId").value.trim();
-  const message = document.getElementById("dmText").value.trim();
-  if (!to || !message) return alert("Enter ID and message.");
-  socket.emit("send-dm", {to,message});
-}
-socket.on("dm-sent", () => {
-  document.getElementById("dmText").value = "";
-  alert("Message sent.");
-});
-socket.on("dm-error", message => alert(message));
-socket.on("new-dm", item => {
-  const div = document.createElement("div");
-  div.className = "message";
-  div.textContent = safeText(item.from) + ": " + safeText(item.message);
-  document.getElementById("inboxMessages").prepend(div);
-  document.getElementById("notices").textContent = "New message received!";
-});
-socket.on("inbox-data", list => {
-  const box = document.getElementById("inboxMessages");
-  box.innerHTML = "";
-  if (!list || !list.length) {
-    box.textContent = "No messages yet.";
-    return;
-  }
-  list.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "message";
-    div.textContent = safeText(item.from) + ": " + safeText(item.message);
-    box.appendChild(div);
-  });
-});
+  const to = dmUserId.value.trim();
+  const text = dmText.value.trim();
 
-function loadDP() {
-  const photo = localStorage.getItem("hukaDP");
-  const box = document.getElementById("profileDP");
-  box.innerHTML = "";
-  if (photo) {
-    const img = document.createElement("img");
-    img.src = photo;
-    box.appendChild(img);
-  } else {
-    box.textContent = "👤";
-  }
+  if (!to || !text) return showToast("Enter User ID and message.");
+
+  socket.emit("send-dm", { to, text });
+  dmText.value = "";
+}
+
+function renderInbox(items) {
+  inboxMessages.innerHTML = "";
+
+  (items || []).slice().reverse().forEach(item => {
+    const div = document.createElement("div");
+    div.className = "msg";
+
+    const title = document.createElement("b");
+    title.textContent = `${item.from} (ID: ${item.fromId}): `;
+
+    const body = document.createElement("span");
+    body.textContent = item.text;
+
+    div.append(title, body);
+    inboxMessages.appendChild(div);
+  });
+}
+
+function openInbox() {
+  showPage("inboxPage");
+  if (myUser) socket.emit("get-inbox");
+}
+
+function changeName() {
+  const name = nameInput.value.trim();
+  if (!name) return showToast("Enter a name.");
+
+  // Name is saved locally for the next login.
+  // The current server profile name changes on next registration.
+  localStorage.setItem("hukaName", name);
+  showToast("Name saved. Reconnect to update your profile.");
 }
 
 function changeDP(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (!file.type.startsWith("image/")) return alert("Select an image.");
-  if (file.size > 2 * 1024 * 1024) return alert("Choose a photo smaller than 2 MB.");
+
+  if (file.size > 2 * 1024 * 1024) {
+    showToast("Choose an image under 2 MB.");
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = () => {
     localStorage.setItem("hukaDP", reader.result);
-    loadDP();
+    avatar.innerHTML = `<img src="${reader.result}" alt="Profile picture">`;
   };
   reader.readAsDataURL(file);
 }
 
-function editName() {
-  const name = prompt("Enter your new display name:", localStorage.getItem("hukaName") || "");
-  if (!name || !name.trim()) return;
-  localStorage.setItem("hukaName", name.trim());
-  document.getElementById("profileName").textContent = name.trim();
-  alert("Name changed on this device. Server profile sync is not added yet.");
-}
-
-function updateLevel() {
-  const level = Math.floor(minutes / 60) + 1;
-  const progress = minutes % 60;
-  document.getElementById("userLevel").textContent = level;
-  document.getElementById("levelText").textContent = progress + " / 60 minutes";
-  document.getElementById("levelBar").style.width = (progress / 60 * 100) + "%";
-}
-
-setInterval(() => {
-  minutes++;
-  localStorage.setItem("hukaMinutes", minutes);
-  updateLevel();
-}, 60000);
-
-function claimReward() {
-  const level = Math.floor(minutes / 60) + 1;
-  if (level <= claimedLevel) return alert("This level reward is already claimed.");
-  coins += 50;
-  claimedLevel = level;
-  localStorage.setItem("hukaClaimedLevel", claimedLevel);
-  updateWallet();
-  alert("You received 50 demo coins!");
-}
-
-function saveLanguage() {
-  const language = document.getElementById("languageSelect").value;
-  localStorage.setItem("hukaLanguage", language);
-  document.getElementById("languageStatus").textContent =
-    "Selected: " + language + ". Full translation is not added yet.";
-}
-
-function saveNotify() {
-  localStorage.setItem("hukaNotify", document.getElementById("notifyToggle").checked ? "on" : "off");
-}
-
-function showInfo(name) {
-  alert(name + " is a demo section. Its full feature needs additional development.");
-}
-
-function game(type) {
-  let result = "";
-  if (type === "number") result = "🎯 Your number: " + (Math.floor(Math.random() * 100) + 1);
-  if (type === "dice") result = "🎲 You rolled: " + (Math.floor(Math.random() * 6) + 1);
-  if (type === "coin") result = "🪙 " + (Math.random() > 0.5 ? "Heads" : "Tails");
-  document.getElementById("gameResult").textContent = result;
-}
-
 function logout() {
   if (!confirm("Are you sure you want to logout?")) return;
+
   stopVoice();
+  socket.disconnect();
+
+  localStorage.removeItem("hukaUserId");
   localStorage.removeItem("hukaName");
-  location.reload();
+
+  showToast("Logged out. Refresh the page to continue.");
 }
 
-socket.on("disconnect", stopVoice);
-updateWallet();
-updateLevel();
-loadDP();
+socket.on("room-list", list => {
+  roomList.innerHTML = "";
 
-const savedLanguage = localStorage.getItem("hukaLanguage");
-if (savedLanguage) document.getElementById("languageSelect").value = savedLanguage;
-document.getElementById("notifyToggle").checked = localStorage.getItem("hukaNotify") !== "off";
+  if (!list.length) {
+    roomList.textContent = "No rooms yet. Create the first room!";
+    return;
+  }
+
+  list.forEach(room => {
+    const div = document.createElement("div");
+    div.className = "room-item";
+
+    const title = document.createElement("b");
+    title.textContent = room.name;
+
+    const info = document.createElement("p");
+    info.textContent =
+      `Room ID: ${room.id} · Host: ${room.owner} · Members: ${room.members}`;
+
+    const button = document.createElement("button");
+    button.textContent = "Join Room";
+    button.onclick = () => joinRoomById(room.id);
+
+    div.append(title, info, button);
+    roomList.appendChild(div);
+  });
+});
+
+socket.on("seats-update", renderSeats);
+
+socket.on("members-update", data => {
+  membersList.innerHTML = "";
+
+  (data.members || []).forEach(member => {
+    const span = document.createElement("span");
+    span.className = "member";
+    span.textContent = `${member.name} · ID ${member.id}`;
+    membersList.appendChild(span);
+  });
+});
+
+socket.on("room-message", addRoomMessage);
+
+socket.on("system-message", message => {
+  addRoomMessage({ name: "Huka Bot", text: message });
+});
+
+socket.on("gift-event", gift => {
+  const div = document.createElement("div");
+  div.className = "msg";
+  div.textContent =
+    `🎁 ${gift.from} sent ${gift.gift} to ${gift.to}!`;
+  giftFeed.prepend(div);
+});
+
+socket.on("online-count", count => {
+  onlineCount.textContent = count;
+});
+
+socket.on("inbox-data", renderInbox);
+
+socket.on("new-dm", item => {
+  showToast("New message from " + item.from);
+  socket.emit("get-inbox");
+});
+
+socket.on("dm-sent", () => showToast("Message sent."));
+socket.on("dm-error", message => showToast(message));
+
+socket.on("disconnect", () => {
+  stopVoice();
+  voiceStatus.textContent = "Disconnected from server";
+});
+
+socket.on("connect", () => {
+  register();
+});
+
+const savedDP = localStorage.getItem("hukaDP");
+if (savedDP) {
+  avatar.innerHTML = `<img src="${savedDP}" alt="Profile picture">`;
+}
 </script>
 </body>
-</html>
+        </html>
