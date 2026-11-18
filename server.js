@@ -1,309 +1,419 @@
-javascript
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
+const DB_FILE = path.join(__dirname, "huka-data.json");
 
-app.use(express.static("public"));
+let db = {
+  nextUserId: 100001,
+  nextRoomId: 100001,
+  profiles: {},
+  inbox: {}
+};
 
-let users = {};
-let rooms = {};
-let messages = {};
-let inbox = {};
-
-function makeId() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+try {
+  if (fs.existsSync(DB_FILE)) {
+    db = { ...db, ...JSON.parse(fs.readFileSync(DB_FILE, "utf8")) };
+  }
+} catch (error) {
+  console.log("Database load error:", error.message);
 }
 
-function getOnlineCount() {
-  return Object.keys(users).length;
+function saveDB() {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+  } catch (error) {
+    console.log("Database save error:", error.message);
+  }
 }
 
-function getRoomList() {
-  return Object.values(rooms).map(room => ({
+const online = new Map();
+const rooms = new Map();
+
+const giftList = {
+  Rose: 10,
+  Heart: 50,
+  Crown: 100,
+  Diamond: 500,
+  Rocket: 1000
+};
+
+function clean(value, max = 100) {
+  return String(value || "").trim().slice(0, max);
+}
+
+function profileFor(socket) {
+  return db.profiles[socket.data.userId];
+}
+
+function onlineCount() {
+  return online.size;
+}
+
+function roomList() {
+  return [...rooms.values()].map(room => ({
     id: room.id,
     name: room.name,
-    owner: room.owner,
-    members: room.members.length,
+    owner: room.ownerName,
+    members: room.members.size,
     seats: room.seats
   }));
 }
 
-function sendRoomUpdate(roomId) {
-  const room = rooms[roomId];
+function updateRooms() {
+  io.emit("room-list", roomList());
+}
+
+function updateRoom(roomId) {
+  const room = rooms.get(roomId);
   if (!room) return;
 
   io.to(roomId).emit("seats-update", room.seats);
-
   io.to(roomId).emit("members-update", {
-    members: room.members.map(id => users[id]).filter(Boolean)
+    members: [...room.members]
+      .map(id => online.get(id))
+      .filter(Boolean)
+      .map(user => ({
+        id: user.id,
+        name: user.name,
+        coins: user.coins
+      }))
   });
+
+  updateRooms();
+}
+
+function leaveRoom(socket) {
+  const roomId = socket.data.roomId;
+  if (!roomId) return;
+
+  const room = rooms.get(roomId);
+  if (room) {
+    room.members.delete(socket.id);
+
+    room.seats = room.seats.map(seat =>
+      seat && seat.socketId === socket.id ? null : seat
+    );
+
+    socket.to(roomId).emit("system-message",
+      `${socket.data.name || "User"} left the room.`
+    );
+
+    updateRoom(roomId);
+
+    if (room.members.size === 0) {
+      rooms.delete(roomId);
+      updateRooms();
+    }
+  }
+
+  socket.leave(roomId);
+  socket.data.roomId = null;
 }
 
 io.on("connection", socket => {
 
   socket.on("register", (data, callback) => {
-    const name = String(data?.name || "Huka User").trim().slice(0, 20);
+    const name = clean(data?.name, 20) || "Huka User";
+    let profileId = clean(data?.profileId, 20);
 
-    users[socket.id] = {
-      socketId: socket.id,
-      name,
-      profileId: makeId()
-    };
+    let profile = db.profiles[profileId];
 
-    if (typeof callback === "function") {
-      callback({ ok: true, user: users[socket.id] });
+    if (!profile) {
+      profileId = String(db.nextUserId++);
+      profile = {
+        id: profileId,
+        name,
+        coins: 1000,
+        diamonds: 0,
+        level: 1,
+        createdAt: Date.now()
+      };
+      db.profiles[profileId] = profile;
+    } else {
+      profile.name = name;
     }
 
-    io.emit("online-count", getOnlineCount());
+    socket.data.userId = profileId;
+    socket.data.name = name;
+
+    const user = {
+      id: profileId,
+      name,
+      coins: profile.coins,
+      diamonds: profile.diamonds,
+      level: profile.level,
+      socketId: socket.id
+    };
+
+    online.set(socket.id, user);
+    saveDB();
+
+    if (typeof callback === "function") {
+      callback({ ok: true, user });
+    }
+
+    io.emit("online-count", onlineCount());
   });
 
   socket.on("get-rooms", () => {
-    socket.emit("room-list", getRoomList());
+    socket.emit("room-list", roomList());
   });
 
   socket.on("create-room", (data, callback) => {
-    const user = users[socket.id];
+    const user = online.get(socket.id);
 
     if (!user) {
-      if (typeof callback === "function") callback({ ok: false, error: "Please register first." });
+      callback?.({ ok: false, error: "Register first." });
       return;
     }
 
-    const id = makeId();
+    const id = String(db.nextRoomId++);
 
-    rooms[id] = {
+    rooms.set(id, {
       id,
-      name: String(data?.name || `${user.name}'s Room`).trim().slice(0, 35),
-      owner: user.name,
-      members: [],
-      seats: Array(8).fill(null)
-    };
+      name: clean(data?.name, 35) || `${user.name}'s Room`,
+      ownerId: user.id,
+      ownerName: user.name,
+      members: new Set(),
+      seats: Array(8).fill(null),
+      messages: []
+    });
 
-    messages[id] = [];
+    saveDB();
 
-    if (typeof callback === "function") {
-      callback({ ok: true, id });
-    }
-
-    io.emit("room-list", getRoomList());
+    callback?.({ ok: true, id });
+    updateRooms();
   });
 
   socket.on("join-room", (data, callback) => {
-    const roomId = String(data?.roomId || "");
-    const room = rooms[roomId];
-    const user = users[socket.id];
+    const user = online.get(socket.id);
+    const roomId = clean(data?.roomId, 20);
+    const room = rooms.get(roomId);
 
-    if (!room || !user) {
-      if (typeof callback === "function") {
-        callback({ ok: false, error: "Room not found. Please try again." });
-      }
+    if (!user || !room) {
+      callback?.({ ok: false, error: "Room not found." });
       return;
     }
 
-    if (socket.data.roomId) {
-      leaveRoom(socket);
-    }
+    if (socket.data.roomId) leaveRoom(socket);
 
     socket.join(roomId);
     socket.data.roomId = roomId;
+    room.members.add(socket.id);
 
-    if (!room.members.includes(socket.id)) {
-      room.members.push(socket.id);
-    }
+    callback?.({
+      ok: true,
+      room: {
+        id: room.id,
+        name: room.name,
+        owner: room.ownerName
+      },
+      messages: room.messages,
+      seats: room.seats
+    });
 
-    if (typeof callback === "function") {
-      callback({
-        ok: true,
-        room,
-        messages: messages[roomId] || [],
-        seats: room.seats
-      });
-    }
+    socket.to(roomId).emit("system-message", `${user.name} joined.`);
+    updateRoom(roomId);
 
-    io.to(roomId).emit("system-message", `${user.name} joined the room.`);
-    sendRoomUpdate(roomId);
-    io.emit("room-list", getRoomList());
+    // Tell existing users to create voice connections.
+    socket.to(roomId).emit("voice-peer-joined", {
+      socketId: socket.id
+    });
+
+    socket.emit("voice-existing-peers",
+      [...room.members].filter(id => id !== socket.id)
+    );
   });
 
+  socket.on("leave-room", () => leaveRoom(socket));
+
   socket.on("take-seat", (seatIndex, callback) => {
-    const roomId = socket.data.roomId;
-    const room = rooms[roomId];
-    const user = users[socket.id];
+    const room = rooms.get(socket.data.roomId);
+    const user = online.get(socket.id);
     const index = Number(seatIndex);
 
-    if (!room || !user || !Number.isInteger(index) || index < 0 || index >= 8) {
-      if (typeof callback === "function") callback({ ok: false, error: "Seat unavailable." });
+    if (!room || !user || !Number.isInteger(index) ||
+        index < 0 || index > 7) {
+      callback?.({ ok: false, error: "Invalid seat." });
       return;
     }
 
-    const occupied = room.seats.findIndex(seat => seat?.socketId === socket.id);
+    const oldIndex = room.seats.findIndex(
+      seat => seat?.socketId === socket.id
+    );
 
-    if (occupied !== -1) {
-      room.seats[occupied] = null;
-    }
+    if (oldIndex !== -1) room.seats[oldIndex] = null;
 
     if (room.seats[index] !== null) {
-      if (typeof callback === "function") callback({ ok: false, error: "This seat is already taken." });
+      callback?.({ ok: false, error: "Seat is occupied." });
+      updateRoom(room.id);
       return;
     }
 
     room.seats[index] = {
       socketId: socket.id,
+      id: user.id,
       name: user.name
     };
 
-    sendRoomUpdate(roomId);
-
-    if (typeof callback === "function") callback({ ok: true });
+    callback?.({ ok: true });
+    updateRoom(room.id);
   });
 
   socket.on("leave-seat", () => {
-    const room = rooms[socket.data.roomId];
+    const room = rooms.get(socket.data.roomId);
     if (!room) return;
 
     room.seats = room.seats.map(seat =>
       seat?.socketId === socket.id ? null : seat
     );
 
-    sendRoomUpdate(room.id);
+    updateRoom(room.id);
   });
 
   socket.on("room-message", data => {
-    const roomId = socket.data.roomId;
-    const user = users[socket.id];
-    const room = rooms[roomId];
+    const room = rooms.get(socket.data.roomId);
+    const user = online.get(socket.id);
+    const text = clean(data?.text, 500);
 
-    if (!room || !user) return;
+    if (!room || !user || !text) return;
 
-    const message = String(data?.text || "").trim().slice(0, 500);
-    if (!message) return;
-
-    const item = {
+    const message = {
       name: user.name,
-      text: message,
-      time: Date.now()
-    };
-
-    messages[roomId].push(item);
-    if (messages[roomId].length > 100) messages[roomId].shift();
-
-    io.to(roomId).emit("room-message", item);
-  });
-
-  socket.on("send-gift", data => {
-    const roomId = socket.data.roomId;
-    const user = users[socket.id];
-    if (!rooms[roomId] || !user) return;
-
-    const gift = {
-      from: user.name,
-      gift: String(data?.gift || "Gift").slice(0, 30),
-      to: String(data?.to || "Everyone").slice(0, 30),
-      time: Date.now()
-    };
-
-    io.to(roomId).emit("gift-event", gift);
-  });
-
-  socket.on("send-dm", data => {
-    const user = users[socket.id];
-    if (!user) return;
-
-    const to = String(data?.to || "").trim();
-    const text = String(data?.text || "").trim().slice(0, 500);
-
-    if (!to || !text) {
-      socket.emit("dm-error", "Enter a user ID and message.");
-      return;
-    }
-
-    const target = Object.values(users).find(u => u.profileId === to);
-
-    if (!target) {
-      socket.emit("dm-error", "User is not online.");
-      return;
-    }
-
-    const item = {
-      from: user.name,
-      fromId: user.profileId,
-      to: target.name,
+      userId: user.id,
       text,
       time: Date.now()
     };
 
-    inbox[target.profileId] ||= [];
-    inbox[target.profileId].push(item);
+    room.messages.push(message);
+    if (room.messages.length > 100) room.messages.shift();
 
-    inbox[user.profileId] ||= [];
-    inbox[user.profileId].push(item);
+    io.to(room.id).emit("room-message", message);
+  });
 
-    const targetSocket = io.sockets.sockets.get(target.socketId);
-    if (targetSocket) targetSocket.emit("new-dm", item);
+  socket.on("send-gift", (data, callback) => {
+    const room = rooms.get(socket.data.roomId);
+    const user = online.get(socket.id);
+    const gift = clean(data?.gift, 30);
+    const cost = giftList[gift];
+
+    if (!room || !user || !cost) {
+      callback?.({ ok: false, error: "Invalid gift." });
+      return;
+    }
+
+    const profile = profileFor(socket);
+
+    if (!profile || profile.coins < cost) {
+      callback?.({ ok: false, error: "Not enough coins." });
+      return;
+    }
+
+    profile.coins -= cost;
+    user.coins = profile.coins;
+    saveDB();
+
+    const event = {
+      from: user.name,
+      gift,
+      to: clean(data?.to, 30) || "Everyone",
+      cost,
+      coins: profile.coins,
+      time: Date.now()
+    };
+
+    io.to(room.id).emit("gift-event", event);
+    callback?.({ ok: true, coins: profile.coins });
+  });
+
+  socket.on("send-dm", data => {
+    const user = online.get(socket.id);
+    if (!user) return;
+
+    const targetId = clean(data?.to, 20);
+    const text = clean(data?.text, 500);
+    const targetProfile = db.profiles[targetId];
+
+    if (!targetProfile || !text) {
+      socket.emit("dm-error", "User ID ya message sahi nahi hai.");
+      return;
+    }
+
+    const item = {
+      from: user.name,
+      fromId: user.id,
+      to: targetProfile.name,
+      toId: targetId,
+      text,
+      time: Date.now()
+    };
+
+    db.inbox[targetId] ||= [];
+    db.inbox[user.id] ||= [];
+
+    db.inbox[targetId].push(item);
+    db.inbox[user.id].push(item);
+
+    saveDB();
+
+    const targetSocketId = [...online.entries()]
+      .find(([, u]) => u.id === targetId)?.[0];
+
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("new-dm", item);
+    }
 
     socket.emit("dm-sent", item);
   });
 
   socket.on("get-inbox", () => {
-    const user = users[socket.id];
+    const user = online.get(socket.id);
     if (!user) return;
 
-    socket.emit("inbox-data", inbox[user.profileId] || []);
+    socket.emit("inbox-data", db.inbox[user.id] || []);
   });
 
-  socket.on("report-user", data => {
-    const user = users[socket.id];
-    if (!user) return;
-
-    console.log("User report:", {
-      reporter: user.profileId,
-      reportedUser: String(data?.userId || "").slice(0, 30),
-      reason: String(data?.reason || "Not specified").slice(0, 200)
-    });
-  });
-
-  function leaveRoom(currentSocket) {
-    const roomId = currentSocket.data.roomId;
-    const room = rooms[roomId];
-
-    if (!room) {
-      currentSocket.data.roomId = null;
-      return;
+  // WebRTC voice signaling
+  socket.on("voice-offer", data => {
+    if (data?.to && data?.offer) {
+      io.to(data.to).emit("voice-offer", {
+        from: socket.id,
+        offer: data.offer
+      });
     }
+  });
 
-    room.members = room.members.filter(id => id !== currentSocket.id);
+  socket.on("voice-answer", data => {
+    if (data?.to && data?.answer) {
+      io.to(data.to).emit("voice-answer", {
+        from: socket.id,
+        answer: data.answer
+      });
+    }
+  });
 
-    room.seats = room.seats.map(seat =>
-      seat?.socketId === currentSocket.id ? null : seat
-    );
-
-    currentSocket.leave(roomId);
-    currentSocket.data.roomId = null;
-
-    sendRoomUpdate(roomId);
-
-    const user = users[currentSocket.id];
-    if (user) io.to(roomId).emit("system-message", `${user.name} left the room.`);
-
-    io.emit("room-list", getRoomList());
-  }
-
-  socket.on("leave-room", () => leaveRoom(socket));
+  socket.on("voice-ice", data => {
+    if (data?.to && data?.candidate) {
+      io.to(data.to).emit("voice-ice", {
+        from: socket.id,
+        candidate: data.candidate
+      });
+    }
+  });
 
   socket.on("disconnect", () => {
     leaveRoom(socket);
-    delete users[socket.id];
-
-    io.emit("online-count", getOnlineCount());
-    io.emit("room-list", getRoomList());
+    online.delete(socket.id);
+    io.emit("online-count", onlineCount());
   });
-
 });
 
 app.get("/health", (req, res) => {
@@ -311,5 +421,5 @@ app.get("/health", (req, res) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Huka Voice Chat running on port ${PORT}`);
+  console.log("Huka Voice Chat running on port " + PORT);
 });
