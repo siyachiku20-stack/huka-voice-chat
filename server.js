@@ -26,7 +26,6 @@ typeof username !== "string"
 return;
 }
 
-```
 room = room.trim().slice(0, 40);
 username = username.trim().slice(0, 20);
 
@@ -65,14 +64,12 @@ socket.emit("chatMessage", {
   username: "Huka Bot",
   message: `Welcome ${username}!`
 });
-```
 
 });
 
 socket.on("chatMessage", (message) => {
 const room = socket.data.room;
 
-```
 if (!room || typeof message !== "string") return;
 
 message = message.trim().slice(0, 500);
@@ -83,7 +80,6 @@ io.to(room).emit("chatMessage", {
   username: socket.data.username,
   message
 });
-```
 
 });
 
@@ -146,9 +142,7 @@ username: name
 })
 );
 
-```
 io.to(room).emit("members", members);
-```
 
 }
 
