@@ -1,170 +1,374 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Huka Voice Chat</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    <title>Huka Voice Chat</title>
+body {
+  margin: 0;
+  background: #160d27;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-    <link rel="stylesheet" href="style.css">
+header {
+  background: linear-gradient(120deg,#7928ca,#ff38a8);
+  padding: 22px;
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 15px;
+}
+
+.card {
+  background: #28183d;
+  padding: 18px;
+  border-radius: 17px;
+  margin-bottom: 15px;
+}
+
+h2 {
+  color: #ff70c3;
+  font-size: 19px;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0;
+  border: none;
+  border-radius: 10px;
+  background: #402957;
+  color: white;
+  font-size: 15px;
+}
+
+button {
+  padding: 12px 17px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(120deg,#8e36e8,#ff36a5);
+  color: white;
+  font-weight: bold;
+  margin: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .5;
+}
+
+.members {
+  padding: 10px;
+  background: #39234e;
+  border-radius: 10px;
+  margin: 7px 0;
+}
+
+#messages {
+  height: 190px;
+  overflow-y: auto;
+  background: #190f29;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.message {
+  padding: 9px;
+  background: #39234e;
+  border-radius: 9px;
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+}
+
+.bottom {
+  text-align: center;
+  padding: 20px;
+  color: #b9a6d0;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="app">
+<header>HUKA ♡</header>
 
-    <header class="header">
+<div class="container">
 
-        <div class="logo">
-            HUKA<span>♡</span>
-        </div>
+<div class="card">
+<h2>👤 My Profile</h2>
 
-        <div class="online">
-            <span class="dot"></span>
-            Online
-        </div>
+<p>Profile ID: <b id="profile">100011</b></p>
 
-    </header>
+<input id="username" placeholder="Enter your name" maxlength="20">
 
-    <main>
+<h2>Join a Room</h2>
 
-        <!-- Login -->
+<input id="room" value="100011" placeholder="Room ID">
 
-        <section id="loginSection" class="card">
+<button onclick="joinRoom()">Join Room</button> <button onclick="leaveRoom()">Leave Room</button>
 
-            <h1>Welcome to Huka</h1>
+<p id="status">Offline</p>
+</div>
 
-            <p>Meet people. Make friends. Have fun.</p>
+<div class="card">
 
-            <input
-                type="text"
-                id="username"
-                placeholder="Enter your username"
-                maxlength="20"
-            >
+<h2>🎙️ Voice Room</h2>
 
-            <button id="createProfile">
-                Create My Profile
-            </button>
+<button onclick="joinVoice()">Join Voice</button> <button onclick="leaveVoice()">Leave Voice</button>
 
-            <p id="loginError" class="error"></p>
-
-        </section>
-
-
-        <!-- Dashboard -->
-
-        <section id="dashboard" hidden>
-
-            <div class="profile-card">
-
-                <h2>My Profile</h2>
-
-                <h3 id="displayName"></h3>
-
-                <p>Profile ID</p>
-
-                <div id="profileId" class="id-box"></div>
-
-                <p>My Room ID</p>
-
-                <div id="myRoomId" class="id-box"></div>
-
-            </div>
-
-
-            <div class="card">
-
-                <h2>Join a Room</h2>
-
-                <input
-                    type="text"
-                    id="roomInput"
-                    placeholder="Enter Room ID"
-                >
-
-                <button id="joinRoom">
-                    Join Room
-                </button>
-
-                <p id="roomError" class="error"></p>
-
-            </div>
-
-
-            <div id="roomSection" class="card" hidden>
-
-                <h2>Room <span id="currentRoom"></span></h2>
-
-                <div class="room-buttons">
-
-                    <button id="voiceButton">
-                        🎙️ Join Voice
-                    </button>
-
-                    <button id="leaveRoom" class="secondary">
-                        Leave Room
-                    </button>
-
-                </div>
-
-                <p id="voiceStatus">Voice disconnected</p>
-
-
-                <h3>Members</h3>
-
-                <div id="members"></div>
-
-
-                <h3>Chat</h3>
-
-                <div id="messages" class="messages"></div>
-
-                <div class="chat-input">
-
-                    <input
-                        type="text"
-                        id="messageInput"
-                        placeholder="Write a message..."
-                        maxlength="500"
-                    >
-
-                    <button id="sendMessage">Send</button>
-
-                </div>
-
-
-                <h3>Send a Gift</h3>
-
-                <div class="gifts">
-
-                    <button data-gift="Rose">🌹</button>
-
-                    <button data-gift="Heart">❤️</button>
-
-                    <button data-gift="Star">⭐</button>
-
-                    <button data-gift="Diamond">💎</button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <footer>
-        © 2026 Huka Voice Chat
-    </footer>
+<p id="voiceStatus">Voice disconnected</p>
 
 </div>
 
+<div class="card">
+
+<h2>👥 Members</h2>
+
+<div id="members"></div>
+
+</div>
+
+<div class="card">
+
+<h2>💬 Chat</h2>
+
+<div id="messages"></div>
+
+<input id="message" placeholder="Write a message..." maxlength="250">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+<div class="card">
+
+<h2>🎁 Gifts</h2>
+
+<button onclick="gift('🌹 Rose')">🌹 Rose</button> <button onclick="gift('❤️ Heart')">❤️ Heart</button> <button onclick="gift('⭐ Star')">⭐ Star</button> <button onclick="gift('👑 Crown')">👑 Crown</button>
+
+</div>
+
+<div class="card">
+
+<h2>🎮 Mini Games</h2>
+
+<button onclick="game()">Play Number Game</button>
+
+<p id="gameResult">Play with your friends!</p>
+
+</div>
+
+<div class="card">
+
+<h2>🏆 My Ranking</h2>
+
+<p>New Huka Member</p>
+
+<p>⭐ Level 1</p>
+
+</div>
+
+</div>
+
+<div class="bottom">
+Huka Voice Chat © 2026
+</div>
+
 <script src="/socket.io/socket.io.js"></script>
-<script src="script.js"></script>
+
+<script>
+
+const socket = io();
+
+let joined = false;
+let stream = null;
+
+function joinRoom() {
+
+const username = document.getElementById("username").value.trim();
+const room = document.getElementById("room").value.trim();
+
+if (!username || !room) {
+alert("Enter name and room ID");
+return;
+}
+
+socket.emit("joinRoom", {
+username: username,
+room: room
+});
+
+joined = true;
+
+document.getElementById("status").innerText = "Online";
+document.getElementById("profile").innerText =
+Math.floor(100000 + Math.random() * 900000);
+
+}
+
+function leaveRoom() {
+
+if (!joined) return;
+
+socket.emit("leaveRoom");
+
+joined = false;
+
+document.getElementById("status").innerText = "Offline";
+document.getElementById("members").innerHTML = "";
+
+}
+
+socket.on("members", (list) => {
+
+const box = document.getElementById("members");
+
+box.innerHTML = "";
+
+list.forEach(name => {
+
+const div = document.createElement("div");
+
+div.className = "members";
+div.textContent = "🟢 " + name;
+
+box.appendChild(div);
+
+});
+
+});
+
+socket.on("chatMessage", (data) => {
+
+const box = document.getElementById("messages");
+
+const div = document.createElement("div");
+
+div.className = "message";
+
+const name = document.createElement("b");
+name.textContent = data.username + ": ";
+
+const message = document.createElement("span");
+message.textContent = data.message;
+
+div.append(name, message);
+box.appendChild(div);
+
+box.scrollTop = box.scrollHeight;
+
+});
+
+function sendMessage() {
+
+const input = document.getElementById("message");
+
+if (!joined) {
+alert("Join a room first");
+return;
+}
+
+const message = input.value.trim();
+
+if (!message) return;
+
+socket.emit("chatMessage", message);
+
+input.value = "";
+
+}
+
+async function joinVoice() {
+
+if (!joined) {
+alert("Join a room first");
+return;
+}
+
+try {
+
+stream = await navigator.mediaDevices.getUserMedia({
+audio: true
+});
+
+document.getElementById("voiceStatus").innerText =
+"Microphone connected";
+
+} catch (error) {
+
+alert("Microphone permission required");
+
+}
+
+}
+
+function leaveVoice() {
+
+if (stream) {
+
+stream.getTracks().forEach(track => track.stop());
+
+stream = null;
+
+}
+
+document.getElementById("voiceStatus").innerText =
+"Voice disconnected";
+
+}
+
+function gift(name) {
+
+if (!joined) {
+alert("Join a room first");
+return;
+}
+
+alert("Gift selected: " + name);
+
+}
+
+function game() {
+
+const number = Math.floor(Math.random() * 100) + 1;
+
+document.getElementById("gameResult").innerText =
+"Your number: " + number;
+
+}
+
+socket.on("roomFull", () => {
+
+joined = false;
+
+alert("Room is full!");
+
+});
+
+socket.on("disconnect", () => {
+
+joined = false;
+
+document.getElementById("status").innerText =
+"Disconnected";
+
+});
+
+</script>
 
 </body>
 </html>
