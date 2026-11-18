@@ -4,150 +4,160 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server);
 
 app.use(express.static("public"));
 
+app.get("/", (req, res) => {
+res.sendFile(__dirname + "/public/index.html");
+});
+
 const rooms = {};
 
 io.on("connection", (socket) => {
+console.log("User connected:", socket.id);
 
-  socket.on("joinRoom", (data = {}) => {
-    let { room, username } = data;
+socket.on("joinRoom", ({ room, username }) => {
+if (
+typeof room !== "string" ||
+typeof username !== "string"
+) {
+return;
+}
 
-    if (
-      typeof room !== "string" ||
-      typeof username !== "string" ||
-      !room.trim() ||
-      !username.trim()
-    ) return;
+```
+room = room.trim().slice(0, 40);
+username = username.trim().slice(0, 20);
 
-    room = room.trim().slice(0, 40);
-    username = username.trim().slice(0, 20);
+if (!room || !username) return;
 
-    leaveRoom();
+if (socket.data.room) {
+  leaveRoom(socket);
+}
 
-    socket.data.room = room;
-    socket.data.username = username;
+socket.data.room = room;
+socket.data.username = username;
 
-    socket.join(room);
+socket.join(room);
 
-    if (!rooms[room]) rooms[room] = {};
+if (!rooms[room]) {
+  rooms[room] = {};
+}
 
-    // Existing members ko naye member ki information
-    const existingUsers = Object.entries(rooms[room]).map(
-      ([id, name]) => ({ id, username: name })
-    );
+rooms[room][socket.id] = username;
 
-    rooms[room][socket.id] = username;
+const members = Object.entries(rooms[room]).map(
+  ([id, name]) => ({
+    id,
+    username: name
+  })
+);
 
-    socket.emit("roomUsers", existingUsers);
+io.to(room).emit("members", members);
 
-    socket.to(room).emit("user-joined", {
-      id: socket.id,
-      username
-    });
-
-    io.to(room).emit(
-      "members",
-      Object.values(rooms[room])
-    );
-
-    socket.to(room).emit("chatMessage", {
-      username: "Huka Bot",
-      message: username + " room mein aa gaya!"
-    });
-  });
-
-  // WebRTC offer
-  socket.on("voice-offer", ({ target, offer } = {}) => {
-    const room = socket.data.room;
-
-    if (!room || !target || !offer) return;
-    if (io.sockets.sockets.get(target)?.data.room !== room) return;
-
-    io.to(target).emit("voice-offer", {
-      from: socket.id,
-      offer
-    });
-  });
-
-  // WebRTC answer
-  socket.on("voice-answer", ({ target, answer } = {}) => {
-    const room = socket.data.room;
-
-    if (!room || !target || !answer) return;
-    if (io.sockets.sockets.get(target)?.data.room !== room) return;
-
-    io.to(target).emit("voice-answer", {
-      from: socket.id,
-      answer
-    });
-  });
-
-  // WebRTC ICE candidate
-  socket.on("voice-ice", ({ target, candidate } = {}) => {
-    const room = socket.data.room;
-
-    if (!room || !target || !candidate) return;
-    if (io.sockets.sockets.get(target)?.data.room !== room) return;
-
-    io.to(target).emit("voice-ice", {
-      from: socket.id,
-      candidate
-    });
-  });
-
-  // Text chat
-  socket.on("chatMessage", (message) => {
-    const room = socket.data.room;
-    const username = socket.data.username;
-
-    if (
-      !room ||
-      !username ||
-      typeof message !== "string" ||
-      !message.trim()
-    ) return;
-
-    io.to(room).emit("chatMessage", {
-      username,
-      message: message.trim().slice(0, 300)
-    });
-  });
-
-  function leaveRoom() {
-    const room = socket.data.room;
-
-    if (room && rooms[room]) {
-      delete rooms[room][socket.id];
-
-      socket.to(room).emit("user-left", {
-        id: socket.id
-      });
-
-      socket.leave(room);
-
-      io.to(room).emit(
-        "members",
-        Object.values(rooms[room])
-      );
-
-      if (Object.keys(rooms[room]).length === 0) {
-        delete rooms[room];
-      }
-    }
-
-    delete socket.data.room;
-    delete socket.data.username;
-  }
-
-  socket.on("leaveRoom", leaveRoom);
-  socket.on("disconnect", leaveRoom);
+socket.to(room).emit("user-joined", {
+  id: socket.id,
+  username
 });
+
+socket.emit("chatMessage", {
+  username: "Huka Bot",
+  message: `Welcome ${username}!`
+});
+```
+
+});
+
+socket.on("chatMessage", (message) => {
+const room = socket.data.room;
+
+```
+if (!room || typeof message !== "string") return;
+
+message = message.trim().slice(0, 500);
+
+if (!message) return;
+
+io.to(room).emit("chatMessage", {
+  username: socket.data.username,
+  message
+});
+```
+
+});
+
+socket.on("voice-offer", ({ to, offer }) => {
+sendToRoomMember(socket, to, "voice-offer", {
+from: socket.id,
+offer
+});
+});
+
+socket.on("voice-answer", ({ to, answer }) => {
+sendToRoomMember(socket, to, "voice-answer", {
+from: socket.id,
+answer
+});
+});
+
+socket.on("voice-ice", ({ to, candidate }) => {
+sendToRoomMember(socket, to, "voice-ice", {
+from: socket.id,
+candidate
+});
+});
+
+socket.on("disconnect", () => {
+leaveRoom(socket);
+console.log("User disconnected:", socket.id);
+});
+});
+
+function sendToRoomMember(socket, targetId, event, data) {
+const room = socket.data.room;
+
+if (!room || !targetId || !rooms[room]) return;
+if (!rooms[room][targetId]) return;
+
+io.to(targetId).emit(event, data);
+}
+
+function leaveRoom(socket) {
+const room = socket.data.room;
+
+if (!room || !rooms[room]) return;
+
+delete rooms[room][socket.id];
+
+socket.to(room).emit("user-left", {
+id: socket.id
+});
+
+socket.leave(room);
+
+if (Object.keys(rooms[room]).length === 0) {
+delete rooms[room];
+} else {
+const members = Object.entries(rooms[room]).map(
+([id, name]) => ({
+id,
+username: name
+})
+);
+
+```
+io.to(room).emit("members", members);
+```
+
+}
+
+socket.data.room = null;
+socket.data.username = null;
+}
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log("Huka Voice Chat running on port " + PORT);
+console.log(`Huka Voice Chat running on port ${PORT}`);
 });
