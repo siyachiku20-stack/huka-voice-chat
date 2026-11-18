@@ -1,4 +1,3 @@
-javascript
 const express = require("express");
 const http = require("http");
 const path = require("path");
@@ -17,18 +16,22 @@ const DB_FILE = path.join(__dirname, "huka-data.json");
 app.use(express.json());
 app.use(express.static(PUBLIC_DIR));
 
-// Main page: explicitly send index.html
 app.get("/", (req, res) => {
   if (!fs.existsSync(INDEX_FILE)) {
     return res.status(404).send(
-      "index.html not found. Check that it is inside the public folder."
+      "Huka error: public/index.html file not found."
     );
   }
+
   res.sendFile(INDEX_FILE);
 });
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true, app: "Huka Voice Chat" });
+  res.json({
+    ok: true,
+    app: "Huka Voice Chat",
+    indexExists: fs.existsSync(INDEX_FILE)
+  });
 });
 
 let db = {
@@ -40,7 +43,10 @@ let db = {
 
 try {
   if (fs.existsSync(DB_FILE)) {
-    db = { ...db, ...JSON.parse(fs.readFileSync(DB_FILE, "utf8")) };
+    db = {
+      ...db,
+      ...JSON.parse(fs.readFileSync(DB_FILE, "utf8"))
+    };
   }
 } catch (error) {
   console.log("Database load error:", error.message);
@@ -360,9 +366,10 @@ io.on("connection", socket => {
   socket.on("send-dm", data => {
     const user = getUser(socket);
     const targetId = clean(data?.to, 20);
-    const text = clean(data?.text, 500);
+    const messageText = clean(data?.text, 500);
 
-    if (!user || !targetId || !text || !db.profiles[targetId]) {
+    if (!user || !targetId || !messageText ||
+        !db.profiles[targetId]) {
       socket.emit("dm-error", "User ID ya message sahi nahi hai.");
       return;
     }
@@ -374,7 +381,7 @@ io.on("connection", socket => {
       fromId: user.id,
       to: target.name,
       toId: targetId,
-      text,
+      text: messageText,
       time: Date.now()
     };
 
@@ -402,7 +409,6 @@ io.on("connection", socket => {
     socket.emit("inbox-data", db.inbox[user.id] || []);
   });
 
-  // WebRTC voice signaling
   socket.on("voice-offer", data => {
     if (data?.to && data?.offer) {
       io.to(data.to).emit("voice-offer", {
@@ -440,4 +446,5 @@ io.on("connection", socket => {
 server.listen(PORT, "0.0.0.0", () => {
   console.log("Huka Voice Chat running on port " + PORT);
   console.log("Public folder: " + PUBLIC_DIR);
+  console.log("Index file exists: " + fs.existsSync(INDEX_FILE));
 });
