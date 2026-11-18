@@ -2,45 +2,40 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Huka Voice Chat</title>
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f7f3ff;color:#28203b;font-family:Arial,sans-serif}
-header{background:linear-gradient(120deg,#7027d9,#ed4ca7);color:white;padding:18px}
+body{margin:0;background:#f7f3ff;color:#30223e;font-family:Arial}
+header{padding:18px;background:linear-gradient(120deg,#7027d9,#ed4ca7);color:white}
 header h2{margin:0}
-header small{opacity:.9}
-main{padding:14px;padding-bottom:85px;max-width:650px;margin:auto}
-.card{background:white;border-radius:18px;padding:15px;margin:12px 0;box-shadow:0 3px 14px #34205a12}
-h3{margin:5px 0 12px}
-button{border:0;border-radius:12px;padding:11px 14px;background:#812fdb;color:white;font-weight:bold;margin:4px;cursor:pointer}
-button.secondary{background:#f0e6ff;color:#6524b8}
-button.pink{background:#e943a0}
-button.red{background:#e34b62}
-button:disabled{opacity:.5}
-input,select{width:100%;padding:13px;border:1px solid #ded2ed;border-radius:12px;margin:6px 0;font-size:15px}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+main{max-width:650px;margin:auto;padding:12px 12px 90px}
+.card{background:white;padding:15px;margin:12px 0;border-radius:18px;box-shadow:0 3px 14px #34205a12}
+button{border:0;border-radius:12px;padding:12px;background:#812fdb;color:white;font-weight:bold;margin:4px;cursor:pointer}
+.secondary{background:#f0e6ff;color:#6524b8}
+.pink{background:#e943a0}
+.red{background:#e34b62}
+input,select{width:100%;padding:13px;margin:6px 0;border:1px solid #ded2ed;border-radius:12px;font-size:15px}
+.row{display:flex;gap:7px;flex-wrap:wrap}
 .row>*{flex:1}
 .hidden{display:none!important}
-.nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:10px 4px;box-shadow:0 -3px 15px #34205a18;z-index:10}
-.nav button{flex:1;background:white;color:#6427aa;margin:0;border-radius:0}
+.nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:9px;box-shadow:0 -3px 15px #34205a18}
+.nav button{flex:1;background:white;color:#6427aa}
 .nav button.active{color:#e33c9a}
 .room-item{border:1px solid #eee4fb;border-radius:14px;padding:12px;margin:9px 0}
-.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.seat{background:#f3eaff;color:#6022a8;min-height:75px;border-radius:14px;padding:8px;font-size:12px}
+.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seat{background:#f3eaff;color:#6022a8;min-height:75px;font-size:12px}
 .seat.taken{background:#fce7f4;color:#a51d6a}
-.chatbox{height:190px;overflow:auto;background:#faf7ff;padding:10px;border-radius:12px}
-.msg{padding:7px;margin:5px 0;background:#eee6fa;border-radius:10px;overflow-wrap:anywhere}
-.msg b{color:#7729c5}
+.chatbox{height:180px;overflow:auto;background:#faf7ff;padding:10px;border-radius:12px}
+.msg{padding:8px;margin:5px 0;background:#eee6fa;border-radius:10px;overflow-wrap:anywhere}
 .member{display:inline-block;background:#f1e8ff;border-radius:20px;padding:8px;margin:4px;font-size:13px}
 .profile-top{display:flex;align-items:center;gap:12px}
-.avatar{width:62px;height:62px;border-radius:50%;background:#eedcff;display:grid;place-items:center;font-size:28px;overflow:hidden}
+.avatar{width:65px;height:65px;border-radius:50%;background:#eedcff;display:grid;place-items:center;font-size:28px;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.stat{background:#f6efff;border-radius:12px;text-align:center;padding:12px}
+.stat{background:#f6efff;border-radius:12px;text-align:center;padding:12px;flex:1}
 .stat b{display:block;font-size:20px;color:#792bc5}
-.gift{background:#fff0f8;color:#a51d6a}
 #toast{position:fixed;top:12px;left:10%;width:80%;background:#302044;color:white;padding:12px;border-radius:12px;text-align:center;display:none;z-index:30}
 audio{display:none}
 </style>
@@ -50,181 +45,192 @@ audio{display:none}
 <div id="toast"></div>
 
 <header>
-  <h2>HUKA♡</h2>
-  <small>Meet • Talk • Play • Make Friends</small>
-  <div style="margin-top:9px">🟢 Online: <b id="onlineCount">0</b></div>
+<h2>HUKA♡</h2>
+<p>Meet • Talk • Play • Make Friends</p>
+🟢 Online: <b id="onlineCount">0</b>
 </header>
 
 <main>
-  <!-- HOME -->
-  <section id="homePage">
-    <div class="card" style="background:linear-gradient(120deg,#762cda,#ec4ca5);color:white">
-      <h2>Welcome to Huka Voice Chat 💜</h2>
-      <p>Meet new people, talk and enjoy together!</p>
-      <button class="secondary" onclick="showPage('profilePage')">My Profile</button>
-    </div>
 
-    <div class="card">
-      <h3>My Room</h3>
-      <div id="myRoomInfo">You haven't created a room yet.</div>
-      <button onclick="createRoom()">＋ Create My Room</button>
-    </div>
+<!-- HOME -->
+<section id="homePage">
+<div class="card" style="background:linear-gradient(120deg,#762cda,#ec4ca5);color:white">
+<h2>Welcome to Huka 💜</h2>
+<p>Meet new people and make friends!</p>
+<button class="secondary" onclick="showPage('profilePage')">My Profile</button>
+</div>
 
-    <div class="card">
-      <h3>Join a Room</h3>
-      <input id="joinRoomId" placeholder="Enter Room ID">
-      <button onclick="joinRoom()">Join Room</button>
-    </div>
+<div class="card">
+<h3>🏠 My Room</h3>
+<div id="myRoomInfo">You haven't created a room yet.</div>
+<button onclick="createRoom()">＋ Create My Room</button>
+</div>
 
-    <div class="card">
-      <h3>All Rooms</h3>
-      <button class="secondary" onclick="loadRooms()">↻ Refresh</button>
-      <div id="roomList">Loading rooms...</div>
-    </div>
-  </section>
+<div class="card">
+<h3>Join a Room</h3>
+<input id="joinRoomId" placeholder="Enter Room ID">
+<button onclick="joinRoom()">Join Room</button>
+</div>
 
-  <!-- ROOM -->
-  <section id="roomPage" class="hidden">
-    <div class="card">
-      <h3 id="roomTitle">Room</h3>
-      <p>Room ID: <b id="roomIdLabel"></b></p>
-      <div class="row">
-        <button onclick="startVoice()">🎙️ Join Voice</button>
-        <button class="red" onclick="stopVoice()">🔇 Leave Voice</button>
-      </div>
-      <div class="row">
-        <button class="secondary" onclick="toggleMic()" id="micBtn">🎤 Mic ON</button>
-        <button class="secondary" onclick="toggleSpeaker()" id="speakerBtn">🔊 Speaker ON</button>
-      </div>
-      <p id="voiceStatus">Voice disconnected</p>
-    </div>
+<div class="card">
+<h3>🌎 All Rooms</h3>
+<button class="secondary" onclick="loadRooms()">Refresh Rooms</button>
+<div id="roomList">Loading rooms...</div>
+</div>
+</section>
 
-    <div class="card">
-      <h3>🎙️ Voice Seats</h3>
-      <p>Tap an empty seat to sit down.</p>
-      <div class="seats" id="seatList"></div>
-      <button class="secondary" onclick="leaveSeat()">Leave Seat</button>
-    </div>
+<!-- ROOM -->
+<section id="roomPage" class="hidden">
+<div class="card">
+<h3 id="roomTitle">Room</h3>
+<p>Room ID: <b id="roomIdLabel"></b></p>
+<div class="row">
+<button onclick="startVoice()">🎙️ Join Voice</button>
+<button class="red" onclick="stopVoice()">Leave Voice</button>
+</div>
+<div class="row">
+<button class="secondary" id="micBtn" onclick="toggleMic()">🎤 Mic ON</button>
+<button class="secondary" id="speakerBtn" onclick="toggleSpeaker()">🔊 Speaker ON</button>
+</div>
+<p id="voiceStatus">Voice disconnected</p>
+</div>
 
-    <div class="card">
-      <h3>👥 Members</h3>
-      <div id="membersList"></div>
-    </div>
+<div class="card">
+<h3>🎙️ Voice Seats</h3>
+<div class="seats" id="seatList"></div>
+<button class="secondary" onclick="leaveSeat()">Leave Seat</button>
+</div>
 
-    <div class="card">
-      <h3>🎁 Send Gifts</h3>
-      <p>Your coins: <b id="roomCoins">1000</b></p>
-      <div class="row">
-        <button class="gift" onclick="sendGift('Rose')">🌹 Rose · 10</button>
-        <button class="gift" onclick="sendGift('Heart')">💗 Heart · 50</button>
-      </div>
-      <div class="row">
-        <button class="gift" onclick="sendGift('Crown')">👑 Crown · 100</button>
-        <button class="gift" onclick="sendGift('Diamond')">💎 Diamond · 500</button>
-      </div>
-      <button class="gift" onclick="sendGift('Rocket')">🚀 Rocket · 1000</button>
-      <div id="giftFeed"></div>
-    </div>
+<div class="card">
+<h3>👥 Members</h3>
+<div id="membersList"></div>
+</div>
 
-    <div class="card">
-      <h3>💬 Room Chat</h3>
-      <div class="chatbox" id="roomChat"></div>
-      <div class="row">
-        <input id="roomMessage" placeholder="Write a message...">
-        <button onclick="sendRoomMessage()">Send</button>
-      </div>
-    </div>
+<div class="card">
+<h3>🎁 Gifts</h3>
+<p>Your Coins: <b id="roomCoins">1000</b></p>
+<div class="row">
+<button class="pink" onclick="sendGift('Rose')">🌹 Rose 10</button>
+<button class="pink" onclick="sendGift('Heart')">💗 Heart 50</button>
+</div>
+<div class="row">
+<button class="pink" onclick="sendGift('Crown')">👑 Crown 100</button>
+<button class="pink" onclick="sendGift('Diamond')">💎 Diamond 500</button>
+</div>
+<button class="pink" onclick="sendGift('Rocket')">🚀 Rocket 1000</button>
+<div id="giftFeed"></div>
+</div>
 
-    <button class="red" style="width:100%" onclick="exitRoom()">Leave Room</button>
-  </section>
+<div class="card">
+<h3>💬 Room Chat</h3>
+<div class="chatbox" id="roomChat"></div>
+<div class="row">
+<input id="roomMessage" placeholder="Write a message">
+<button onclick="sendRoomMessage()">Send</button>
+</div>
+</div>
 
-  <!-- INBOX -->
-  <section id="inboxPage" class="hidden">
-    <div class="card">
-      <h3>💌 Inbox</h3>
-      <p>Your User ID: <b id="inboxMyId"></b></p>
-      <input id="dmUserId" placeholder="Friend's User ID">
-      <input id="dmText" placeholder="Write a message">
-      <button onclick="sendDM()">Send Message</button>
-      <div id="inboxMessages"></div>
-    </div>
-  </section>
+<button class="red" style="width:100%" onclick="exitRoom()">Leave Room</button>
+</section>
 
-  <!-- PROFILE -->
-  <section id="profilePage" class="hidden">
-    <div class="card">
-      <div class="profile-top">
-        <div class="avatar" id="avatar">👤</div>
-        <div>
-          <h3 id="profileName">Huka User</h3>
-          <p>User ID: <b id="profileId"></b></p>
-          <p>Level: <b id="profileLevel">1</b></p>
-        </div>
-      </div>
-      <input id="nameInput" placeholder="Change username">
-      <button onclick="changeName()">Update Name</button>
-      <label>Change profile picture</label>
-      <input type="file" accept="image/*" onchange="changeDP(event)">
-    </div>
+<!-- INBOX -->
+<section id="inboxPage" class="hidden">
+<div class="card">
+<h3>💌 Inbox</h3>
+<p>Your User ID: <b id="inboxMyId"></b></p>
+<input id="dmUserId" placeholder="Friend's User ID">
+<input id="dmText" placeholder="Write message">
+<button onclick="sendDM()">Send Message</button>
+<div id="inboxMessages"></div>
+</div>
+</section>
 
-    <div class="card">
-      <div class="row">
-        <div class="stat"><b>0</b>Following</div>
-        <div class="stat"><b>0</b>Followers</div>
-        <div class="stat"><b>0</b>Visitors</div>
-      </div>
-    </div>
+<!-- PROFILE -->
+<section id="profilePage" class="hidden">
 
-    <div class="card">
-      <h3>💰 Wallet</h3>
-      <p>🪙 Coins: <b id="walletCoins">1000</b></p>
-      <p>💎 Diamonds: <b id="walletDiamonds">0</b></p>
-      <button onclick="showToast('Wallet recharge will be added later.')">Recharge</button>
-    </div>
+<div class="card">
+<div class="profile-top">
+<div class="avatar" id="avatar">👤</div>
+<div>
+<h3 id="profileName">Huka User</h3>
+<p>User ID: <b id="profileId"></b></p>
+<p>Level: <b id="profileLevel">1</b></p>
+</div>
+</div>
 
-    <div class="card">
-      <h3>⭐ My Features</h3>
-      <button onclick="showToast('SVIP feature coming soon.')">SVIP</button>
-      <button onclick="showToast('Level rewards coming soon.')">User Level</button>
-      <button onclick="showToast('Medals coming soon.')">Medal</button>
-      <button onclick="showToast('CP Space coming soon.')">CP Space</button>
-      <button onclick="showToast('Family feature coming soon.')">Family</button>
-      <button onclick="showToast('Your bag is empty.')">Bag</button>
-      <button onclick="showToast('Dress feature coming soon.')">Dress</button>
-      <button onclick="showToast('Invite friends feature coming soon.')">Invite Friend</button>
-      <button onclick="showToast('CD Key feature coming soon.')">CD Key</button>
-    </div>
+<input id="nameInput" placeholder="Change username">
+<button onclick="changeName()">Update Name</button>
+<p>Change DP:</p>
+<input type="file" accept="image/*" onchange="changeDP(event)">
+</div>
 
-    <div class="card">
-      <h3>🌐 Language</h3>
-      <select id="language">
-        <option>English</option><option>Hindi</option>
-        <option>Rajasthani</option><option>Arabic</option>
-        <option>Gujarati</option><option>Marathi</option>
-        <option>Assamese</option><option>Nepali</option>
-        <option>Urdu</option><option>Punjabi</option>
-        <option>Bengali</option><option>Tamil</option>
-        <option>Telugu</option><option>Kannada</option>
-        <option>Malayalam</option><option>Odia</option>
-      </select>
-    </div>
+<div class="card">
+<div class="row">
+<div class="stat"><b>0</b>Following</div>
+<div class="stat"><b>0</b>Followers</div>
+<div class="stat"><b>0</b>Visitors</div>
+</div>
+</div>
 
-    <div class="card">
-      <h3>⚙️ Settings</h3>
-      <button class="secondary" onclick="showToast('Notifications setting coming soon.')">Message Notifications</button>
-      <button class="secondary" onclick="showToast('Blocklist coming soon.')">Blocklist</button>
-      <button class="secondary" onclick="showToast('Huka Voice Chat version 1.0')">About</button>
-      <button class="secondary" onclick="showToast('Help and feedback coming soon.')">Help & Feedback</button>
-      <button class="secondary" onclick="showToast('Customer service coming soon.')">Customer Service</button>
-      <button class="red" onclick="logout()">Logout</button>
-    </div>
-  </section>
+<div class="card">
+<h3>💰 Wallet</h3>
+<p>🪙 Coins: <b id="walletCoins">1000</b></p>
+<p>💎 Diamonds: <b id="walletDiamonds">0</b></p>
+<button onclick="showToast('Recharge feature coming soon')">Recharge</button>
+</div>
+
+<div class="card">
+<h3>⭐ Features</h3>
+<button onclick="showToast('SVIP coming soon')">SVIP</button>
+<button onclick="showToast('Level rewards coming soon')">User Level</button>
+<button onclick="showToast('Medals coming soon')">Medal</button>
+<button onclick="showToast('CP Space coming soon')">CP Space</button>
+<button onclick="showToast('Family coming soon')">Family</button>
+<button onclick="showToast('Your bag is empty')">Bag</button>
+<button onclick="showToast('Dress coming soon')">Dress</button>
+<button onclick="showToast('Invite feature coming soon')">Invite Friend</button>
+<button onclick="showToast('CD Key coming soon')">CD Key</button>
+</div>
+
+<div class="card">
+<h3>🌐 Language</h3>
+<select id="language">
+<option>English</option>
+<option>Hindi</option>
+<option>Rajasthani</option>
+<option>Arabic</option>
+<option>Gujarati</option>
+<option>Marathi</option>
+<option>Assamese</option>
+<option>Nepali</option>
+<option>Urdu</option>
+<option>Punjabi</option>
+<option>Bengali</option>
+<option>Tamil</option>
+<option>Telugu</option>
+<option>Kannada</option>
+<option>Malayalam</option>
+<option>Odia</option>
+</select>
+</div>
+
+<div class="card">
+<h3>⚙️ Settings</h3>
+<button class="secondary" onclick="showToast('Notifications coming soon')">Message Notifications</button>
+<button class="secondary" onclick="showToast('Blocklist coming soon')">Blocklist</button>
+<button class="secondary" onclick="showToast('Huka Voice Chat version 1.0')">About</button>
+<button class="secondary" onclick="showToast('Help and feedback coming soon')">Help & Feedback</button>
+<button class="secondary" onclick="showToast('Customer service coming soon')">Customer Service</button>
+<button class="red" onclick="logout()">Logout</button>
+</div>
+</section>
+
 </main>
 
 <nav class="nav">
-  <button id="navHome" class="active" onclick="showPage('homePage')">🏠<br>Home</button>
-  <button id="navInbox" onclick="openInbox()">💌<br>Inbox</button>
-  <button id="navProfile" onclick="showPage('profilePage')">👤<br>Profile</button>
+<button id="navHome" class="active" onclick="showPage('homePage')">🏠<br>Home</button>
+<button id="navInbox" onclick="openInbox()">💌<br>Inbox</button>
+<button id="navProfile" onclick="showPage('profilePage')">👤<br>Profile</button>
 </nav>
 
 <script>
@@ -239,65 +245,70 @@ let peerConnections = {};
 let knownPeers = [];
 let myRoomId = localStorage.getItem("hukaMyRoom") || "";
 
+const $ = id => document.getElementById(id);
+
 const ICE = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+  iceServers: [
+    {urls:"stun:stun.l.google.com:19302"}
+  ]
 };
 
 function showToast(message) {
-  const el = document.getElementById("toast");
-  el.textContent = message;
-  el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 2500);
+  $("toast").textContent = message;
+  $("toast").style.display = "block";
+  setTimeout(() => $("toast").style.display = "none", 2500);
 }
 
 function showPage(id) {
   ["homePage","roomPage","inboxPage","profilePage"].forEach(page => {
-    document.getElementById(page).classList.add("hidden");
+    $(page).classList.add("hidden");
   });
-  document.getElementById(id).classList.remove("hidden");
 
-  ["navHome","navInbox","navProfile"].forEach(n =>
-    document.getElementById(n).classList.remove("active")
-  );
+  $(id).classList.remove("hidden");
 
-  if (id === "homePage") navHome.classList.add("active");
-  if (id === "inboxPage") navInbox.classList.add("active");
-  if (id === "profilePage") navProfile.classList.add("active");
+  ["navHome","navInbox","navProfile"].forEach(n => {
+    $(n).classList.remove("active");
+  });
+
+  if(id==="homePage") $("navHome").classList.add("active");
+  if(id==="inboxPage") $("navInbox").classList.add("active");
+  if(id==="profilePage") $("navProfile").classList.add("active");
 }
 
 function updateProfile() {
-  if (!myUser) return;
-  profileName.textContent = myUser.name;
-  profileId.textContent = myUser.id;
-  inboxMyId.textContent = myUser.id;
-  walletCoins.textContent = myUser.coins;
-  roomCoins.textContent = myUser.coins;
-  walletDiamonds.textContent = myUser.diamonds;
-  profileLevel.textContent = myUser.level;
-  nameInput.value = myUser.name;
+  if(!myUser) return;
+
+  $("profileName").textContent = myUser.name;
+  $("profileId").textContent = myUser.id;
+  $("inboxMyId").textContent = myUser.id;
+  $("walletCoins").textContent = myUser.coins;
+  $("roomCoins").textContent = myUser.coins;
+  $("walletDiamonds").textContent = myUser.diamonds;
+  $("profileLevel").textContent = myUser.level;
+  $("nameInput").value = myUser.name;
 }
 
 function register() {
-  const savedName = localStorage.getItem("hukaName") || "Huka User";
-  const savedId = localStorage.getItem("hukaUserId") || "";
-
   socket.emit("register", {
-    name: savedName,
-    profileId: savedId
+    name: localStorage.getItem("hukaName") || "Huka User",
+    profileId: localStorage.getItem("hukaUserId") || ""
   }, result => {
-    if (!result?.ok) {
-      showToast("Registration failed.");
+    if(!result || !result.ok) {
+      showToast("Registration failed");
       return;
     }
 
     myUser = result.user;
-    localStorage.setItem("hukaUserId", myUser.id);
-    localStorage.setItem("hukaName", myUser.name);
+
+    localStorage.setItem("hukaUserId",myUser.id);
+    localStorage.setItem("hukaName",myUser.name);
+
     updateProfile();
     loadRooms();
 
-    if (myRoomId) {
-      myRoomInfo.innerHTML = `Your Room ID: <b>${myRoomId}</b>`;
+    if(myRoomId) {
+      $("myRoomInfo").innerHTML =
+        "Your Room ID: <b>"+myRoomId+"</b>";
     }
   });
 }
@@ -308,39 +319,43 @@ function loadRooms() {
 
 function createRoom() {
   const name = prompt("Enter room name:");
-  if (!name) return;
+  if(!name) return;
 
-  socket.emit("create-room", { name }, result => {
-    if (!result?.ok) {
-      showToast(result?.error || "Room create failed.");
+  socket.emit("create-room",{name},result => {
+    if(!result || !result.ok) {
+      showToast(result?.error || "Room creation failed");
       return;
     }
 
     myRoomId = result.id;
-    localStorage.setItem("hukaMyRoom", myRoomId);
-    myRoomInfo.innerHTML = `Your Room ID: <b>${myRoomId}</b>`;
+    localStorage.setItem("hukaMyRoom",myRoomId);
+
+    $("myRoomInfo").innerHTML =
+      "Your Room ID: <b>"+myRoomId+"</b>";
+
     joinRoomById(myRoomId);
   });
 }
 
 function joinRoom() {
-  const id = joinRoomId.value.trim();
-  if (!id) return showToast("Enter Room ID.");
+  const id = $("joinRoomId").value.trim();
+  if(!id) return showToast("Enter Room ID");
   joinRoomById(id);
 }
 
 function joinRoomById(id) {
-  socket.emit("join-room", { roomId: id }, result => {
-    if (!result?.ok) {
-      showToast(result?.error || "Could not join room.");
+  socket.emit("join-room",{roomId:id},result => {
+    if(!result || !result.ok) {
+      showToast(result?.error || "Could not join room");
       return;
     }
 
     currentRoom = result.room;
-    roomTitle.textContent = result.room.name;
-    roomIdLabel.textContent = result.room.id;
-    roomChat.innerHTML = "";
-    giftFeed.innerHTML = "";
+
+    $("roomTitle").textContent = result.room.name;
+    $("roomIdLabel").textContent = result.room.id;
+    $("roomChat").innerHTML = "";
+    $("giftFeed").innerHTML = "";
 
     (result.messages || []).forEach(addRoomMessage);
     renderSeats(result.seats || Array(8).fill(null));
@@ -359,24 +374,26 @@ function exitRoom() {
 }
 
 function renderSeats(seats) {
-  seatList.innerHTML = "";
+  $("seatList").innerHTML = "";
 
-  seats.forEach((seat, index) => {
+  seats.forEach((seat,index) => {
     const button = document.createElement("button");
-    button.className = "seat" + (seat ? " taken" : "");
+    button.className = "seat"+(seat?" taken":"");
     button.textContent = seat
-      ? `🎙️ ${seat.name}`
-      : `＋ Seat ${index + 1}`;
+      ? "🎙️ "+seat.name
+      : "＋ Seat "+(index+1);
 
     button.disabled = !!seat;
 
     button.onclick = () => {
-      socket.emit("take-seat", index, result => {
-        if (!result?.ok) showToast(result?.error || "Seat unavailable.");
+      socket.emit("take-seat",index,result => {
+        if(!result || !result.ok) {
+          showToast(result?.error || "Seat unavailable");
+        }
       });
     };
 
-    seatList.appendChild(button);
+    $("seatList").appendChild(button);
   });
 }
 
@@ -389,53 +406,55 @@ function addRoomMessage(message) {
   div.className = "msg";
 
   const name = document.createElement("b");
-  name.textContent = (message.name || "User") + ": ";
+  name.textContent = (message.name || "User")+": ";
 
   const text = document.createElement("span");
   text.textContent = message.text || "";
 
-  div.append(name, text);
-  roomChat.appendChild(div);
-  roomChat.scrollTop = roomChat.scrollHeight;
+  div.append(name,text);
+  $("roomChat").appendChild(div);
+  $("roomChat").scrollTop = $("roomChat").scrollHeight;
 }
 
 function sendRoomMessage() {
-  const text = roomMessage.value.trim();
-  if (!text) return;
+  const text = $("roomMessage").value.trim();
+  if(!text) return;
 
-  socket.emit("room-message", { text });
-  roomMessage.value = "";
+  socket.emit("room-message",{text});
+  $("roomMessage").value = "";
 }
 
-roomMessage.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendRoomMessage();
+$("roomMessage").addEventListener("keydown",e => {
+  if(e.key==="Enter") sendRoomMessage();
 });
 
 function sendGift(gift) {
-  socket.emit("send-gift", { gift, to: "Everyone" }, result => {
-    if (!result?.ok) {
-      showToast(result?.error || "Gift failed.");
+  socket.emit("send-gift",{gift,to:"Everyone"},result => {
+    if(!result || !result.ok) {
+      showToast(result?.error || "Gift failed");
       return;
     }
 
     myUser.coins = result.coins;
     updateProfile();
-    showToast("Gift sent successfully!");
+    showToast("Gift sent!");
   });
 }
 
 function toggleMic() {
-  if (!localStream) {
-    showToast("Pehle Join Voice dabao.");
+  if(!localStream) {
+    showToast("Pehle Join Voice dabao");
     return;
   }
 
   micEnabled = !micEnabled;
+
   localStream.getAudioTracks().forEach(track => {
     track.enabled = micEnabled;
   });
 
-  micBtn.textContent = micEnabled ? "🎤 Mic ON" : "🔇 Mic OFF";
+  $("micBtn").textContent = micEnabled
+    ? "🎤 Mic ON" : "🔇 Mic OFF";
 }
 
 function toggleSpeaker() {
@@ -445,57 +464,60 @@ function toggleSpeaker() {
     audio.muted = !speakerEnabled;
   });
 
-  speakerBtn.textContent = speakerEnabled
+  $("speakerBtn").textContent = speakerEnabled
     ? "🔊 Speaker ON" : "🔇 Speaker OFF";
 }
 
 async function startVoice() {
-  if (localStream) return showToast("Voice already connected.");
+  if(localStream) return showToast("Voice already connected");
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false
+      audio:true,
+      video:false
     });
 
     micEnabled = true;
-    voiceStatus.textContent = "🟢 Microphone connected";
-    micBtn.textContent = "🎤 Mic ON";
+    $("voiceStatus").textContent = "🟢 Microphone connected";
+    $("micBtn").textContent = "🎤 Mic ON";
 
     knownPeers.forEach(id => makeOffer(id));
-  } catch (error) {
-    voiceStatus.textContent = "Microphone permission denied";
-    showToast("Allow microphone permission in browser settings.");
+
+  } catch(error) {
+    $("voiceStatus").textContent = "Microphone permission denied";
+    showToast("Allow microphone permission");
   }
 }
 
 function createPeer(peerId) {
-  if (peerConnections[peerId]) return peerConnections[peerId];
+  if(peerConnections[peerId]) {
+    return peerConnections[peerId];
+  }
 
   const pc = new RTCPeerConnection(ICE);
   peerConnections[peerId] = pc;
 
-  if (localStream) {
+  if(localStream) {
     localStream.getTracks().forEach(track => {
-      pc.addTrack(track, localStream);
+      pc.addTrack(track,localStream);
     });
   }
 
   pc.onicecandidate = event => {
-    if (event.candidate) {
-      socket.emit("voice-ice", {
-        to: peerId,
-        candidate: event.candidate
+    if(event.candidate) {
+      socket.emit("voice-ice",{
+        to:peerId,
+        candidate:event.candidate
       });
     }
   };
 
   pc.ontrack = event => {
-    let audio = document.getElementById("audio-" + peerId);
+    let audio = $("audio-"+peerId);
 
-    if (!audio) {
+    if(!audio) {
       audio = document.createElement("audio");
-      audio.id = "audio-" + peerId;
+      audio.id = "audio-"+peerId;
       audio.className = "remoteAudio";
       audio.autoplay = true;
       audio.playsInline = true;
@@ -504,12 +526,12 @@ function createPeer(peerId) {
 
     audio.srcObject = event.streams[0];
     audio.muted = !speakerEnabled;
-    audio.play().catch(() => {});
+    audio.play().catch(()=>{});
   };
 
   pc.onconnectionstatechange = () => {
-    if (pc.connectionState === "failed" ||
-        pc.connectionState === "closed") {
+    if(pc.connectionState==="failed" ||
+       pc.connectionState==="closed") {
       closePeer(peerId);
     }
   };
@@ -518,34 +540,39 @@ function createPeer(peerId) {
 }
 
 async function makeOffer(peerId) {
-  if (!localStream || peerId === socket.id) return;
+  if(!localStream || peerId===socket.id) return;
 
   try {
     const pc = createPeer(peerId);
     const offer = await pc.createOffer();
+
     await pc.setLocalDescription(offer);
 
-    socket.emit("voice-offer", {
-      to: peerId,
-      offer: pc.localDescription
+    socket.emit("voice-offer",{
+      to:peerId,
+      offer:pc.localDescription
     });
-  } catch (error) {
-    console.log("Voice offer error:", error);
+
+  } catch(error) {
+    console.log("Voice offer error:",error);
   }
 }
 
-socket.on("voice-existing-peers", peers => {
+socket.on("voice-existing-peers",peers => {
   knownPeers = peers || [];
-  if (localStream) knownPeers.forEach(id => makeOffer(id));
+
+  if(localStream) {
+    knownPeers.forEach(id => makeOffer(id));
+  }
 });
 
-socket.on("voice-peer-joined", data => {
-  if (data?.socketId && !knownPeers.includes(data.socketId)) {
+socket.on("voice-peer-joined",data => {
+  if(data?.socketId && !knownPeers.includes(data.socketId)) {
     knownPeers.push(data.socketId);
   }
 });
 
-socket.on("voice-offer", async data => {
+socket.on("voice-offer",async data => {
   try {
     const pc = createPeer(data.from);
 
@@ -556,126 +583,132 @@ socket.on("voice-offer", async data => {
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
 
-    socket.emit("voice-answer", {
-      to: data.from,
-      answer: pc.localDescription
+    socket.emit("voice-answer",{
+      to:data.from,
+      answer:pc.localDescription
     });
-  } catch (error) {
-    console.log("Voice answer error:", error);
+
+  } catch(error) {
+    console.log("Voice answer error:",error);
   }
 });
 
-socket.on("voice-answer", async data => {
+socket.on("voice-answer",async data => {
   const pc = peerConnections[data.from];
-  if (!pc) return;
+  if(!pc) return;
 
   try {
     await pc.setRemoteDescription(
       new RTCSessionDescription(data.answer)
     );
-  } catch (error) {
-    console.log("Answer error:", error);
+  } catch(error) {
+    console.log("Answer error:",error);
   }
 });
 
-socket.on("voice-ice", async data => {
+socket.on("voice-ice",async data => {
   const pc = peerConnections[data.from];
-  if (!pc || !data.candidate) return;
+  if(!pc || !data.candidate) return;
 
   try {
     await pc.addIceCandidate(
       new RTCIceCandidate(data.candidate)
     );
-  } catch (error) {
-    console.log("ICE error:", error);
+  } catch(error) {
+    console.log("ICE error:",error);
   }
 });
 
-function closePeer(peerId) {
-  if (peerConnections[peerId]) {
-    peerConnections[peerId].close();
-    delete peerConnections[peerId];
+function closePeer(id) {
+  if(peerConnections[id]) {
+    peerConnections[id].close();
+    delete peerConnections[id];
   }
 
-  const audio = document.getElementById("audio-" + peerId);
-  if (audio) audio.remove();
+  const audio = $("audio-"+id);
+  if(audio) audio.remove();
 }
 
 function stopVoice() {
   Object.keys(peerConnections).forEach(closePeer);
 
-  if (localStream) {
+  if(localStream) {
     localStream.getTracks().forEach(track => track.stop());
     localStream = null;
   }
 
-  voiceStatus.textContent = "Voice disconnected";
-  micBtn.textContent = "🎤 Mic ON";
+  $("voiceStatus").textContent = "Voice disconnected";
+  $("micBtn").textContent = "🎤 Mic ON";
   micEnabled = true;
 }
 
 function sendDM() {
-  const to = dmUserId.value.trim();
-  const text = dmText.value.trim();
+  const to = $("dmUserId").value.trim();
+  const text = $("dmText").value.trim();
 
-  if (!to || !text) return showToast("Enter User ID and message.");
+  if(!to || !text) {
+    return showToast("Enter User ID and message");
+  }
 
-  socket.emit("send-dm", { to, text });
-  dmText.value = "";
+  socket.emit("send-dm",{to,text});
+  $("dmText").value = "";
 }
 
 function renderInbox(items) {
-  inboxMessages.innerHTML = "";
+  $("inboxMessages").innerHTML = "";
 
   (items || []).slice().reverse().forEach(item => {
     const div = document.createElement("div");
     div.className = "msg";
 
     const title = document.createElement("b");
-    title.textContent = `${item.from} (ID: ${item.fromId}): `;
+    title.textContent = item.from+" (ID: "+item.fromId+"): ";
 
     const body = document.createElement("span");
     body.textContent = item.text;
 
-    div.append(title, body);
-    inboxMessages.appendChild(div);
+    div.append(title,body);
+    $("inboxMessages").appendChild(div);
   });
 }
 
 function openInbox() {
   showPage("inboxPage");
-  if (myUser) socket.emit("get-inbox");
+
+  if(myUser) {
+    socket.emit("get-inbox");
+  }
 }
 
 function changeName() {
-  const name = nameInput.value.trim();
-  if (!name) return showToast("Enter a name.");
+  const name = $("nameInput").value.trim();
+  if(!name) return showToast("Enter username");
 
-  // Name is saved locally for the next login.
-  // The current server profile name changes on next registration.
-  localStorage.setItem("hukaName", name);
-  showToast("Name saved. Reconnect to update your profile.");
+  localStorage.setItem("hukaName",name);
+  showToast("Name saved. Refresh page to update.");
 }
 
 function changeDP(event) {
   const file = event.target.files[0];
-  if (!file) return;
+  if(!file) return;
 
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("Choose an image under 2 MB.");
-    return;
+  if(file.size>2*1024*1024) {
+    return showToast("Image must be under 2 MB");
   }
 
   const reader = new FileReader();
+
   reader.onload = () => {
-    localStorage.setItem("hukaDP", reader.result);
-    avatar.innerHTML = `<img src="${reader.result}" alt="Profile picture">`;
+    localStorage.setItem("hukaDP",reader.result);
+    $("avatar").innerHTML =
+      `<img src="${reader.result}" alt="Profile picture">`;
   };
+
   reader.readAsDataURL(file);
 }
 
 function logout() {
-  if (!confirm("Are you sure you want to logout?")) return;
+  if(!confirm("Are you sure you want to logout?")) return;
 
   stopVoice();
   socket.disconnect();
@@ -683,14 +716,14 @@ function logout() {
   localStorage.removeItem("hukaUserId");
   localStorage.removeItem("hukaName");
 
-  showToast("Logged out. Refresh the page to continue.");
+  showToast("Logged out. Refresh the page.");
 }
 
-socket.on("room-list", list => {
-  roomList.innerHTML = "";
+socket.on("room-list",list => {
+  $("roomList").innerHTML = "";
 
-  if (!list.length) {
-    roomList.textContent = "No rooms yet. Create the first room!";
+  if(!list.length) {
+    $("roomList").textContent = "No rooms yet. Create a room!";
     return;
   }
 
@@ -709,65 +742,66 @@ socket.on("room-list", list => {
     button.textContent = "Join Room";
     button.onclick = () => joinRoomById(room.id);
 
-    div.append(title, info, button);
-    roomList.appendChild(div);
+    div.append(title,info,button);
+    $("roomList").appendChild(div);
   });
 });
 
-socket.on("seats-update", renderSeats);
+socket.on("seats-update",renderSeats);
 
-socket.on("members-update", data => {
-  membersList.innerHTML = "";
+socket.on("members-update",data => {
+  $("membersList").innerHTML = "";
 
   (data.members || []).forEach(member => {
     const span = document.createElement("span");
     span.className = "member";
-    span.textContent = `${member.name} · ID ${member.id}`;
-    membersList.appendChild(span);
+    span.textContent = member.name+" · ID "+member.id;
+    $("membersList").appendChild(span);
   });
 });
 
-socket.on("room-message", addRoomMessage);
+socket.on("room-message",addRoomMessage);
 
-socket.on("system-message", message => {
-  addRoomMessage({ name: "Huka Bot", text: message });
+socket.on("system-message",message => {
+  addRoomMessage({name:"Huka Bot",text:message});
 });
 
-socket.on("gift-event", gift => {
+socket.on("gift-event",gift => {
   const div = document.createElement("div");
   div.className = "msg";
   div.textContent =
     `🎁 ${gift.from} sent ${gift.gift} to ${gift.to}!`;
-  giftFeed.prepend(div);
+  $("giftFeed").prepend(div);
 });
 
-socket.on("online-count", count => {
-  onlineCount.textContent = count;
+socket.on("online-count",count => {
+  $("onlineCount").textContent = count;
 });
 
-socket.on("inbox-data", renderInbox);
+socket.on("inbox-data",renderInbox);
 
-socket.on("new-dm", item => {
-  showToast("New message from " + item.from);
+socket.on("new-dm",item => {
+  showToast("New message from "+item.from);
   socket.emit("get-inbox");
 });
 
-socket.on("dm-sent", () => showToast("Message sent."));
-socket.on("dm-error", message => showToast(message));
+socket.on("dm-sent",() => showToast("Message sent"));
+socket.on("dm-error",message => showToast(message));
 
-socket.on("disconnect", () => {
+socket.on("disconnect",() => {
   stopVoice();
-  voiceStatus.textContent = "Disconnected from server";
+  $("voiceStatus").textContent = "Disconnected from server";
 });
 
-socket.on("connect", () => {
-  register();
-});
+socket.on("connect",register);
 
 const savedDP = localStorage.getItem("hukaDP");
-if (savedDP) {
-  avatar.innerHTML = `<img src="${savedDP}" alt="Profile picture">`;
+
+if(savedDP) {
+  $("avatar").innerHTML =
+    `<img src="${savedDP}" alt="Profile picture">`;
 }
 </script>
+
 </body>
-        </html>
+</html>
