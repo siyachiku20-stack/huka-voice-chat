@@ -1,377 +1,170 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Huka Voice Chat</title>
-<script src="/socket.io/socket.io.js"></script>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#100d20;color:white;font-family:Arial,sans-serif}
-header{padding:20px;background:#21183a;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:25px;font-weight:bold;color:#ff6cbd}
-button{border:0;border-radius:12px;padding:12px 16px;background:#9c4dff;color:white;font-weight:bold;cursor:pointer}
-.container{padding:18px;max-width:750px;margin:auto}
-h2{margin-top:25px}
-.card{background:#241b3d;padding:18px;border-radius:17px;margin:12px 0}
-.room{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.room h3{margin:0 0 7px}
-.small{color:#c6b9dc;font-size:13px}
-nav{position:fixed;bottom:0;left:0;right:0;background:#21183a;display:flex;justify-content:space-around;padding:12px 4px}
-nav button{background:transparent;padding:10px 5px;font-size:12px}
-.page{display:none;padding-bottom:80px}
-.page.active{display:block}
-input{width:100%;padding:14px;border:1px solid #594875;border-radius:12px;background:#1a1430;color:white;margin:8px 0}
-#messages{height:230px;overflow:auto;background:#171127;padding:12px;border-radius:12px}
-.message{padding:7px 0;border-bottom:1px solid #332746}
-.members{display:flex;flex-wrap:wrap;gap:8px}
-.member{background:#392754;padding:9px;border-radius:20px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-</style>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Huka Voice Chat</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>
-  <div class="logo">💜 HUKA</div>
-  <div>Voice • Friends • Fun</div>
-</header>
+<div class="app">
 
-<div class="container">
+    <header class="header">
 
-<section id="home" class="page active">
-  <h2>Welcome to Huka! 👋</h2>
-  <div class="card">
-    <h2>Meet New Friends</h2>
-    <p class="small">Join rooms, chat and enjoy together.</p>
-    <button onclick="showPage('rooms')">Explore Rooms</button>
-  </div>
-  <h2>Popular Rooms</h2>
-  <div id="homeRooms"></div>
-</section>
+        <div class="logo">
+            HUKA<span>♡</span>
+        </div>
 
-<section id="rooms" class="page">
-  <h2>🎙️ Voice Rooms</h2>
-  <div id="roomList"></div>
-</section>
+        <div class="online">
+            <span class="dot"></span>
+            Online
+        </div>
 
-<section id="games" class="page">
-  <h2>🎮 Games</h2>
-  <div class="card">
-    <h3>Coming Soon</h3>
-    <p class="small">Games will be added in a future update.</p>
-  </div>
-</section>
+    </header>
 
-<section id="friends" class="page">
-  <h2>👥 Friends</h2>
-  <div class="card">
-    <p>Meet people in rooms and make new friends.</p>
-    <p class="small">Friend requests are coming soon.</p>
-  </div>
-</section>
+    <main>
 
-<section id="profile" class="page">
-  <h2>👤 Your Profile</h2>
-  <div class="card">
-    <label>Your username</label>
-    <input id="username" maxlength="20" placeholder="Enter username">
-    <button onclick="saveName()">Save Profile</button>
-  </div>
-</section>
+        <!-- Login -->
 
-<section id="roomPage" class="page">
-  <button onclick="leaveRoom()">← Back to Rooms</button>
-  <h2 id="roomTitle">Room</h2>
+        <section id="loginSection" class="card">
 
-  <div class="card">
-    <h3>🎙️ Voice Members</h3>
-    <div id="members" class="members"></div>
-    <div class="actions">
-      <button id="micButton" onclick="toggleMic()">🎤 Turn Mic On</button>
-    </div>
-    <p class="small" id="voiceStatus">Mic is off.</p>
-  </div>
+            <h1>Welcome to Huka</h1>
 
-  <div class="card">
-    <h3>💬 Room Chat</h3>
-    <div id="messages"></div>
-    <input id="chatInput" placeholder="Write a message..." maxlength="500">
-    <button onclick="sendMessage()">Send</button>
-  </div>
-</section>
+            <p>Meet people. Make friends. Have fun.</p>
+
+            <input
+                type="text"
+                id="username"
+                placeholder="Enter your username"
+                maxlength="20"
+            >
+
+            <button id="createProfile">
+                Create My Profile
+            </button>
+
+            <p id="loginError" class="error"></p>
+
+        </section>
+
+
+        <!-- Dashboard -->
+
+        <section id="dashboard" hidden>
+
+            <div class="profile-card">
+
+                <h2>My Profile</h2>
+
+                <h3 id="displayName"></h3>
+
+                <p>Profile ID</p>
+
+                <div id="profileId" class="id-box"></div>
+
+                <p>My Room ID</p>
+
+                <div id="myRoomId" class="id-box"></div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2>Join a Room</h2>
+
+                <input
+                    type="text"
+                    id="roomInput"
+                    placeholder="Enter Room ID"
+                >
+
+                <button id="joinRoom">
+                    Join Room
+                </button>
+
+                <p id="roomError" class="error"></p>
+
+            </div>
+
+
+            <div id="roomSection" class="card" hidden>
+
+                <h2>Room <span id="currentRoom"></span></h2>
+
+                <div class="room-buttons">
+
+                    <button id="voiceButton">
+                        🎙️ Join Voice
+                    </button>
+
+                    <button id="leaveRoom" class="secondary">
+                        Leave Room
+                    </button>
+
+                </div>
+
+                <p id="voiceStatus">Voice disconnected</p>
+
+
+                <h3>Members</h3>
+
+                <div id="members"></div>
+
+
+                <h3>Chat</h3>
+
+                <div id="messages" class="messages"></div>
+
+                <div class="chat-input">
+
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="Write a message..."
+                        maxlength="500"
+                    >
+
+                    <button id="sendMessage">Send</button>
+
+                </div>
+
+
+                <h3>Send a Gift</h3>
+
+                <div class="gifts">
+
+                    <button data-gift="Rose">🌹</button>
+
+                    <button data-gift="Heart">❤️</button>
+
+                    <button data-gift="Star">⭐</button>
+
+                    <button data-gift="Diamond">💎</button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        © 2026 Huka Voice Chat
+    </footer>
 
 </div>
 
-<nav>
-  <button onclick="showPage('home')">🏠<br>Home</button>
-  <button onclick="showPage('rooms')">🎙️<br>Rooms</button>
-  <button onclick="showPage('games')">🎮<br>Games</button>
-  <button onclick="showPage('friends')">👥<br>Friends</button>
-  <button onclick="showPage('profile')">👤<br>Profile</button>
-</nav>
-
-<script>
-const socket = io();
-
-const roomNames = ["Dosti","Music","Masti","Study"];
-let currentRoom = null;
-let localStream = null;
-let peers = {};
-let pendingIce = {};
-
-let username = localStorage.getItem("hukaUsername") || "";
-document.getElementById("username").value = username;
-
-function showPage(id){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function saveName(){
-  const name = document.getElementById("username").value.trim();
-  if(!name){alert("Please enter a username");return}
-  username = name.slice(0,20);
-  localStorage.setItem("hukaUsername",username);
-  alert("Profile saved!");
-}
-
-function makeRoomCard(name){
-  return `
-  <div class="card room">
-    <div>
-      <h3>🎙️ ${name}</h3>
-      <div class="small">Join and meet people</div>
-    </div>
-    <button onclick="joinRoom('${name}')">Join</button>
-  </div>`;
-}
-
-document.getElementById("roomList").innerHTML =
-roomNames.map(makeRoomCard).join("");
-
-document.getElementById("homeRooms").innerHTML =
-roomNames.slice(0,2).map(makeRoomCard).join("");
-
-function joinRoom(room){
-  if(!username){
-    username = prompt("Enter your username") || "";
-    username = username.trim().slice(0,20);
-    if(!username)return;
-    localStorage.setItem("hukaUsername",username);
-    document.getElementById("username").value=username;
-  }
-
-  currentRoom=room;
-  document.getElementById("roomTitle").textContent="🎙️ "+room;
-  document.getElementById("messages").innerHTML="";
-  document.getElementById("members").innerHTML="";
-  showPage("roomPage");
-  socket.emit("joinRoom",{room,username});
-}
-
-socket.on("members", members=>{
-  const box=document.getElementById("members");
-  box.innerHTML="";
-  members.forEach(member=>{
-    const el=document.createElement("span");
-    el.className="member";
-    el.textContent="👤 "+member.username;
-    box.appendChild(el);
-  });
-});
-
-socket.on("chatMessage",data=>{
-  const box=document.getElementById("messages");
-  const row=document.createElement("div");
-  row.className="message";
-  const name=document.createElement("b");
-  name.textContent=data.username+": ";
-  const message=document.createElement("span");
-  message.textContent=data.message;
-  row.append(name,message);
-  box.appendChild(row);
-  box.scrollTop=box.scrollHeight;
-});
-
-function sendMessage(){
-  const input=document.getElementById("chatInput");
-  const message=input.value.trim();
-  if(!message || !currentRoom)return;
-  socket.emit("chatMessage",message);
-  input.value="";
-}
-
-document.getElementById("chatInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter")sendMessage();
-});
-
-async function toggleMic(){
-  if(!currentRoom)return;
-
-  if(localStream){
-    stopMic();
-    return;
-  }
-
-  try{
-    localStream=await navigator.mediaDevices.getUserMedia({audio:true});
-    document.getElementById("micButton").textContent="🔇 Turn Mic Off";
-    document.getElementById("voiceStatus").textContent="Microphone is on. Connecting to room members...";
-    await createOffers();
-  }catch(error){
-    document.getElementById("voiceStatus").textContent="Microphone permission was not granted or is unavailable.";
-  }
-}
-
-function stopMic(){
-  if(localStream){
-    localStream.getTracks().forEach(track=>track.stop());
-    localStream=null;
-  }
-  Object.values(peers).forEach(peer=>peer.close());
-  peers={};
-  pendingIce={};
-  document.getElementById("micButton").textContent="🎤 Turn Mic On";
-  document.getElementById("voiceStatus").textContent="Mic is off.";
-}
-
-function createPeer(id){
-  if(peers[id])return peers[id];
-
-  const peer=new RTCPeerConnection({
-    iceServers:[{urls:"stun:stun.l.google.com:19302"}]
-  });
-
-  peers[id]=peer;
-
-  if(localStream){
-    localStream.getTracks().forEach(track=>{
-      peer.addTrack(track,localStream);
-    });
-  }
-
-  peer.onicecandidate=e=>{
-    if(e.candidate){
-      socket.emit("voice-ice",{to:id,candidate:e.candidate});
-    }
-  };
-
-  peer.ontrack=e=>{
-    let audio=document.getElementById("audio-"+id);
-    if(!audio){
-      audio=document.createElement("audio");
-      audio.id="audio-"+id;
-      audio.autoplay=true;
-      audio.playsInline=true;
-      document.body.appendChild(audio);
-    }
-    audio.srcObject=e.streams[0];
-    audio.play().catch(()=>{});
-  };
-
-  peer.onconnectionstatechange=()=>{
-    if(peer.connectionState==="failed" || peer.connectionState==="closed"){
-      peer.close();
-      delete peers[id];
-    }
-  };
-
-  return peer;
-}
-
-async function createOffers(){
-  const members=await new Promise(resolve=>{
-    socket.once("members",resolve);
-    socket.emit("request-members");
-    setTimeout(()=>resolve([]),1500);
-  });
-
-  for(const member of members){
-    if(member.id===socket.id)continue;
-    try{
-      const peer=createPeer(member.id);
-      const offer=await peer.createOffer();
-      await peer.setLocalDescription(offer);
-      socket.emit("voice-offer",{to:member.id,offer});
-    }catch(error){
-      console.log(error);
-    }
-  }
-}
-
-socket.on("user-joined", async user=>{
-  if(!localStream)return;
-  try{
-    const peer=createPeer(user.id);
-    const offer=await peer.createOffer();
-    await peer.setLocalDescription(offer);
-    socket.emit("voice-offer",{to:user.id,offer});
-  }catch(error){console.log(error)}
-});
-
-socket.on("voice-offer",async data=>{
-  try{
-    const peer=createPeer(data.from);
-    await peer.setRemoteDescription(data.offer);
-    const answer=await peer.createAnswer();
-    await peer.setLocalDescription(answer);
-    socket.emit("voice-answer",{to:data.from,answer});
-
-    if(pendingIce[data.from]){
-      for(const candidate of pendingIce[data.from]){
-        await peer.addIceCandidate(candidate);
-      }
-      delete pendingIce[data.from];
-    }
-  }catch(error){console.log(error)}
-});
-
-socket.on("voice-answer",async data=>{
-  const peer=peers[data.from];
-  if(!peer)return;
-  try{
-    await peer.setRemoteDescription(data.answer);
-    if(pendingIce[data.from]){
-      for(const candidate of pendingIce[data.from]){
-        await peer.addIceCandidate(candidate);
-      }
-      delete pendingIce[data.from];
-    }
-  }catch(error){console.log(error)}
-});
-
-socket.on("voice-ice",async data=>{
-  const peer=peers[data.from];
-  if(!peer)return;
-  try{
-    if(peer.remoteDescription){
-      await peer.addIceCandidate(data.candidate);
-    }else{
-      pendingIce[data.from]=pendingIce[data.from]||[];
-      pendingIce[data.from].push(data.candidate);
-    }
-  }catch(error){console.log(error)}
-});
-
-socket.on("user-left",data=>{
-  if(peers[data.id]){
-    peers[data.id].close();
-    delete peers[data.id];
-  }
-  const audio=document.getElementById("audio-"+data.id);
-  if(audio)audio.remove();
-});
-
-function leaveRoom(){
-  stopMic();
-  if(currentRoom){
-    socket.emit("leaveRoom");
-  }
-  currentRoom=null;
-  showPage("rooms");
-}
-</script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
