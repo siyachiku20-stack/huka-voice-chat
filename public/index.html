@@ -1,807 +1,351 @@
+html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Huka Voice Chat</title>
-<script src="/socket.io/socket.io.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#f7f3ff;color:#30223e;font-family:Arial}
-header{padding:18px;background:linear-gradient(120deg,#7027d9,#ed4ca7);color:white}
-header h2{margin:0}
-main{max-width:650px;margin:auto;padding:12px 12px 90px}
-.card{background:white;padding:15px;margin:12px 0;border-radius:18px;box-shadow:0 3px 14px #34205a12}
-button{border:0;border-radius:12px;padding:12px;background:#812fdb;color:white;font-weight:bold;margin:4px;cursor:pointer}
-.secondary{background:#f0e6ff;color:#6524b8}
-.pink{background:#e943a0}
-.red{background:#e34b62}
-input,select{width:100%;padding:13px;margin:6px 0;border:1px solid #ded2ed;border-radius:12px;font-size:15px}
-.row{display:flex;gap:7px;flex-wrap:wrap}
-.row>*{flex:1}
-.hidden{display:none!important}
-.nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:9px;box-shadow:0 -3px 15px #34205a18}
-.nav button{flex:1;background:white;color:#6427aa}
-.nav button.active{color:#e33c9a}
-.room-item{border:1px solid #eee4fb;border-radius:14px;padding:12px;margin:9px 0}
-.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.seat{background:#f3eaff;color:#6022a8;min-height:75px;font-size:12px}
-.seat.taken{background:#fce7f4;color:#a51d6a}
-.chatbox{height:180px;overflow:auto;background:#faf7ff;padding:10px;border-radius:12px}
-.msg{padding:8px;margin:5px 0;background:#eee6fa;border-radius:10px;overflow-wrap:anywhere}
-.member{display:inline-block;background:#f1e8ff;border-radius:20px;padding:8px;margin:4px;font-size:13px}
-.profile-top{display:flex;align-items:center;gap:12px}
-.avatar{width:65px;height:65px;border-radius:50%;background:#eedcff;display:grid;place-items:center;font-size:28px;overflow:hidden}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.stat{background:#f6efff;border-radius:12px;text-align:center;padding:12px;flex:1}
-.stat b{display:block;font-size:20px;color:#792bc5}
-#toast{position:fixed;top:12px;left:10%;width:80%;background:#302044;color:white;padding:12px;border-radius:12px;text-align:center;display:none;z-index:30}
-audio{display:none}
-</style>
+  <title>Huka Voice Chat</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: linear-gradient(145deg, #160d24, #351447, #651c70);
+    }
+
+    .header {
+      padding: 22px 15px;
+      text-align: center;
+      background: linear-gradient(135deg, #7928bd, #e83caa);
+      border-radius: 0 0 25px 25px;
+    }
+
+    .logo {
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    .online {
+      font-size: 13px;
+      margin-top: 7px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+      padding: 15px;
+    }
+
+    .card {
+      background: #281638;
+      border: 1px solid #8242a2;
+      padding: 18px;
+      margin-top: 15px;
+      border-radius: 17px;
+      box-shadow: 0 5px 18px #00000044;
+    }
+
+    h2 {
+      color: #ff9bdc;
+      font-size: 19px;
+      margin-top: 0;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
+      border: 1px solid #9852b6;
+      border-radius: 10px;
+      background: #190f25;
+      color: white;
+      font-size: 15px;
+    }
+
+    input::placeholder {
+      color: #c5a9d1;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #8738c9, #e83b9f);
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    .profile {
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .room-id {
+      font-size: 24px;
+      color: #ff9bdc;
+      font-weight: bold;
+    }
+
+    #status {
+      color: #ff9bdc;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 25px 10px;
+      color: #c8a9d6;
+      font-size: 12px;
+    }
+  </style>
 </head>
 
 <body>
-<div id="toast"></div>
 
-<header>
-<h2>HUKA♡</h2>
-<p>Meet • Talk • Play • Make Friends</p>
-🟢 Online: <b id="onlineCount">0</b>
-</header>
+  <div class="header">
+    <div class="logo">HUKA ♡</div>
+    <div class="online">Meet • Talk • Play • Make Friends</div>
+  </div>
 
-<main>
+  <main class="container">
 
-<!-- HOME -->
-<section id="homePage">
-<div class="card" style="background:linear-gradient(120deg,#762cda,#ec4ca5);color:white">
-<h2>Welcome to Huka 💜</h2>
-<p>Meet new people and make friends!</p>
-<button class="secondary" onclick="showPage('profilePage')">My Profile</button>
-</div>
+    <section class="card profile">
+      <h2>My Profile</h2>
 
-<div class="card">
-<h3>🏠 My Room</h3>
-<div id="myRoomInfo">You haven't created a room yet.</div>
-<button onclick="createRoom()">＋ Create My Room</button>
-</div>
+      <p>Name: <strong id="profileName">Huka User</strong></p>
 
-<div class="card">
-<h3>Join a Room</h3>
-<input id="joinRoomId" placeholder="Enter Room ID">
-<button onclick="joinRoom()">Join Room</button>
-</div>
+      <p>Profile ID</p>
+      <div class="room-id" id="profileId">--------</div>
 
-<div class="card">
-<h3>🌎 All Rooms</h3>
-<button class="secondary" onclick="loadRooms()">Refresh Rooms</button>
-<div id="roomList">Loading rooms...</div>
-</div>
-</section>
+      <p>Coins: <strong id="coins">0</strong></p>
+      <p>Diamonds: <strong id="diamonds">0</strong></p>
 
-<!-- ROOM -->
-<section id="roomPage" class="hidden">
-<div class="card">
-<h3 id="roomTitle">Room</h3>
-<p>Room ID: <b id="roomIdLabel"></b></p>
-<div class="row">
-<button onclick="startVoice()">🎙️ Join Voice</button>
-<button class="red" onclick="stopVoice()">Leave Voice</button>
-</div>
-<div class="row">
-<button class="secondary" id="micBtn" onclick="toggleMic()">🎤 Mic ON</button>
-<button class="secondary" id="speakerBtn" onclick="toggleSpeaker()">🔊 Speaker ON</button>
-</div>
-<p id="voiceStatus">Voice disconnected</p>
-</div>
+      <button onclick="editProfile()">Edit Profile</button>
+    </section>
 
-<div class="card">
-<h3>🎙️ Voice Seats</h3>
-<div class="seats" id="seatList"></div>
-<button class="secondary" onclick="leaveSeat()">Leave Seat</button>
-</div>
+    <section class="card">
+      <h2>Join a Room</h2>
 
-<div class="card">
-<h3>👥 Members</h3>
-<div id="membersList"></div>
-</div>
+      <input
+        id="joinRoomId"
+        type="text"
+        placeholder="Enter Room ID"
+      >
 
-<div class="card">
-<h3>🎁 Gifts</h3>
-<p>Your Coins: <b id="roomCoins">1000</b></p>
-<div class="row">
-<button class="pink" onclick="sendGift('Rose')">🌹 Rose 10</button>
-<button class="pink" onclick="sendGift('Heart')">💗 Heart 50</button>
-</div>
-<div class="row">
-<button class="pink" onclick="sendGift('Crown')">👑 Crown 100</button>
-<button class="pink" onclick="sendGift('Diamond')">💎 Diamond 500</button>
-</div>
-<button class="pink" onclick="sendGift('Rocket')">🚀 Rocket 1000</button>
-<div id="giftFeed"></div>
-</div>
+      <button onclick="joinRoom()">
+        Join Room
+      </button>
+    </section>
 
-<div class="card">
-<h3>💬 Room Chat</h3>
-<div class="chatbox" id="roomChat"></div>
-<div class="row">
-<input id="roomMessage" placeholder="Write a message">
-<button onclick="sendRoomMessage()">Send</button>
-</div>
-</div>
+    <section class="card">
+      <h2>Create Your Room</h2>
 
-<button class="red" style="width:100%" onclick="exitRoom()">Leave Room</button>
-</section>
+      <input
+        id="newRoomName"
+        type="text"
+        placeholder="Enter Room Name"
+        maxlength="40"
+      >
 
-<!-- INBOX -->
-<section id="inboxPage" class="hidden">
-<div class="card">
-<h3>💌 Inbox</h3>
-<p>Your User ID: <b id="inboxMyId"></b></p>
-<input id="dmUserId" placeholder="Friend's User ID">
-<input id="dmText" placeholder="Write message">
-<button onclick="sendDM()">Send Message</button>
-<div id="inboxMessages"></div>
-</div>
-</section>
+      <button onclick="createRoom()">
+        Create Room
+      </button>
+    </section>
 
-<!-- PROFILE -->
-<section id="profilePage" class="hidden">
+    <div id="status">Connecting to Huka...</div>
 
-<div class="card">
-<div class="profile-top">
-<div class="avatar" id="avatar">👤</div>
-<div>
-<h3 id="profileName">Huka User</h3>
-<p>User ID: <b id="profileId"></b></p>
-<p>Level: <b id="profileLevel">1</b></p>
-</div>
-</div>
+  </main>
 
-<input id="nameInput" placeholder="Change username">
-<button onclick="changeName()">Update Name</button>
-<p>Change DP:</p>
-<input type="file" accept="image/*" onchange="changeDP(event)">
-</div>
+  <div class="footer">
+    Huka Voice Chat © 2026
+  </div>
 
-<div class="card">
-<div class="row">
-<div class="stat"><b>0</b>Following</div>
-<div class="stat"><b>0</b>Followers</div>
-<div class="stat"><b>0</b>Visitors</div>
-</div>
-</div>
+  <script src="/socket.io/socket.io.js"></script>
 
-<div class="card">
-<h3>💰 Wallet</h3>
-<p>🪙 Coins: <b id="walletCoins">1000</b></p>
-<p>💎 Diamonds: <b id="walletDiamonds">0</b></p>
-<button onclick="showToast('Recharge feature coming soon')">Recharge</button>
-</div>
+  <script>
+    const socket = io();
 
-<div class="card">
-<h3>⭐ Features</h3>
-<button onclick="showToast('SVIP coming soon')">SVIP</button>
-<button onclick="showToast('Level rewards coming soon')">User Level</button>
-<button onclick="showToast('Medals coming soon')">Medal</button>
-<button onclick="showToast('CP Space coming soon')">CP Space</button>
-<button onclick="showToast('Family coming soon')">Family</button>
-<button onclick="showToast('Your bag is empty')">Bag</button>
-<button onclick="showToast('Dress coming soon')">Dress</button>
-<button onclick="showToast('Invite feature coming soon')">Invite Friend</button>
-<button onclick="showToast('CD Key coming soon')">CD Key</button>
-</div>
+    let user = null;
 
-<div class="card">
-<h3>🌐 Language</h3>
-<select id="language">
-<option>English</option>
-<option>Hindi</option>
-<option>Rajasthani</option>
-<option>Arabic</option>
-<option>Gujarati</option>
-<option>Marathi</option>
-<option>Assamese</option>
-<option>Nepali</option>
-<option>Urdu</option>
-<option>Punjabi</option>
-<option>Bengali</option>
-<option>Tamil</option>
-<option>Telugu</option>
-<option>Kannada</option>
-<option>Malayalam</option>
-<option>Odia</option>
-</select>
-</div>
+    const savedName =
+      localStorage.getItem("hukaName") || "";
 
-<div class="card">
-<h3>⚙️ Settings</h3>
-<button class="secondary" onclick="showToast('Notifications coming soon')">Message Notifications</button>
-<button class="secondary" onclick="showToast('Blocklist coming soon')">Blocklist</button>
-<button class="secondary" onclick="showToast('Huka Voice Chat version 1.0')">About</button>
-<button class="secondary" onclick="showToast('Help and feedback coming soon')">Help & Feedback</button>
-<button class="secondary" onclick="showToast('Customer service coming soon')">Customer Service</button>
-<button class="red" onclick="logout()">Logout</button>
-</div>
-</section>
+    const savedId =
+      localStorage.getItem("hukaUserId") || "";
 
-</main>
-
-<nav class="nav">
-<button id="navHome" class="active" onclick="showPage('homePage')">🏠<br>Home</button>
-<button id="navInbox" onclick="openInbox()">💌<br>Inbox</button>
-<button id="navProfile" onclick="showPage('profilePage')">👤<br>Profile</button>
-</nav>
-
-<script>
-const socket = io();
-
-let myUser = null;
-let currentRoom = null;
-let localStream = null;
-let micEnabled = true;
-let speakerEnabled = true;
-let peerConnections = {};
-let knownPeers = [];
-let myRoomId = localStorage.getItem("hukaMyRoom") || "";
-
-const $ = id => document.getElementById(id);
-
-const ICE = {
-  iceServers: [
-    {urls:"stun:stun.l.google.com:19302"}
-  ]
-};
-
-function showToast(message) {
-  $("toast").textContent = message;
-  $("toast").style.display = "block";
-  setTimeout(() => $("toast").style.display = "none", 2500);
-}
-
-function showPage(id) {
-  ["homePage","roomPage","inboxPage","profilePage"].forEach(page => {
-    $(page).classList.add("hidden");
-  });
-
-  $(id).classList.remove("hidden");
-
-  ["navHome","navInbox","navProfile"].forEach(n => {
-    $(n).classList.remove("active");
-  });
-
-  if(id==="homePage") $("navHome").classList.add("active");
-  if(id==="inboxPage") $("navInbox").classList.add("active");
-  if(id==="profilePage") $("navProfile").classList.add("active");
-}
-
-function updateProfile() {
-  if(!myUser) return;
-
-  $("profileName").textContent = myUser.name;
-  $("profileId").textContent = myUser.id;
-  $("inboxMyId").textContent = myUser.id;
-  $("walletCoins").textContent = myUser.coins;
-  $("roomCoins").textContent = myUser.coins;
-  $("walletDiamonds").textContent = myUser.diamonds;
-  $("profileLevel").textContent = myUser.level;
-  $("nameInput").value = myUser.name;
-}
-
-function register() {
-  socket.emit("register", {
-    name: localStorage.getItem("hukaName") || "Huka User",
-    profileId: localStorage.getItem("hukaUserId") || ""
-  }, result => {
-    if(!result || !result.ok) {
-      showToast("Registration failed");
-      return;
+    function status(message) {
+      document.getElementById("status").textContent = message;
     }
 
-    myUser = result.user;
+    function editProfile() {
+      const name = prompt(
+        "Enter your display name:",
+        savedName || "Huka User"
+      );
 
-    localStorage.setItem("hukaUserId",myUser.id);
-    localStorage.setItem("hukaName",myUser.name);
+      if (!name || !name.trim()) return;
 
-    updateProfile();
-    loadRooms();
+      localStorage.setItem("hukaName", name.trim());
 
-    if(myRoomId) {
-      $("myRoomInfo").innerHTML =
-        "Your Room ID: <b>"+myRoomId+"</b>";
-    }
-  });
-}
+      status("Name saved. Reloading...");
 
-function loadRooms() {
-  socket.emit("get-rooms");
-}
-
-function createRoom() {
-  const name = prompt("Enter room name:");
-  if(!name) return;
-
-  socket.emit("create-room",{name},result => {
-    if(!result || !result.ok) {
-      showToast(result?.error || "Room creation failed");
-      return;
+      location.reload();
     }
 
-    myRoomId = result.id;
-    localStorage.setItem("hukaMyRoom",myRoomId);
+    function registerUser() {
+      let name = localStorage.getItem("hukaName");
 
-    $("myRoomInfo").innerHTML =
-      "Your Room ID: <b>"+myRoomId+"</b>";
+      if (!name) {
+        name = prompt("Enter your Huka name:");
 
-    joinRoomById(myRoomId);
-  });
-}
-
-function joinRoom() {
-  const id = $("joinRoomId").value.trim();
-  if(!id) return showToast("Enter Room ID");
-  joinRoomById(id);
-}
-
-function joinRoomById(id) {
-  socket.emit("join-room",{roomId:id},result => {
-    if(!result || !result.ok) {
-      showToast(result?.error || "Could not join room");
-      return;
-    }
-
-    currentRoom = result.room;
-
-    $("roomTitle").textContent = result.room.name;
-    $("roomIdLabel").textContent = result.room.id;
-    $("roomChat").innerHTML = "";
-    $("giftFeed").innerHTML = "";
-
-    (result.messages || []).forEach(addRoomMessage);
-    renderSeats(result.seats || Array(8).fill(null));
-
-    showPage("roomPage");
-  });
-}
-
-function exitRoom() {
-  stopVoice();
-  socket.emit("leave-seat");
-  socket.emit("leave-room");
-  currentRoom = null;
-  showPage("homePage");
-  loadRooms();
-}
-
-function renderSeats(seats) {
-  $("seatList").innerHTML = "";
-
-  seats.forEach((seat,index) => {
-    const button = document.createElement("button");
-    button.className = "seat"+(seat?" taken":"");
-    button.textContent = seat
-      ? "🎙️ "+seat.name
-      : "＋ Seat "+(index+1);
-
-    button.disabled = !!seat;
-
-    button.onclick = () => {
-      socket.emit("take-seat",index,result => {
-        if(!result || !result.ok) {
-          showToast(result?.error || "Seat unavailable");
+        if (!name || !name.trim()) {
+          name = "Huka User";
         }
-      });
-    };
 
-    $("seatList").appendChild(button);
-  });
-}
+        localStorage.setItem("hukaName", name.trim());
+      }
 
-function leaveSeat() {
-  socket.emit("leave-seat");
-}
+      const profileId =
+        localStorage.getItem("hukaUserId") || "";
 
-function addRoomMessage(message) {
-  const div = document.createElement("div");
-  div.className = "msg";
+      socket.emit(
+        "register",
+        {
+          name: name.trim(),
+          profileId: profileId
+        },
+        response => {
+          if (!response || !response.ok) {
+            status(response?.error || "Registration failed.");
+            return;
+          }
 
-  const name = document.createElement("b");
-  name.textContent = (message.name || "User")+": ";
+          user = response.user;
 
-  const text = document.createElement("span");
-  text.textContent = message.text || "";
+          localStorage.setItem("hukaUserId", user.id);
+          localStorage.setItem("hukaName", user.name);
 
-  div.append(name,text);
-  $("roomChat").appendChild(div);
-  $("roomChat").scrollTop = $("roomChat").scrollHeight;
-}
+          showProfile(user);
 
-function sendRoomMessage() {
-  const text = $("roomMessage").value.trim();
-  if(!text) return;
-
-  socket.emit("room-message",{text});
-  $("roomMessage").value = "";
-}
-
-$("roomMessage").addEventListener("keydown",e => {
-  if(e.key==="Enter") sendRoomMessage();
-});
-
-function sendGift(gift) {
-  socket.emit("send-gift",{gift,to:"Everyone"},result => {
-    if(!result || !result.ok) {
-      showToast(result?.error || "Gift failed");
-      return;
+          status("Welcome to Huka Voice Chat!");
+        }
+      );
     }
 
-    myUser.coins = result.coins;
-    updateProfile();
-    showToast("Gift sent!");
-  });
-}
+    function showProfile(data) {
+      document.getElementById("profileName").textContent =
+        data.name || "Huka User";
 
-function toggleMic() {
-  if(!localStream) {
-    showToast("Pehle Join Voice dabao");
-    return;
-  }
+      document.getElementById("profileId").textContent =
+        data.id || "--------";
 
-  micEnabled = !micEnabled;
+      document.getElementById("coins").textContent =
+        data.coins ?? 0;
 
-  localStream.getAudioTracks().forEach(track => {
-    track.enabled = micEnabled;
-  });
-
-  $("micBtn").textContent = micEnabled
-    ? "🎤 Mic ON" : "🔇 Mic OFF";
-}
-
-function toggleSpeaker() {
-  speakerEnabled = !speakerEnabled;
-
-  document.querySelectorAll("audio.remoteAudio").forEach(audio => {
-    audio.muted = !speakerEnabled;
-  });
-
-  $("speakerBtn").textContent = speakerEnabled
-    ? "🔊 Speaker ON" : "🔇 Speaker OFF";
-}
-
-async function startVoice() {
-  if(localStream) return showToast("Voice already connected");
-
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      audio:true,
-      video:false
-    });
-
-    micEnabled = true;
-    $("voiceStatus").textContent = "🟢 Microphone connected";
-    $("micBtn").textContent = "🎤 Mic ON";
-
-    knownPeers.forEach(id => makeOffer(id));
-
-  } catch(error) {
-    $("voiceStatus").textContent = "Microphone permission denied";
-    showToast("Allow microphone permission");
-  }
-}
-
-function createPeer(peerId) {
-  if(peerConnections[peerId]) {
-    return peerConnections[peerId];
-  }
-
-  const pc = new RTCPeerConnection(ICE);
-  peerConnections[peerId] = pc;
-
-  if(localStream) {
-    localStream.getTracks().forEach(track => {
-      pc.addTrack(track,localStream);
-    });
-  }
-
-  pc.onicecandidate = event => {
-    if(event.candidate) {
-      socket.emit("voice-ice",{
-        to:peerId,
-        candidate:event.candidate
-      });
-    }
-  };
-
-  pc.ontrack = event => {
-    let audio = $("audio-"+peerId);
-
-    if(!audio) {
-      audio = document.createElement("audio");
-      audio.id = "audio-"+peerId;
-      audio.className = "remoteAudio";
-      audio.autoplay = true;
-      audio.playsInline = true;
-      document.body.appendChild(audio);
+      document.getElementById("diamonds").textContent =
+        data.diamonds ?? 0;
     }
 
-    audio.srcObject = event.streams[0];
-    audio.muted = !speakerEnabled;
-    audio.play().catch(()=>{});
-  };
+    function joinRoom() {
+      const roomId =
+        document.getElementById("joinRoomId").value.trim();
 
-  pc.onconnectionstatechange = () => {
-    if(pc.connectionState==="failed" ||
-       pc.connectionState==="closed") {
-      closePeer(peerId);
+      if (!roomId) {
+        alert("Please enter Room ID.");
+        return;
+      }
+
+      if (!user) {
+        alert("Please wait for profile registration.");
+        return;
+      }
+
+      localStorage.setItem("hukaMyRoom", roomId);
+
+      location.href =
+        "room.html?room=" + encodeURIComponent(roomId);
     }
-  };
 
-  return pc;
-}
+    function createRoom() {
+      const name =
+        document.getElementById("newRoomName").value.trim();
 
-async function makeOffer(peerId) {
-  if(!localStream || peerId===socket.id) return;
+      if (!name) {
+        alert("Please enter Room Name.");
+        return;
+      }
 
-  try {
-    const pc = createPeer(peerId);
-    const offer = await pc.createOffer();
+      if (!user) {
+        alert("Please wait for profile registration.");
+        return;
+      }
 
-    await pc.setLocalDescription(offer);
+      status("Creating room...");
 
-    socket.emit("voice-offer",{
-      to:peerId,
-      offer:pc.localDescription
+      socket.emit(
+        "create-room",
+        { name: name },
+        response => {
+          if (!response || !response.ok) {
+            status(response?.error || "Room creation failed.");
+            return;
+          }
+
+          const roomId =
+            response.room?.id ||
+            response.roomId ||
+            response.id;
+
+          if (!roomId) {
+            status("Room created, but Room ID was not returned.");
+            return;
+          }
+
+          localStorage.setItem("hukaMyRoom", roomId);
+
+          location.href =
+            "room.html?room=" + encodeURIComponent(roomId);
+        }
+      );
+    }
+
+    socket.on("connect", () => {
+      status("Connected. Registering profile...");
+      registerUser();
     });
 
-  } catch(error) {
-    console.log("Voice offer error:",error);
-  }
-}
-
-socket.on("voice-existing-peers",peers => {
-  knownPeers = peers || [];
-
-  if(localStream) {
-    knownPeers.forEach(id => makeOffer(id));
-  }
-});
-
-socket.on("voice-peer-joined",data => {
-  if(data?.socketId && !knownPeers.includes(data.socketId)) {
-    knownPeers.push(data.socketId);
-  }
-});
-
-socket.on("voice-offer",async data => {
-  try {
-    const pc = createPeer(data.from);
-
-    await pc.setRemoteDescription(
-      new RTCSessionDescription(data.offer)
-    );
-
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    socket.emit("voice-answer",{
-      to:data.from,
-      answer:pc.localDescription
+    socket.on("disconnect", () => {
+      status("Disconnected. Reconnecting...");
     });
 
-  } catch(error) {
-    console.log("Voice answer error:",error);
-  }
-});
+    socket.on("profile-update", data => {
+      user = {
+        ...user,
+        ...data
+      };
 
-socket.on("voice-answer",async data => {
-  const pc = peerConnections[data.from];
-  if(!pc) return;
-
-  try {
-    await pc.setRemoteDescription(
-      new RTCSessionDescription(data.answer)
-    );
-  } catch(error) {
-    console.log("Answer error:",error);
-  }
-});
-
-socket.on("voice-ice",async data => {
-  const pc = peerConnections[data.from];
-  if(!pc || !data.candidate) return;
-
-  try {
-    await pc.addIceCandidate(
-      new RTCIceCandidate(data.candidate)
-    );
-  } catch(error) {
-    console.log("ICE error:",error);
-  }
-});
-
-function closePeer(id) {
-  if(peerConnections[id]) {
-    peerConnections[id].close();
-    delete peerConnections[id];
-  }
-
-  const audio = $("audio-"+id);
-  if(audio) audio.remove();
-}
-
-function stopVoice() {
-  Object.keys(peerConnections).forEach(closePeer);
-
-  if(localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-    localStream = null;
-  }
-
-  $("voiceStatus").textContent = "Voice disconnected";
-  $("micBtn").textContent = "🎤 Mic ON";
-  micEnabled = true;
-}
-
-function sendDM() {
-  const to = $("dmUserId").value.trim();
-  const text = $("dmText").value.trim();
-
-  if(!to || !text) {
-    return showToast("Enter User ID and message");
-  }
-
-  socket.emit("send-dm",{to,text});
-  $("dmText").value = "";
-}
-
-function renderInbox(items) {
-  $("inboxMessages").innerHTML = "";
-
-  (items || []).slice().reverse().forEach(item => {
-    const div = document.createElement("div");
-    div.className = "msg";
-
-    const title = document.createElement("b");
-    title.textContent = item.from+" (ID: "+item.fromId+"): ";
-
-    const body = document.createElement("span");
-    body.textContent = item.text;
-
-    div.append(title,body);
-    $("inboxMessages").appendChild(div);
-  });
-}
-
-function openInbox() {
-  showPage("inboxPage");
-
-  if(myUser) {
-    socket.emit("get-inbox");
-  }
-}
-
-function changeName() {
-  const name = $("nameInput").value.trim();
-  if(!name) return showToast("Enter username");
-
-  localStorage.setItem("hukaName",name);
-  showToast("Name saved. Refresh page to update.");
-}
-
-function changeDP(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-
-  if(file.size>2*1024*1024) {
-    return showToast("Image must be under 2 MB");
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    localStorage.setItem("hukaDP",reader.result);
-    $("avatar").innerHTML =
-      `<img src="${reader.result}" alt="Profile picture">`;
-  };
-
-  reader.readAsDataURL(file);
-}
-
-function logout() {
-  if(!confirm("Are you sure you want to logout?")) return;
-
-  stopVoice();
-  socket.disconnect();
-
-  localStorage.removeItem("hukaUserId");
-  localStorage.removeItem("hukaName");
-
-  showToast("Logged out. Refresh the page.");
-}
-
-socket.on("room-list",list => {
-  $("roomList").innerHTML = "";
-
-  if(!list.length) {
-    $("roomList").textContent = "No rooms yet. Create a room!";
-    return;
-  }
-
-  list.forEach(room => {
-    const div = document.createElement("div");
-    div.className = "room-item";
-
-    const title = document.createElement("b");
-    title.textContent = room.name;
-
-    const info = document.createElement("p");
-    info.textContent =
-      `Room ID: ${room.id} · Host: ${room.owner} · Members: ${room.members}`;
-
-    const button = document.createElement("button");
-    button.textContent = "Join Room";
-    button.onclick = () => joinRoomById(room.id);
-
-    div.append(title,info,button);
-    $("roomList").appendChild(div);
-  });
-});
-
-socket.on("seats-update",renderSeats);
-
-socket.on("members-update",data => {
-  $("membersList").innerHTML = "";
-
-  (data.members || []).forEach(member => {
-    const span = document.createElement("span");
-    span.className = "member";
-    span.textContent = member.name+" · ID "+member.id;
-    $("membersList").appendChild(span);
-  });
-});
-
-socket.on("room-message",addRoomMessage);
-
-socket.on("system-message",message => {
-  addRoomMessage({name:"Huka Bot",text:message});
-});
-
-socket.on("gift-event",gift => {
-  const div = document.createElement("div");
-  div.className = "msg";
-  div.textContent =
-    `🎁 ${gift.from} sent ${gift.gift} to ${gift.to}!`;
-  $("giftFeed").prepend(div);
-});
-
-socket.on("online-count",count => {
-  $("onlineCount").textContent = count;
-});
-
-socket.on("inbox-data",renderInbox);
-
-socket.on("new-dm",item => {
-  showToast("New message from "+item.from);
-  socket.emit("get-inbox");
-});
-
-socket.on("dm-sent",() => showToast("Message sent"));
-socket.on("dm-error",message => showToast(message));
-
-socket.on("disconnect",() => {
-  stopVoice();
-  $("voiceStatus").textContent = "Disconnected from server";
-});
-
-socket.on("connect",register);
-
-const savedDP = localStorage.getItem("hukaDP");
-
-if(savedDP) {
-  $("avatar").innerHTML =
-    `<img src="${savedDP}" alt="Profile picture">`;
-}
-</script>
+      showProfile(user);
+    });
+  </script>
 
 </body>
 </html>
