@@ -1,142 +1,412 @@
+html
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Huka Voice Chat - Room</title>
-    <link rel="stylesheet" href="room.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huka Voice Chat - Room</title>
+
+  <link rel="stylesheet" href="room.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #160d27;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: linear-gradient(120deg,#8528db,#ed3caa);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .main {
+      padding: 12px;
+      padding-bottom: 100px;
+    }
+
+    .room-info,.panel {
+      background: #28183e;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+
+    .seats {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .seat {
+      background: #39264f;
+      min-height: 85px;
+      color: white;
+      border: 1px solid #69458b;
+    }
+
+    .seat.locked {
+      background: #50303c;
+    }
+
+    .seat small {
+      display: block;
+      margin-top: 8px;
+    }
+
+    .members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .member {
+      background: #422b5d;
+      padding: 8px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .chat-box {
+      height: 220px;
+      overflow-y: auto;
+      background: #180f27;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 0;
+    }
+
+    .bottom-menu {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #251436;
+      display: flex;
+      justify-content: space-around;
+      gap: 4px;
+      padding: 10px 4px;
+      border-top: 1px solid #75439b;
+      z-index: 10;
+    }
+
+    .bottom-menu button {
+      flex: 1;
+      padding: 10px 2px;
+      background: #47265f;
+      color: white;
+      font-size: 11px;
+    }
+
+    .primary {
+      background: #e33aa8;
+      color: white;
+    }
+
+    .secondary {
+      background: #7540b9;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: #000b;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: #29183e;
+      padding: 18px;
+      border-radius: 15px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 0;
+    }
+
+    .gift-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 10px;
+    }
+
+    .gift-grid button {
+      background: #493064;
+      color: white;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toolbar button {
+      background: #50306c;
+      color: white;
+    }
+
+    .status {
+      color: #ffb5e7;
+      font-size: 13px;
+    }
+
+    @media(max-width:380px) {
+      .seats {
+        grid-template-columns: repeat(3,1fr);
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="topbar">
-    <button onclick="exitRoom()">←</button>
-    <div class="room-info">
-        <h2 id="roomName">HUKA ROOM</h2>
-        <small>Room ID: <span id="roomId">100011</span></small>
-    </div>
-    <button onclick="openMore()">⋮</button>
+<header>
+  <div>
+    <strong>HUKA ♡</strong>
+    <div id="connectionStatus">Connecting...</div>
+  </div>
+
+  <button onclick="leaveRoom()" class="primary">
+    Leave
+  </button>
 </header>
 
-<section class="room-stats">
-    <span>👥 <b id="onlineCount">0</b></span>
-    <span>🏆 Ranking</span>
-    <span>💰 <b id="myCoins">0</b> Coins</span>
-</section>
+<div class="main">
 
-<section class="announcement" id="announcement">
-    ❤️ Welcome to Huka Voice Chat!
-</section>
+  <section class="room-info">
+    <h2 id="roomName">Huka Room</h2>
+    <p>Room ID: <span id="roomId">---</span></p>
+    <p>Owner: <span id="roomOwner">---</span></p>
+    <p>Members: <span id="memberCount">0</span></p>
+    <p class="status" id="roomStatus">Loading room...</p>
+  </section>
 
-<section class="video-area" id="videoArea">
-    <div id="youtubePlayer"></div>
-    <input id="youtubeLink" placeholder="Paste YouTube Video Link">
-    <button onclick="playYouTube()">▶ Play Video</button>
-</section>
+  <section class="panel">
+    <h3>🎙️ Voice Seats</h3>
 
-<section class="seats-section">
-    <div class="seat-heading">
-        <h3>🎙️ Voice Seats</h3>
-        <select id="seatCount" onchange="changeSeats()">
-            <option value="9">9 Seats</option>
-            <option value="11">11 Seats</option>
-            <option value="15">15 Seats</option>
-            <option value="20">20 Seats</option>
-        </select>
+    <div class="toolbar">
+      <button onclick="changeSeatCount(9)">9 Seats</button>
+      <button onclick="changeSeatCount(11)">11 Seats</button>
+      <button onclick="changeSeatCount(15)">15 Seats</button>
+      <button onclick="changeSeatCount(20)">20 Seats</button>
     </div>
-    <div id="seats" class="seats"></div>
-</section>
 
-<section class="music-area">
-    <h3>🎵 Room Music</h3>
-    <input type="file" id="mp3File" accept="audio/mpeg,audio/mp3">
-    <audio id="musicPlayer" controls></audio>
-</section>
+    <div class="seats" id="seats"></div>
 
-<section class="live-effects" id="liveEffects"></section>
+    <div class="toolbar" style="margin-top:12px">
+      <button onclick="leaveSeat()">Leave Seat</button>
+      <button onclick="toggleMic()" id="micButton">🎤 Mic ON</button>
+    </div>
 
-<section class="chat-section">
+    <p id="voiceStatus" class="status">
+      Voice disconnected
+    </p>
+  </section>
+
+  <section class="panel">
+    <h3>👥 Room Members</h3>
+    <div class="members" id="members"></div>
+  </section>
+
+  <section class="panel">
     <h3>💬 Room Chat</h3>
-    <div id="chatMessages" class="chat-messages"></div>
-</section>
 
-<div class="gift-ranking">
-    <h3>🏆 Room Gift Ranking</h3>
-    <div id="giftRanking">No gifts yet</div>
-</div>
+    <div class="chat-box" id="chatMessages"></div>
 
-<div class="bottom-bar">
-    <button onclick="mentionUser()">@</button>
-    <button onclick="openEmoji()">😊</button>
-    <button onclick="toggleSpeaker()">🔊</button>
-    <button onclick="toggleMic()" id="micButton">🎙️</button>
-    <button onclick="openInbox()">📩</button>
-    <button onclick="openGifts()">🎁</button>
-    <button onclick="openMore()">More</button>
-</div>
+    <div class="chat-input">
+      <input
+        id="chatInput"
+        placeholder="Write a message..."
+        maxlength="500"
+      >
 
-<div id="giftPanel" class="panel">
-    <div class="panel-header">
-        <h2>🎁 Huka Gifts</h2>
-        <button onclick="closePanels()">✕</button>
+      <button onclick="sendMessage()" class="primary">
+        Send
+      </button>
     </div>
-    <div class="gift-categories">
-        <button onclick="showGifts('All')">All</button>
-        <button onclick="showGifts('Customization')">Customization</button>
-        <button onclick="showGifts('Lucky')">Lucky</button>
-        <button onclick="showGifts('VIP')">VIP</button>
-        <button onclick="showGifts('Love')">Love</button>
-        <button onclick="showGifts('Royal')">Royal</button>
-        <button onclick="showGifts('Premium')">Premium</button>
-    </div>
-    <div id="giftList" class="gift-list"></div>
-</div>
 
-<div id="emojiPanel" class="panel">
-    <h3>😊 Emoji & Stickers</h3>
-    <div id="emojiList">
-        <button onclick="sendEmoji('❤️')">❤️</button>
-        <button onclick="sendEmoji('😂')">😂</button>
-        <button onclick="sendEmoji('😍')">😍</button>
-        <button onclick="sendEmoji('🔥')">🔥</button>
-        <button onclick="sendEmoji('👏')">👏</button>
-        <button onclick="sendEmoji('🥰')">🥰</button>
-    </div>
-    <button onclick="closePanels()">Close</button>
-</div>
+    <button onclick="clearChat()" id="clearChatButton"
+      class="secondary hidden" style="margin-top:10px">
+      Clear Chat
+    </button>
+  </section>
 
-<div id="inboxPanel" class="panel">
-    <h3>📩 Inbox</h3>
-    <div id="inboxMessages">No new messages</div>
-    <button onclick="closePanels()">Close</button>
-</div>
+  <section class="panel">
+    <h3>🏆 Gift Ranking</h3>
+    <div id="giftRanking">No gifts yet.</div>
+  </section>
 
-<div id="morePanel" class="panel">
-    <h3>⚙️ More Options</h3>
-    <button onclick="openRoomSettings()">Room Settings</button>
-    <button onclick="openYouTube()">YouTube Video</button>
-    <button onclick="openMusic()">MP3 Music</button>
-    <button onclick="showRanking()">Gift Ranking</button>
-    <button onclick="clearChat()">Clear Chat</button>
-    <button onclick="closePanels()">Close</button>
-</div>
+  <section class="panel">
+    <h3>📺 YouTube Sharing</h3>
 
-<div id="settingsPanel" class="panel">
+    <input
+      id="youtubeInput"
+      placeholder="Paste YouTube link"
+      style="width:100%;padding:12px"
+    >
+
+    <button onclick="shareYoutube()" class="primary"
+      style="margin-top:8px">
+      Share YouTube
+    </button>
+
+    <div id="youtubeLinks"></div>
+  </section>
+
+  <section class="panel hidden" id="adminPanel">
     <h3>⚙️ Room Settings</h3>
-    <input id="newRoomName" placeholder="Room Name">
-    <input id="newAnnouncement" placeholder="Announcement">
-    <button onclick="saveRoomSettings()">Save Settings</button>
-    <button onclick="closePanels()">Close</button>
+
+    <input id="settingRoomName" placeholder="Room name">
+
+    <input id="settingDescription"
+      placeholder="Room description">
+
+    <label>
+      <input type="checkbox" id="roomLocked">
+      Lock Room
+    </label>
+
+    <label>
+      <input type="checkbox" id="youtubeAllowed" checked>
+      Allow YouTube
+    </label>
+
+    <button onclick="saveRoomSettings()" class="primary">
+      Save Settings
+    </button>
+  </section>
+
 </div>
 
-<div id="mentionPanel" class="panel">
-    <h3>@ Mention User</h3>
-    <div id="mentionUsers"></div>
-    <button onclick="closePanels()">Close</button>
+<!-- BOTTOM MENU -->
+
+<nav class="bottom-menu">
+
+  <button onclick="mentionUser()">@ Mention</button>
+
+  <button onclick="openEmoji()">😊 Emoji</button>
+
+  <button onclick="toggleSpeaker()" id="speakerButton">
+    🔊 Speaker
+  </button>
+
+  <button onclick="toggleMic()" id="bottomMicButton">
+    🎤 ON
+  </button>
+
+  <button onclick="openInbox()">📥 Inbox</button>
+
+  <button onclick="openGifts()">🎁 Gift</button>
+
+</nav>
+
+<!-- EMOJI MODAL -->
+
+<div class="modal" id="emojiModal">
+  <div class="modal-content">
+    <h3>😊 Emojis & Stickers</h3>
+
+    <div class="gift-grid">
+      <button onclick="sendEmoji('❤️')">❤️</button>
+      <button onclick="sendEmoji('😂')">😂</button>
+      <button onclick="sendEmoji('😍')">😍</button>
+      <button onclick="sendEmoji('🔥')">🔥</button>
+      <button onclick="sendEmoji('🥰')">🥰</button>
+      <button onclick="sendEmoji('👏')">👏</button>
+      <button onclick="sendEmoji('🎉')">🎉</button>
+      <button onclick="sendEmoji('😘')">😘</button>
+      <button onclick="sendEmoji('🌹')">🌹</button>
+      <button onclick="sendEmoji('💎')">💎</button>
+    </div>
+
+    <button onclick="closeModal('emojiModal')"
+      class="primary" style="margin-top:15px">
+      Close
+    </button>
+  </div>
+</div>
+
+<!-- GIFT MODAL -->
+
+<div class="modal" id="giftModal">
+  <div class="modal-content">
+    <h3>🎁 Send Gift</h3>
+
+    <input id="giftReceiver" placeholder="Receiver Profile ID (optional)">
+
+    <div class="gift-grid" id="giftList"></div>
+
+    <button onclick="closeModal('giftModal')"
+      class="primary" style="margin-top:15px">
+      Close
+    </button>
+  </div>
+</div>
+
+<!-- INBOX MODAL -->
+
+<div class="modal" id="inboxModal">
+  <div class="modal-content">
+    <h3>📥 Inbox</h3>
+
+    <div id="inboxMessages"></div>
+
+    <button onclick="closeModal('inboxModal')"
+      class="primary" style="margin-top:15px">
+      Close
+    </button>
+  </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-
 <script src="room.js"></script>
 
 </body>
