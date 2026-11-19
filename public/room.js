@@ -1,658 +1,1218 @@
-// =====================================
-// HUKA VOICE CHAT - ROOM SYSTEM
-// =====================================
+javascript
+"use strict";
 
-const socket = typeof io !== "undefined" ? io() : null;
+// ==========================================
+// HUKA VOICE CHAT - ROOM JAVASCRIPT
+// ==========================================
 
-let myCoins = 10000;
+const socket = io();
+
+const $ = id => document.getElementById(id);
+
+const params = new URLSearchParams(location.search);
+
+const USER_NAME =
+  localStorage.getItem("hukaName") ||
+  localStorage.getItem("hukaUsername") ||
+  "Huka User";
+
+const SAVED_USER_ID =
+  localStorage.getItem("hukaUserId") || "";
+
+let currentUser = null;
+let currentRoom = null;
+
+let isOwner = false;
+let isAdmin = false;
+
+let localStream = null;
 let micOn = false;
 let speakerOn = true;
-let currentSeats = 9;
-let currentCategory = "All";
+let joined = false;
 
-const myUsername = localStorage.getItem("hukaUsername") || "Huka";
-const roomId = new URLSearchParams(location.search).get("room") || "100011";
+let roomSeats = [];
+let roomMembers = [];
+let lockedSeats = [];
 
-const seatUsers = {};
-const giftRanking = {};
-const gifts = [];
+const peerConnections = new Map();
+const remoteAudio = new Map();
 
-// =====================================
-// 251 GIFTS SYSTEM
-// =====================================
-
-const giftCategories = {
-Customization: ["👑","💎","🌈","🦋","🌸","✨","🎀","💫","🪄","💖"],
-Lucky: ["🍀","🐉","🧧","🎲","🌟","🪙","🌻","🐞","🎁","🔮"],
-VIP: ["🏆","🚘","🛥️","💍","👸","🤴","🏰","💎","🦚","🌹"],
-Love: ["❤️","💘","💝","💞","💗","💕","💓","🌹","🥰","💌"],
-Royal: ["👑","🏰","🐎","🦁","⚜️","💠","💍","🛡️","🦚","🏆"],
-Premium: ["🚀","🌌","🌠","🎇","🎆","🪐","🌙","☀️","💫","🎊"],
-Popular: ["🔥","🎂","🍫","🍓","🎵","🎤","🎧","🐼","🐱","🐰"],
-Special: ["🦄","🐬","🦋","🐯","🦊","🐻","🐨","🐸","🦜","🦩"],
-Festival: ["🎄","🎃","🎅","🎉","🪔","🎊","🎆","🎇","🪅","🎈"],
-Exclusive: ["💎","👑","🚁","✈️","🏎️","🌋","🌊","🛸","🦄","🌟"]
+const ICE_SERVERS = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    }
+  ]
 };
 
-const categoryPrices = {
-Customization: 100,
-Lucky: 200,
-VIP: 500,
-Love: 50,
-Royal: 1000,
-Premium: 1500,
-Popular: 80,
-Special: 300,
-Festival: 250,
-Exclusive: 2500
-};
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
 
-function createGifts() {
-const categories = Object.keys(giftCategories);
-
-```
-for (let i = 1; i <= 251; i++) {
-    const category = categories[(i - 1) % categories.length];
-    const icons = giftCategories[category];
-    const icon = icons[Math.floor((i - 1) / categories.length) % icons.length];
-
-    gifts.push({
-        id: i,
-        name: category + " Gift " + i,
-        category,
-        icon,
-        price: categoryPrices[category] + (i % 10) * 10
-    });
-}
-```
-
+function showStatus(message) {
+  if ($("roomStatus")) {
+    $("roomStatus").textContent = message;
+  }
 }
 
-createGifts();
-
-// =====================================
-// ROOM INITIALIZATION
-// =====================================
-
-document.getElementById("roomId").textContent = roomId;
-
-function updateCoins() {
-document.getElementById("myCoins").textContent = myCoins.toLocaleString();
+function showVoiceStatus(message) {
+  if ($("voiceStatus")) {
+    $("voiceStatus").textContent = message;
+  }
 }
 
-updateCoins();
-
-// =====================================
-// SEAT SYSTEM
-// =====================================
-
-function changeSeats() {
-const count = Number(document.getElementById("seatCount").value);
-
-```
-if (![9, 11, 15, 20].includes(count)) return;
-
-currentSeats = count;
-renderSeats();
-
-if (socket) {
-    socket.emit("changeSeats", {
-        roomId,
-        count
-    });
+function showModal(id) {
+  const modal = $(id);
+  if (modal) modal.style.display = "flex";
 }
-```
 
+function closeModal(id) {
+  const modal = $(id);
+  if (modal) modal.style.display = "none";
 }
+
+function escapeText(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[char]
+  );
+}
+
+function emitWithCallback(event, data = {}) {
+  return new Promise(resolve => {
+    socket.timeout(10000).emit(
+      event,
+      data,
+      (error, response) => {
+        if (error) {
+          resolve({
+            ok: false,
+            error: "Server response timeout."
+          });
+        } else {
+          resolve(response || {
+            ok: false,
+            error: "No response from server."
+          });
+        }
+      }
+    );
+  });
+}
+
+// ==========================================
+// CONNECT AND REGISTER
+// ==========================================
+
+socket.on("connect", async () => {
+  $("connectionStatus").textContent = "Online";
+
+  const result = await emitWithCallback("register", {
+    name: USER_NAME,
+    profileId: SAVED_USER_ID
+  });
+
+  if (!result.ok) {
+    showStatus(result.error || "Registration failed.");
+    return;
+  }
+
+  currentUser = result.user;
+
+  localStorage.setItem("hukaUserId", currentUser.id);
+  localStorage.setItem("hukaName", currentUser.name);
+
+  const roomId =
+    params.get("room") ||
+    localStorage.getItem("hukaMyRoom") ||
+    "";
+
+  if (!roomId) {
+    showStatus("Room ID missing. Open a room from Home.");
+    return;
+  }
+
+  await joinRoom(roomId);
+});
+
+socket.on("disconnect", () => {
+  $("connectionStatus").textContent = "Disconnected";
+  showStatus("Connection lost. Reconnecting...");
+});
+
+socket.on("connect_error", () => {
+  $("connectionStatus").textContent = "Connection error";
+});
+
+// ==========================================
+// JOIN ROOM
+// ==========================================
+
+async function joinRoom(roomId) {
+  if (!currentUser) return;
+
+  currentRoom = String(roomId);
+
+  showStatus("Joining room...");
+
+  const result = await emitWithCallback("join-room", {
+    roomId: currentRoom
+  });
+
+  if (!result.ok) {
+    showStatus(result.error || "Unable to join room.");
+    return;
+  }
+
+  joined = true;
+
+  $("roomId").textContent = result.room.id;
+  $("roomName").textContent = result.room.name;
+  $("roomOwner").textContent = result.room.owner;
+
+  roomSeats = result.seats || [];
+  roomMembers = result.members || [];
+
+  renderSeats();
+  renderMembers();
+
+  if (result.messages) {
+    result.messages.forEach(addMessage);
+  }
+
+  if (result.settings) {
+    updateSettings(result.settings);
+  }
+
+  showStatus("You joined the room.");
+
+  // Start with microphone OFF.
+  micOn = false;
+
+  socket.emit("mic-state", {
+    micOn: false
+  });
+
+  updateMicButtons();
+
+  socket.emit("get-gifts", result => {
+    if (result?.ok) {
+      renderGifts(result.gifts);
+    }
+  });
+
+  $("adminPanel")?.classList.add("hidden");
+}
+
+// ==========================================
+// ROOM MEMBERS
+// ==========================================
+
+function renderMembers() {
+  const container = $("members");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  $("memberCount").textContent = roomMembers.length;
+
+  roomMembers.forEach(member => {
+    const div = document.createElement("div");
+
+    div.className = "member";
+
+    const role = member.isOwner
+      ? " 👑 Owner"
+      : member.isAdmin
+        ? " 🛡️ Admin"
+        : "";
+
+    const mic = member.micOn ? "🎤" : "🔇";
+
+    div.textContent =
+      `${member.name} ${mic}${role}`;
+
+    container.appendChild(div);
+
+    if (isAdmin &&
+        member.id !== currentUser?.id &&
+        member.id !== currentRoom?.ownerId) {
+
+      const kickButton = document.createElement("button");
+
+      kickButton.textContent = "Kick";
+      kickButton.style.margin = "4px";
+
+      kickButton.onclick = () => kickMember(member.id);
+
+      container.appendChild(kickButton);
+    }
+  });
+
+  const me = roomMembers.find(
+    member => member.id === currentUser?.id
+  );
+
+  if (me) {
+    isOwner = me.isOwner;
+    isAdmin = me.isAdmin;
+
+    $("adminPanel")?.classList.toggle(
+      "hidden",
+      !isAdmin
+    );
+
+    $("clearChatButton")?.classList.toggle(
+      "hidden",
+      !isAdmin
+    );
+  }
+}
+
+socket.on("members-update", data => {
+  roomMembers = data.members || [];
+  renderMembers();
+});
+
+// ==========================================
+// SEATS
+// ==========================================
 
 function renderSeats() {
-const container = document.getElementById("seats");
-container.innerHTML = "";
+  const container = $("seats");
 
-```
-for (let i = 1; i <= currentSeats; i++) {
-    const user = seatUsers[i];
+  if (!container) return;
 
-    const seat = document.createElement("div");
-    seat.className = "seat";
+  container.innerHTML = "";
 
-    seat.innerHTML = `
-        <div class="avatar">${user ? "👤" : "🎙️"}</div>
-        <strong>${user || "Empty Seat"}</strong>
-        <small>Seat ${i}</small>
-        <button onclick="joinSeat(${i})">
-            ${user ? "Occupied" : "Join"}
-        </button>
-    `;
-
-    container.appendChild(seat);
-}
-```
-
-}
-
-function joinSeat(number) {
-if (seatUsers[number]) {
-alert("This seat is occupied!");
-return;
-}
-
-```
-seatUsers[number] = myUsername;
-renderSeats();
-
-if (socket) {
-    socket.emit("joinSeat", {
-        roomId,
-        seat: number,
-        username: myUsername
-    });
-}
-```
-
-}
-
-renderSeats();
-
-// =====================================
-// MIC SYSTEM
-// =====================================
-
-function toggleMic() {
-micOn = !micOn;
-
-```
-document.getElementById("micButton").textContent =
-    micOn ? "🔴" : "🎙️";
-
-if (socket) {
-    socket.emit("toggleMic", {
-        roomId,
-        username: myUsername,
-        micOn
-    });
-}
-
-alert(micOn ? "Mic ON" : "Mic OFF");
-```
-
-}
-
-// =====================================
-// SPEAKER SYSTEM
-// =====================================
-
-function toggleSpeaker() {
-speakerOn = !speakerOn;
-
-```
-const button = event.currentTarget;
-button.textContent = speakerOn ? "🔊" : "🔇";
-```
-
-}
-
-// =====================================
-// GIFT PANEL
-// =====================================
-
-function openGifts() {
-closePanels();
-document.getElementById("giftPanel").style.display = "block";
-showGifts("All");
-}
-
-function showGifts(category) {
-currentCategory = category;
-
-```
-const container = document.getElementById("giftList");
-container.innerHTML = "";
-
-const filtered = category === "All"
-    ? gifts
-    : gifts.filter(g => g.category === category);
-
-filtered.forEach(gift => {
-    const item = document.createElement("div");
-    item.className = "gift-item";
-
-    item.innerHTML = `
-        <div class="gift-icon">${gift.icon}</div>
-        <strong>${gift.name}</strong>
-        <small>💰 ${gift.price} Coins</small>
-        <button onclick="sendGift(${gift.id})">Send</button>
-    `;
-
-    container.appendChild(item);
-});
-```
-
-}
-
-// =====================================
-// SEND GIFT
-// =====================================
-
-function sendGift(id) {
-const gift = gifts.find(g => g.id === id);
-
-```
-if (!gift) return;
-
-if (myCoins < gift.price) {
-    alert("Not enough coins!");
-    return;
-}
-
-myCoins -= gift.price;
-updateCoins();
-
-giftRanking[myUsername] =
-    (giftRanking[myUsername] || 0) + gift.price;
-
-showLiveGift(gift);
-renderGiftRanking();
-
-if (socket) {
-    socket.emit("sendGift", {
-        roomId,
-        gift,
-        username: myUsername
-    });
-}
-```
-
-}
-
-function showLiveGift(gift) {
-const area = document.getElementById("liveEffects");
-
-```
-const effect = document.createElement("div");
-
-effect.innerHTML = `
-    <div style="font-size:40px">${gift.icon}</div>
-    <strong>${myUsername} sent ${gift.name}!</strong>
-`;
-
-area.appendChild(effect);
-
-setTimeout(() => effect.remove(), 4000);
-```
-
-}
-
-// =====================================
-// GIFT RANKING
-// =====================================
-
-function renderGiftRanking() {
-const container = document.getElementById("giftRanking");
-
-```
-const ranking = Object.entries(giftRanking)
-    .sort((a, b) => b[1] - a[1]);
-
-container.innerHTML = "";
-
-ranking.forEach(([username, coins], index) => {
-    const row = document.createElement("p");
-
-    row.textContent =
-        `${index + 1}. ${username} - ${coins} Coins`;
-
-    container.appendChild(row);
-});
-```
-
-}
-
-// =====================================
-// EMOJI SYSTEM
-// =====================================
-
-function openEmoji() {
-closePanels();
-document.getElementById("emojiPanel").style.display = "block";
-}
-
-function sendEmoji(emoji) {
-showLiveEmoji(emoji);
-
-```
-if (socket) {
-    socket.emit("sendEmoji", {
-        roomId,
-        username: myUsername,
-        emoji
-    });
-}
-
-closePanels();
-```
-
-}
-
-function showLiveEmoji(emoji) {
-const area = document.getElementById("liveEffects");
-const item = document.createElement("div");
-
-```
-item.textContent = emoji;
-item.style.fontSize = "35px";
-
-area.appendChild(item);
-
-setTimeout(() => item.remove(), 3000);
-```
-
-}
-
-// =====================================
-// MENTION SYSTEM
-// =====================================
-
-function mentionUser() {
-closePanels();
-
-```
-const panel = document.getElementById("mentionPanel");
-const container = document.getElementById("mentionUsers");
-
-container.innerHTML = "";
-
-Object.values(seatUsers).forEach(username => {
+  roomSeats.forEach((seat, index) => {
     const button = document.createElement("button");
 
-    button.textContent = "@" + username;
+    button.className = "seat";
+
+    const locked = lockedSeats.includes(index);
+
+    if (locked) button.classList.add("locked");
+
+    if (seat) {
+      button.innerHTML =
+        `<strong>${escapeText(seat.name)}</strong>
+         <small>Seat ${index + 1}</small>`;
+    } else if (locked) {
+      button.innerHTML =
+        `🔒 Locked<small>Seat ${index + 1}</small>`;
+    } else {
+      button.innerHTML =
+        `🎙️ Empty<small>Seat ${index + 1}</small>`;
+    }
 
     button.onclick = () => {
-        const message = prompt(
-            "Message for @" + username
-        );
-
-        if (message) {
-            addChatMessage(myUsername, "@" + username + " " + message);
+      if (seat) {
+        if (seat.id === currentUser?.id) {
+          leaveSeat();
+        } else {
+          showStatus("This seat is already occupied.");
         }
-
-        closePanels();
+      } else {
+        takeSeat(index);
+      }
     };
 
     container.appendChild(button);
+  });
+}
+
+async function takeSeat(index) {
+  const result = await emitWithCallback(
+    "take-seat",
+    index
+  );
+
+  if (!result.ok) {
+    showStatus(result.error);
+    return;
+  }
+
+  showStatus("You took seat " + (index + 1));
+}
+
+async function leaveSeat() {
+  const result = await emitWithCallback("leave-seat");
+
+  if (result.ok) {
+    showStatus("You left your seat.");
+  } else {
+    showStatus(result.error);
+  }
+}
+
+socket.on("seats-update", seats => {
+  roomSeats = seats || [];
+  renderSeats();
 });
 
-panel.style.display = "block";
-```
+socket.on("locked-seats-update", seats => {
+  lockedSeats = seats || [];
+  renderSeats();
+});
 
+// ==========================================
+// CHANGE SEAT COUNT
+// ==========================================
+
+async function changeSeatCount(count) {
+  if (!isOwner) {
+    showStatus("Only Room Owner can change seats.");
+    return;
+  }
+
+  const result = await emitWithCallback(
+    "update-room-settings",
+    { seats: count }
+  );
+
+  if (!result.ok) {
+    showStatus(result.error);
+    return;
+  }
+
+  showStatus(count + " seats selected.");
 }
 
-// =====================================
-// CHAT SYSTEM
-// =====================================
+// ==========================================
+// MIC CONTROL
+// ==========================================
 
-function addChatMessage(username, message) {
-const container = document.getElementById("chatMessages");
+async function toggleMic() {
+  if (!joined) return;
 
-```
-const item = document.createElement("div");
-item.className = "chat-message";
+  if (!micOn) {
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: false
+      });
 
-const name = document.createElement("strong");
-name.textContent = username + ": ";
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = true;
+      });
 
-const text = document.createElement("span");
-text.textContent = message;
+      micOn = true;
 
-item.appendChild(name);
-item.appendChild(text);
+      // Add microphone to all existing connections.
+      for (const [peerId, pc] of peerConnections) {
+        addLocalTracks(pc);
 
-container.appendChild(item);
-container.scrollTop = container.scrollHeight;
-```
+        if (pc.signalingState === "stable") {
+          await makeOffer(peerId);
+        }
+      }
 
+      showVoiceStatus("Microphone connected.");
+    } catch (error) {
+      micOn = false;
+
+      showVoiceStatus(
+        "Microphone permission denied or unavailable."
+      );
+
+      updateMicButtons();
+      return;
+    }
+  } else {
+    micOn = false;
+
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = false;
+      });
+    }
+
+    showVoiceStatus("Microphone OFF.");
+  }
+
+  socket.emit("mic-state", {
+    micOn
+  });
+
+  updateMicButtons();
 }
 
-function clearChat() {
-if (!confirm("Delete all visible chat messages?")) return;
+function updateMicButtons() {
+  const text = micOn ? "🎤 Mic ON" : "🔇 Mic OFF";
 
-```
-document.getElementById("chatMessages").innerHTML = "";
+  if ($("micButton")) {
+    $("micButton").textContent = text;
+  }
 
-if (socket) {
-    socket.emit("clearChat", { roomId });
+  if ($("bottomMicButton")) {
+    $("bottomMicButton").textContent =
+      micOn ? "🎤 ON" : "🔇 OFF";
+  }
 }
 
-closePanels();
-```
+socket.on("force-mute", data => {
+  if (data?.muted) {
+    micOn = false;
 
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = false;
+      });
+    }
+
+    updateMicButtons();
+
+    showVoiceStatus("Admin muted your microphone.");
+  }
+});
+
+// ==========================================
+// SPEAKER
+// ==========================================
+
+function toggleSpeaker() {
+  speakerOn = !speakerOn;
+
+  remoteAudio.forEach(audio => {
+    audio.muted = !speakerOn;
+  });
+
+  if ($("speakerButton")) {
+    $("speakerButton").textContent =
+      speakerOn ? "🔊 Speaker" : "🔇 Speaker";
+  }
 }
 
-// =====================================
+// ==========================================
+// WEBRTC VOICE CHAT
+// ==========================================
+
+function addLocalTracks(pc) {
+  if (!localStream) return;
+
+  const existingTracks = pc.getSenders()
+    .map(sender => sender.track?.id)
+    .filter(Boolean);
+
+  localStream.getTracks().forEach(track => {
+    if (!existingTracks.includes(track.id)) {
+      pc.addTrack(track, localStream);
+    }
+  });
+}
+
+function createPeer(peerId) {
+  if (peerConnections.has(peerId)) {
+    return peerConnections.get(peerId);
+  }
+
+  const pc = new RTCPeerConnection(ICE_SERVERS);
+
+  peerConnections.set(peerId, pc);
+
+  addLocalTracks(pc);
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      socket.emit("voice-ice", {
+        to: peerId,
+        candidate: event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event => {
+    let audio = remoteAudio.get(peerId);
+
+    if (!audio) {
+      audio = document.createElement("audio");
+
+      audio.autoplay = true;
+      audio.playsInline = true;
+      audio.muted = !speakerOn;
+
+      document.body.appendChild(audio);
+
+      remoteAudio.set(peerId, audio);
+    }
+
+    audio.srcObject = event.streams[0];
+
+    audio.play().catch(() => {
+      showVoiceStatus("Tap Speaker to enable audio.");
+    });
+
+    showVoiceStatus("Voice connected.");
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (
+      pc.connectionState === "failed" ||
+      pc.connectionState === "closed"
+    ) {
+      removePeer(peerId);
+    }
+  };
+
+  return pc;
+}
+
+async function makeOffer(peerId) {
+  try {
+    const pc = createPeer(peerId);
+
+    if (pc.signalingState !== "stable") return;
+
+    addLocalTracks(pc);
+
+    const offer = await pc.createOffer();
+
+    await pc.setLocalDescription(offer);
+
+    socket.emit("voice-offer", {
+      to: peerId,
+      offer: pc.localDescription
+    });
+  } catch (error) {
+    console.error("Voice offer error:", error);
+  }
+}
+
+// Existing members receive this when a new member joins.
+// Existing member creates the offer.
+socket.on("voice-peer-joined", async data => {
+  if (!data?.socketId) return;
+
+  await makeOffer(data.socketId);
+});
+
+// New member receives existing peer IDs.
+// It waits for their offers.
+socket.on("voice-existing-peers", peers => {
+  (peers || []).forEach(peerId => {
+    createPeer(peerId);
+  });
+});
+
+// Receive voice offer.
+socket.on("voice-offer", async data => {
+  try {
+    const pc = createPeer(data.from);
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(data.offer)
+    );
+
+    const answer = await pc.createAnswer();
+
+    await pc.setLocalDescription(answer);
+
+    socket.emit("voice-answer", {
+      to: data.from,
+      answer: pc.localDescription
+    });
+  } catch (error) {
+    console.error("Voice answer error:", error);
+  }
+});
+
+// Receive voice answer.
+socket.on("voice-answer", async data => {
+  try {
+    const pc = peerConnections.get(data.from);
+
+    if (!pc) return;
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(data.answer)
+    );
+  } catch (error) {
+    console.error("Voice answer receive error:", error);
+  }
+});
+
+// ICE candidates.
+socket.on("voice-ice", async data => {
+  try {
+    const pc = peerConnections.get(data.from);
+
+    if (!pc || !data.candidate) return;
+
+    await pc.addIceCandidate(
+      new RTCIceCandidate(data.candidate)
+    );
+  } catch (error) {
+    console.error("ICE error:", error);
+  }
+});
+
+function removePeer(peerId) {
+  const pc = peerConnections.get(peerId);
+
+  if (pc) {
+    pc.close();
+    peerConnections.delete(peerId);
+  }
+
+  const audio = remoteAudio.get(peerId);
+
+  if (audio) {
+    audio.srcObject = null;
+    audio.remove();
+
+    remoteAudio.delete(peerId);
+  }
+}
+
+socket.on("voice-peer-left", data => {
+  if (data?.socketId) {
+    removePeer(data.socketId);
+  }
+});
+
+// ==========================================
+// ROOM CHAT
+// ==========================================
+
+function addMessage(message) {
+  const container = $("chatMessages");
+
+  if (!container) return;
+
+  const div = document.createElement("div");
+
+  div.style.padding = "7px";
+  div.style.marginBottom = "5px";
+  div.style.borderRadius = "8px";
+  div.style.background = "#352149";
+
+  const name = document.createElement("strong");
+  name.textContent = message.name + ": ";
+
+  const text = document.createElement("span");
+  text.textContent = message.text;
+
+  div.appendChild(name);
+  div.appendChild(text);
+
+  container.appendChild(div);
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendMessage() {
+  const input = $("chatInput");
+
+  const text = input?.value.trim();
+
+  if (!text || !joined) return;
+
+  socket.emit("room-message", {
+    text
+  });
+
+  input.value = "";
+}
+
+$("chatInput")?.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    sendMessage();
+  }
+});
+
+socket.on("room-message", addMessage);
+
+socket.on("system-message", message => {
+  addMessage({
+    name: "Huka System",
+    text: message
+  });
+});
+
+// ==========================================
+// CLEAR CHAT
+// ==========================================
+
+async function clearChat() {
+  if (!isAdmin) {
+    showStatus("Permission denied.");
+    return;
+  }
+
+  if (!confirm("Clear all room messages?")) {
+    return;
+  }
+
+  const result = await emitWithCallback("clear-chat");
+
+  if (!result.ok) {
+    showStatus(result.error);
+  }
+}
+
+socket.on("chat-cleared", data => {
+  $("chatMessages").innerHTML = "";
+
+  addMessage({
+    name: "Huka System",
+    text: "Chat cleared by " + data.by
+  });
+});
+
+// ==========================================
+// MENTION
+// ==========================================
+
+function mentionUser() {
+  if (!roomMembers.length) return;
+
+  const names = roomMembers
+    .map(member => member.name)
+    .join(", ");
+
+  const selected = prompt(
+    "Enter username to mention:\n" + names
+  );
+
+  if (!selected) return;
+
+  const input = $("chatInput");
+
+  if (input) {
+    input.value += "@" + selected + " ";
+    input.focus();
+  }
+}
+
+// ==========================================
+// EMOJI
+// ==========================================
+
+function openEmoji() {
+  showModal("emojiModal");
+}
+
+function sendEmoji(emoji) {
+  socket.emit("send-emoji", {
+    emoji
+  });
+
+  closeModal("emojiModal");
+}
+
+socket.on("emoji-event", data => {
+  const div = document.createElement("div");
+
+  div.textContent =
+    `${data.name}: ${data.emoji}`;
+
+  div.style.fontSize = "24px";
+  div.style.textAlign = "center";
+  div.style.padding = "5px";
+
+  $("chatMessages")?.appendChild(div);
+});
+
+// ==========================================
+// GIFTS
+// ==========================================
+
+function openGifts() {
+  showModal("giftModal");
+}
+
+function renderGifts(gifts) {
+  const container = $("giftList");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  Object.entries(gifts || {}).forEach(([name, cost]) => {
+    const button = document.createElement("button");
+
+    button.textContent = `${name} 💎 ${cost}`;
+
+    button.onclick = () => sendGift(name);
+
+    container.appendChild(button);
+  });
+}
+
+async function sendGift(gift) {
+  const receiver =
+    $("giftReceiver")?.value.trim() || "Everyone";
+
+  const result = await emitWithCallback(
+    "send-gift",
+    {
+      gift,
+      to: receiver
+    }
+  );
+
+  if (!result.ok) {
+    alert(result.error || "Gift failed.");
+    return;
+  }
+
+  closeModal("giftModal");
+
+  showStatus(
+    "Gift sent! Remaining coins: " + result.coins
+  );
+}
+
+socket.on("gift-event", data => {
+  addMessage({
+    name: "🎁 Gift",
+    text:
+      `${data.from} sent ${data.gift} to ${data.to}`
+  });
+});
+
+// ==========================================
+// GIFT RANKING
+// ==========================================
+
+socket.on("gift-ranking", ranking => {
+  const container = $("giftRanking");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!ranking || ranking.length === 0) {
+    container.textContent = "No gifts yet.";
+    return;
+  }
+
+  ranking.forEach((item, index) => {
+    const div = document.createElement("div");
+
+    div.style.padding = "8px";
+
+    div.textContent =
+      `${index + 1}. ${item.name} — ` +
+      `${item.gifts} Gifts — ${item.coins} Coins`;
+
+    container.appendChild(div);
+  });
+});
+
+// ==========================================
 // INBOX
-// =====================================
+// ==========================================
 
 function openInbox() {
-closePanels();
-
-```
-document.getElementById("inboxPanel").style.display = "block";
-```
-
+  socket.emit("get-inbox");
+  showModal("inboxModal");
 }
 
-// =====================================
-// MORE MENU
-// =====================================
+socket.on("inbox-data", messages => {
+  const container = $("inboxMessages");
 
-function openMore() {
-closePanels();
+  if (!container) return;
 
-```
-document.getElementById("morePanel").style.display = "block";
-```
+  container.innerHTML = "";
 
-}
-
-function openRoomSettings() {
-closePanels();
-
-```
-document.getElementById("settingsPanel").style.display = "block";
-```
-
-}
-
-function saveRoomSettings() {
-const name = document.getElementById("newRoomName").value.trim();
-const announcement = document.getElementById("newAnnouncement").value.trim();
-
-```
-if (name) {
-    document.getElementById("roomName").textContent = name;
-}
-
-if (announcement) {
-    document.getElementById("announcement").textContent = announcement;
-}
-
-if (socket) {
-    socket.emit("updateRoom", {
-        roomId,
-        name,
-        announcement
-    });
-}
-
-closePanels();
-alert("Room settings updated!");
-```
-
-}
-
-// =====================================
-// YOUTUBE PLAYER
-// =====================================
-
-function openYouTube() {
-closePanels();
-
-```
-document.getElementById("videoArea").style.display = "block";
-```
-
-}
-
-function playYouTube() {
-const link = document.getElementById("youtubeLink").value.trim();
-
-```
-let videoId = "";
-
-try {
-    const url = new URL(link);
-
-    if (url.hostname.includes("youtu.be")) {
-        videoId = url.pathname.substring(1);
-    } else {
-        videoId = url.searchParams.get("v") || "";
-    }
-} catch {
-    alert("Please enter a valid YouTube link.");
+  if (!messages.length) {
+    container.textContent = "Inbox is empty.";
     return;
-}
+  }
 
-if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-    alert("Invalid YouTube video link.");
+  messages.forEach(message => {
+    const div = document.createElement("div");
+
+    div.style.padding = "10px";
+    div.style.marginBottom = "7px";
+    div.style.background = "#412b58";
+    div.style.borderRadius = "8px";
+
+    div.textContent =
+      `${message.from}: ${message.text}`;
+
+    container.appendChild(div);
+  });
+});
+
+socket.on("new-dm", message => {
+  showStatus("New message from " + message.from);
+});
+
+socket.on("dm-error", message => {
+  alert(message);
+});
+
+// ==========================================
+// YOUTUBE SHARING
+// ==========================================
+
+async function shareYoutube() {
+  const input = $("youtubeInput");
+
+  const url = input?.value.trim();
+
+  if (!url) {
+    alert("Enter YouTube link.");
     return;
-}
+  }
 
-document.getElementById("youtubePlayer").innerHTML = `
-    <iframe
-        src="https://www.youtube.com/embed/${videoId}"
-        allowfullscreen
-        allow="autoplay; encrypted-media; picture-in-picture">
-    </iframe>
-`;
+  const result = await emitWithCallback(
+    "share-youtube",
+    { url }
+  );
 
-if (socket) {
-    socket.emit("youtubePlay", {
-        roomId,
-        videoId
-    });
-}
-```
-
-}
-
-// =====================================
-// MP3 MUSIC PLAYER
-// =====================================
-
-function openMusic() {
-closePanels();
-
-```
-document.getElementById("mp3File").click();
-```
-
-}
-
-document.getElementById("mp3File").addEventListener("change", function() {
-const file = this.files[0];
-
-```
-if (!file) return;
-
-if (!file.type.startsWith("audio/")) {
-    alert("Please select an audio file.");
+  if (!result.ok) {
+    alert(result.error);
     return;
+  }
+
+  input.value = "";
 }
 
-const url = URL.createObjectURL(file);
+socket.on("youtube-link", data => {
+  const container = $("youtubeLinks");
 
-const player = document.getElementById("musicPlayer");
+  if (!container) return;
 
-player.src = url;
-player.play();
+  const link = document.createElement("a");
 
-document.querySelector(".music-area").style.display = "block";
-```
+  link.href = data.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
 
+  link.textContent =
+    "▶ YouTube shared by " + data.by;
+
+  link.style.display = "block";
+  link.style.padding = "10px";
+  link.style.color = "#ff8bd7";
+
+  container.appendChild(link);
 });
 
-// =====================================
-// RANKING
-// =====================================
+// ==========================================
+// ROOM SETTINGS
+// ==========================================
 
-function showRanking() {
-closePanels();
+function updateSettings(settings) {
+  if (!settings) return;
 
-```
-document.querySelector(".gift-ranking").scrollIntoView({
-    behavior: "smooth"
+  $("settingRoomName").value =
+    $("roomName").textContent;
+
+  $("settingDescription").value =
+    settings.description || "";
+
+  $("roomLocked").checked =
+    Boolean(settings.locked);
+
+  $("youtubeAllowed").checked =
+    settings.allowYoutube !== false;
+}
+
+socket.on("room-settings-update", settings => {
+  updateSettings(settings);
+
+  if (settings.name) {
+    $("roomName").textContent = settings.name;
+  }
 });
-```
 
+async function saveRoomSettings() {
+  if (!isAdmin) {
+    showStatus("Permission denied.");
+    return;
+  }
+
+  const data = {
+    name: $("settingRoomName").value,
+    description: $("settingDescription").value,
+    allowYoutube: $("youtubeAllowed").checked
+  };
+
+  if (isOwner) {
+    data.locked = $("roomLocked").checked;
+  }
+
+  const result = await emitWithCallback(
+    "update-room-settings",
+    data
+  );
+
+  if (!result.ok) {
+    showStatus(result.error);
+    return;
+  }
+
+  showStatus("Room settings saved.");
 }
 
-// =====================================
-// CLOSE PANELS
-// =====================================
+// ==========================================
+// ADMIN CONTROLS
+// ==========================================
 
-function closePanels() {
-document.querySelectorAll(".panel").forEach(panel => {
-panel.style.display = "none";
+async function kickMember(userId) {
+  if (!isAdmin) return;
+
+  if (!confirm("Remove this member from room?")) {
+    return;
+  }
+
+  const result = await emitWithCallback(
+    "kick-member",
+    { userId }
+  );
+
+  if (!result.ok) {
+    alert(result.error);
+  }
+}
+
+async function addAdmin(userId) {
+  if (!isOwner) return;
+
+  const result = await emitWithCallback(
+    "add-room-admin",
+    { userId }
+  );
+
+  if (!result.ok) alert(result.error);
+}
+
+async function removeAdmin(userId) {
+  if (!isOwner) return;
+
+  const result = await emitWithCallback(
+    "remove-room-admin",
+    { userId }
+  );
+
+  if (!result.ok) alert(result.error);
+}
+
+async function forceMute(userId) {
+  if (!isAdmin) return;
+
+  const result = await emitWithCallback(
+    "force-mute",
+    { userId }
+  );
+
+  if (!result.ok) alert(result.error);
+}
+
+// ==========================================
+// ROOM ADMIN UPDATES
+// ==========================================
+
+socket.on("room-admins-update", admins => {
+  roomMembers = roomMembers.map(member => ({
+    ...member,
+    isAdmin: admins.includes(member.id) ||
+      member.isOwner
+  }));
+
+  renderMembers();
 });
+
+// ==========================================
+// LEAVE ROOM
+// ==========================================
+
+function leaveRoom() {
+  if (!confirm("Are you sure you want to leave?")) {
+    return;
+  }
+
+  socket.emit("leave-room");
+
+  cleanupVoice();
+
+  joined = false;
+
+  location.href = "index.html";
 }
 
-// =====================================
-// EXIT ROOM
-// =====================================
+function cleanupVoice() {
+  peerConnections.forEach((pc, peerId) => {
+    pc.close();
+  });
 
-function exitRoom() {
-if (!confirm("Are you sure you want to leave this room?")) {
-return;
-}
+  peerConnections.clear();
 
-```
-if (socket) {
-    socket.emit("leaveRoom", {
-        roomId,
-        username: myUsername
+  remoteAudio.forEach(audio => {
+    audio.srcObject = null;
+    audio.remove();
+  });
+
+  remoteAudio.clear();
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => {
+      track.stop();
     });
+
+    localStream = null;
+  }
 }
 
-location.href = "index.html";
-```
+socket.on("kicked-from-room", data => {
+  alert(data.message || "You were removed from room.");
 
-}
+  cleanupVoice();
 
-// =====================================
-// SOCKET EVENTS
-// =====================================
+  joined = false;
 
-if (socket) {
-socket.on("receiveGift", data => {
-showLiveGift(data.gift);
+  location.href = "index.html";
 });
 
-```
-socket.on("receiveEmoji", data => {
-    showLiveEmoji(data.emoji);
+// ==========================================
+// PROFILE UPDATE
+// ==========================================
+
+socket.on("profile-update", profile => {
+  currentUser = {
+    ...currentUser,
+    ...profile
+  };
+
+  localStorage.setItem("hukaUserId", profile.id);
 });
 
-socket.on("chatMessage", data => {
-    addChatMessage(data.username, data.message);
+// ==========================================
+// ROOM CLOSE / PAGE EXIT
+// ==========================================
+
+window.addEventListener("beforeunload", () => {
+  cleanupVoice();
 });
 
-socket.on("members", members => {
-    document.getElementById("onlineCount").textContent =
-        Array.isArray(members) ? members.length : 0;
+window.addEventListener("offline", () => {
+  showStatus("Internet connection lost.");
 });
-```
 
-}
+window.addEventListener("online", () => {
+  showStatus("Internet connection restored.");
+});
 
-console.log("Huka Voice Chat Room Loaded!");
-console.log("Total Gifts:", gifts.length);
+// ==========================================
+// INITIAL STATE
+// ==========================================
+
+updateMicButtons();
+
+console.log("Huka Voice Chat Room JS loaded.");
