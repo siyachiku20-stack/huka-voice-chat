@@ -3,389 +3,469 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Huka Voice Room</title>
-
+<title>Huka Voice Chat Room</title>
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Arial,sans-serif;
+  color:white;
+  background:#080b20;
+  min-height:100vh;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #090b20;
-  color: white;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.room {
-  min-height: 100vh;
-  position: relative;
-  padding: 18px 12px 105px;
-  overflow: hidden;
+.room{
+  min-height:100vh;
+  padding:15px 12px 100px;
   background:
-    radial-gradient(ellipse at 50% 30%, #54236f 0%, transparent 45%),
-    radial-gradient(ellipse at 15% 60%, #132d67 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 70%, #40105d 0%, transparent 45%),
-    linear-gradient(160deg,#111329,#090b20 70%);
+  radial-gradient(ellipse at 50% 30%,#54236f,transparent 55%),
+  radial-gradient(ellipse at 15% 65%,#122d67,transparent 50%),
+  radial-gradient(ellipse at 90% 75%,#47105e,transparent 50%),
+  linear-gradient(160deg,#151329,#080b20);
+  position:relative;
+  overflow:hidden;
 }
 
-.room::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .45;
+.room:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
   background-image:
-    radial-gradient(circle, #ff61d8 2px, transparent 3px),
-    radial-gradient(circle, #39c9ff 2px, transparent 3px),
-    radial-gradient(circle, #b96bff 2px, transparent 3px);
-  background-size: 90px 110px, 130px 150px, 170px 180px;
-  background-position: 10px 20px, 40px 70px, 80px 30px;
+  radial-gradient(circle,#ff61d8 2px,transparent 3px),
+  radial-gradient(circle,#39c9ff 2px,transparent 3px),
+  radial-gradient(circle,#b96bff 2px,transparent 3px);
+  background-size:90px 110px,130px 150px,170px 180px;
 }
 
-.content {
-  position: relative;
-  z-index: 2;
-  max-width: 600px;
-  margin: auto;
+.content{
+  position:relative;
+  z-index:2;
+  max-width:600px;
+  margin:auto;
 }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:30px;
 }
 
-.back {
-  font-size: 27px;
-  background: none;
-  color: white;
-  border: none;
-  cursor: pointer;
+.topbar button{
+  background:none;
+  border:0;
+  color:white;
+  font-size:27px;
 }
 
-.room-title {
-  font-size: 17px;
-  font-weight: bold;
+.room-title{
+  font-weight:bold;
+  font-size:18px;
 }
 
-.room-info {
-  text-align: right;
-  font-size: 12px;
-  color: #ddd;
+.room-info{
+  text-align:right;
+  font-size:11px;
+  color:#ddd;
 }
 
-.owner {
-  text-align: center;
-  margin-bottom: 32px;
+.owner{
+  text-align:center;
+  margin-bottom:28px;
 }
 
-.owner-avatar {
-  width: 85px;
-  height: 85px;
-  margin: auto;
-  border-radius: 50%;
-  border: 3px solid #e6a5ff;
-  box-shadow: 0 0 20px #d34cff;
-  background: linear-gradient(135deg,#ff79d2,#654cff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 42px;
-  overflow: hidden;
+.owner-avatar{
+  width:85px;
+  height:85px;
+  border-radius:50%;
+  margin:auto;
+  border:3px solid #e6a5ff;
+  box-shadow:0 0 22px #d34cff;
+  background:linear-gradient(135deg,#ff79d2,#654cff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  font-size:35px;
 }
 
-.owner-avatar img,
-.seat-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.owner-avatar img,.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-.owner-name {
-  margin-top: 9px;
-  font-size: 14px;
+.owner-name{
+  margin-top:9px;
+  font-size:14px;
 }
 
-.host-label {
-  display: inline-block;
-  background: #6447d9;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  margin-top: 7px;
+.owner-label{
+  display:inline-block;
+  background:#6447d9;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:10px;
+  margin-top:6px;
 }
 
-.seat-settings {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 20px;
+.room-subtitle{
+  text-align:center;
+  font-size:12px;
+  color:#d9b8f6;
+  margin-bottom:15px;
 }
 
-.seat-settings button {
-  background: #ffffff15;
-  color: white;
-  border: 1px solid #ffffff35;
-  border-radius: 20px;
-  padding: 7px 13px;
-  font-size: 12px;
-  cursor: pointer;
+.seat-settings{
+  display:flex;
+  justify-content:center;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:24px;
 }
 
-.seat-settings button.active {
-  background: linear-gradient(90deg,#a43bdf,#ed4fae);
-  border-color: transparent;
+.seat-settings button{
+  border:1px solid #ffffff30;
+  background:#ffffff15;
+  color:white;
+  padding:7px 12px;
+  border-radius:20px;
+  font-size:11px;
 }
 
-.seats {
-  display: grid;
-  grid-template-columns: repeat(5,1fr);
-  gap: 24px 8px;
-  justify-items: center;
-  margin: 0 auto 35px;
+.seat-settings button.active{
+  background:linear-gradient(90deg,#a43bdf,#ed4fae);
+  border:0;
 }
 
-.seat {
-  text-align: center;
-  width: 100%;
-  cursor: pointer;
+.seat-settings button:disabled{
+  opacity:.7;
 }
 
-.seat-avatar {
-  width: 57px;
-  height: 57px;
-  margin: auto;
-  border-radius: 50%;
-  background: linear-gradient(135deg,#a24cdb,#4d6ee8);
-  border: 2px solid #d78aff;
-  box-shadow: 0 0 12px #8c4dff70;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 27px;
-  overflow: hidden;
-  position: relative;
+.seats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:25px 7px;
+  justify-items:center;
+  margin-bottom:25px;
 }
 
-.seat.empty .seat-avatar {
-  background: #ffffff18;
-  border: 1px solid #ffffff25;
-  color: #c9c5dc;
-  box-shadow: none;
+.seat{
+  width:100%;
+  text-align:center;
+  cursor:pointer;
 }
 
-.seat-name {
-  margin-top: 7px;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.avatar{
+  width:58px;
+  height:58px;
+  margin:auto;
+  border-radius:50%;
+  background:linear-gradient(135deg,#a24cdb,#4d6ee8);
+  border:2px solid #d78aff;
+  box-shadow:0 0 13px #8c4dff80;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  font-size:26px;
+  position:relative;
 }
 
-.seat-number {
-  color: #aaa;
-  font-size: 11px;
-  margin-top: 5px;
+.seat.empty .avatar{
+  background:#ffffff18;
+  border:1px solid #ffffff30;
+  box-shadow:none;
+  color:#c9c5dc;
 }
 
-.seat.me .seat-avatar {
-  border: 2px solid #44f5b3;
+.seat.me .avatar{
+  border:2px solid #44f5b3;
 }
 
-.room-status {
-  text-align: center;
-  color: #c5b5e8;
-  font-size: 12px;
-  margin: 25px 0;
+.seat-name{
+  margin-top:7px;
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
-.chat-box {
-  background: #130e2dba;
-  border: 1px solid #ffffff20;
-  border-radius: 15px;
-  padding: 12px;
-  margin-top: 25px;
-  display: none;
+.seat-number{
+  margin-top:5px;
+  font-size:10px;
+  color:#c9b8e9;
 }
 
-.chat-box.show {
-  display: block;
+.mic-indicator{
+  position:absolute;
+  bottom:0;
+  right:0;
+  background:#ff4d9b;
+  border-radius:50%;
+  font-size:10px;
+  padding:3px;
 }
 
-.chat-heading {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
+.online-status{
+  text-align:center;
+  font-size:12px;
+  color:#cdb5f3;
+  margin:20px 0;
 }
 
-.chat-messages {
-  height: 130px;
-  overflow-y: auto;
-  font-size: 13px;
+.coins{
+  text-align:center;
+  color:#ffd77a;
+  font-size:13px;
+  margin:12px 0;
 }
 
-.message {
-  padding: 5px 0;
-  color: #eee;
-  overflow-wrap: anywhere;
+.notice{
+  text-align:center;
+  color:#ffb8e9;
+  font-size:12px;
+  min-height:20px;
+  margin:8px;
 }
 
-.message strong {
-  color: #ff8add;
+.chat-box{
+  display:none;
+  background:#160f30eF;
+  border:1px solid #ffffff25;
+  border-radius:16px;
+  padding:13px;
+  margin-top:20px;
 }
 
-.chat-input {
-  display: flex;
-  gap: 7px;
-  margin-top: 10px;
+.chat-box.show{display:block}
+
+.chat-heading{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
 }
 
-.chat-input input {
-  flex: 1;
-  min-width: 0;
-  background: #ffffff15;
-  border: 1px solid #ffffff30;
-  border-radius: 20px;
-  padding: 11px;
-  color: white;
-  outline: none;
+.chat-heading button{
+  background:none;
+  color:white;
+  border:0;
+  font-size:19px;
 }
 
-.chat-input button {
-  border: none;
-  background: #b746e8;
-  color: white;
-  padding: 0 16px;
-  border-radius: 20px;
+.chat-messages{
+  height:145px;
+  overflow-y:auto;
+  font-size:12px;
 }
 
-.bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
-  background: #100c27ed;
-  border-top: 1px solid #ffffff20;
-  padding: 12px 7px 18px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  backdrop-filter: blur(15px);
+.message{
+  padding:6px 0;
+  overflow-wrap:anywhere;
 }
 
-.control {
-  border: none;
-  background: none;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
+.message strong{
+  color:#ff9bdb;
 }
 
-.control span {
-  font-size: 9px;
+.chat-input{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
 }
 
-.control.off {
-  color: #ff5b9c;
+input,select{
+  background:#ffffff15;
+  color:white;
+  border:1px solid #ffffff30;
+  border-radius:20px;
+  padding:11px;
+  outline:none;
 }
 
-.gift {
-  background: linear-gradient(135deg,#ff54bd,#9747ee);
-  width: 47px;
-  height: 47px;
-  border-radius: 50%;
-  font-size: 24px;
-  justify-content: center;
+input{flex:1;min-width:0}
+
+select option{
+  background:#21153d;
+  color:white;
 }
 
-.popup {
-  display: none;
-  position: fixed;
-  z-index: 20;
-  bottom: 85px;
-  left: 10px;
-  right: 10px;
-  background: #21153d;
-  border: 1px solid #b55aff;
-  border-radius: 18px;
-  padding: 17px;
-  box-shadow: 0 0 25px #0008;
+.send-btn{
+  border:0;
+  border-radius:20px;
+  background:linear-gradient(90deg,#a43bdf,#ed4fae);
+  color:white;
+  padding:0 17px;
 }
 
-.popup.show {
-  display: block;
+.bottom-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  z-index:10;
+  background:#100c27f5;
+  border-top:1px solid #ffffff25;
+  padding:11px 5px 18px;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  backdrop-filter:blur(15px);
 }
 
-.popup h3 {
-  margin-bottom: 15px;
+.control{
+  background:none;
+  border:0;
+  color:white;
+  font-size:21px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  cursor:pointer;
 }
 
-.popup-grid {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 15px;
+.control span{
+  font-size:9px;
 }
 
-.popup-grid button {
-  background: #ffffff15;
-  border: 1px solid #ffffff20;
-  color: white;
-  border-radius: 12px;
-  padding: 12px 5px;
-  font-size: 23px;
-  cursor: pointer;
+.control.off{color:#ff579b}
+
+.gift-control{
+  background:linear-gradient(135deg,#ff54bd,#9747ee);
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  justify-content:center;
 }
 
-.popup-grid small {
-  display: block;
-  font-size: 10px;
-  margin-top: 5px;
+.popup{
+  display:none;
+  position:fixed;
+  bottom:85px;
+  left:10px;
+  right:10px;
+  max-width:580px;
+  margin:auto;
+  z-index:20;
+  background:#21153d;
+  border:1px solid #b55aff;
+  border-radius:18px;
+  padding:17px;
+  box-shadow:0 0 25px #0009;
+  max-height:65vh;
+  overflow-y:auto;
 }
 
-.popup-close {
-  float: right;
-  background: none;
-  color: white;
-  border: none;
-  font-size: 20px;
+.popup.show{display:block}
+
+.popup-title{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:15px;
 }
 
-#notice {
-  text-align: center;
-  font-size: 12px;
-  color: #ffb8e9;
-  margin: 10px;
+.popup-title button{
+  color:white;
+  background:none;
+  border:0;
+  font-size:20px;
 }
 
-@media(max-width:360px) {
-  .seat-avatar {
-    width: 49px;
-    height: 49px;
-  }
+.popup-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
 
-  .seats {
-    gap: 20px 5px;
-  }
+.popup-grid button{
+  background:#ffffff15;
+  border:1px solid #ffffff20;
+  color:white;
+  border-radius:12px;
+  padding:12px 4px;
+  font-size:22px;
+}
 
-  .control {
-    font-size: 19px;
-  }
+.popup-grid small{
+  display:block;
+  font-size:10px;
+  margin-top:5px;
+}
 
-  .control span {
-    font-size: 8px;
-  }
+.popup select,.popup input{
+  width:100%;
+  margin-bottom:10px;
+  border-radius:10px;
+}
+
+.popup-action{
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:linear-gradient(90deg,#a43bdf,#ed4fae);
+  color:white;
+  margin-top:8px;
+}
+
+.member-list{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.member-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#ffffff12;
+  border-radius:10px;
+  padding:10px;
+  font-size:12px;
+}
+
+.member-item button{
+  border:0;
+  background:#8f42c9;
+  color:white;
+  padding:7px 10px;
+  border-radius:10px;
+}
+
+#giftAnimation{
+  position:fixed;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:50;
+  font-size:65px;
+  display:none;
+  text-align:center;
+  text-shadow:0 0 25px #ff45d4;
+  pointer-events:none;
+}
+
+#giftAnimation.show{
+  display:block;
+  animation:giftPop 1.5s ease;
+}
+
+@keyframes giftPop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}
+  40%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1)}
+}
+
+@media(max-width:360px){
+  .avatar{width:49px;height:49px}
+  .seats{gap:20px 4px}
+  .control{font-size:18px}
+  .control span{font-size:8px}
 }
 </style>
 </head>
@@ -396,38 +476,45 @@ body {
 <div class="content">
 
   <div class="topbar">
-    <button class="back" onclick="leaveRoom()">‹</button>
-
+    <button onclick="leaveRoom()">‹</button>
     <div class="room-title">HUKA ♡</div>
-
     <div class="room-info">
       ROOM ID<br>
-      <b id="roomIdText">200001</b>
+      <b id="roomIdText">------</b>
     </div>
   </div>
 
   <div class="owner">
     <div class="owner-avatar" id="ownerAvatar">👑</div>
     <div class="owner-name" id="ownerName">Huka Owner</div>
-    <div class="host-label">👑 ROOM OWNER</div>
+    <div class="owner-label">👑 ROOM OWNER</div>
   </div>
 
-  <div class="seat-settings">
-    <button class="active" onclick="changeSeats(9,this)">9 Seats</button>
-    <button onclick="changeSeats(11,this)">11 Seats</button>
-    <button onclick="changeSeats(15,this)">15 Seats</button>
-    <button onclick="changeSeats(20,this)">20 Seats</button>
+  <div class="room-subtitle" id="roomName">
+    Huka Friends Room
+  </div>
+
+  <div class="seat-settings" id="seatSettings">
+    <button onclick="changeSeats(9)">9 Seats</button>
+    <button onclick="changeSeats(11)">11 Seats</button>
+    <button onclick="changeSeats(15)">15 Seats</button>
+    <button onclick="changeSeats(20)">20 Seats</button>
   </div>
 
   <div class="seats" id="seats"></div>
 
-  <div class="room-status" id="connectionStatus">
-    Connecting to Huka Room...
+  <div class="online-status" id="onlineStatus">
+    Connecting to Huka...
   </div>
 
-  <div id="notice"></div>
+  <div class="coins" id="coinBalance">
+    🪙 0 Coins
+  </div>
+
+  <div class="notice" id="notice"></div>
 
   <div class="chat-box" id="chatBox">
+
     <div class="chat-heading">
       <b>💬 Room Chat</b>
       <button onclick="toggleChat()">✕</button>
@@ -440,14 +527,16 @@ body {
         placeholder="Write a message..."
         maxlength="500">
 
-      <button onclick="sendMessage()">Send</button>
+      <button class="send-btn"
+        onclick="sendMessage()">Send</button>
     </div>
+
   </div>
 
 </div>
 </div>
 
-<!-- Bottom Controls -->
+<!-- BOTTOM BAR -->
 
 <div class="bottom-bar">
 
@@ -458,7 +547,7 @@ body {
 
   <button class="control" onclick="openPopup('emojiPopup')">
     😊
-    <span>EMOJI</span>
+    <span>STICKERS</span>
   </button>
 
   <button class="control" onclick="toggleSpeaker()" id="speakerBtn">
@@ -466,62 +555,144 @@ body {
     <span>SPEAKER</span>
   </button>
 
-  <button class="control" onclick="toggleMic()" id="micBtn">
-    🎙️
-    <span>MIC ON</span>
+  <button class="control off" onclick="toggleMic()" id="micBtn">
+    🔇
+    <span>MIC OFF</span>
   </button>
 
-  <button class="control" onclick="toggleChat()">
+  <button class="control" onclick="openInbox()">
     📩
     <span>INBOX</span>
   </button>
 
-  <button class="control gift" onclick="openPopup('giftPopup')">
+  <button class="control gift-control"
+    onclick="openPopup('giftPopup')">
     🎁
     <span>GIFT</span>
   </button>
 
 </div>
 
-<!-- Emoji Popup -->
+<!-- EMOJI POPUP -->
 
 <div class="popup" id="emojiPopup">
-  <button class="popup-close"
-    onclick="closePopups()">✕</button>
 
-  <h3>😊 Stickers & Emoji</h3>
+  <div class="popup-title">
+    <b>😊 Emojis & Stickers</b>
+    <button onclick="closePopups()">✕</button>
+  </div>
 
   <div class="popup-grid">
-    <button onclick="insertEmoji('❤️')">❤️</button>
-    <button onclick="insertEmoji('😍')">😍</button>
-    <button onclick="insertEmoji('😂')">😂</button>
-    <button onclick="insertEmoji('🥰')">🥰</button>
-    <button onclick="insertEmoji('🔥')">🔥</button>
-    <button onclick="insertEmoji('🌹')">🌹</button>
-    <button onclick="insertEmoji('🎉')">🎉</button>
-    <button onclick="insertEmoji('😘')">😘</button>
+
+    <button onclick="sendEmoji('😀')">😀</button>
+    <button onclick="sendEmoji('😂')">😂</button>
+    <button onclick="sendEmoji('😍')">😍</button>
+    <button onclick="sendEmoji('🥰')">🥰</button>
+    <button onclick="sendEmoji('😘')">😘</button>
+    <button onclick="sendEmoji('😎')">😎</button>
+    <button onclick="sendEmoji('😭')">😭</button>
+    <button onclick="sendEmoji('🔥')">🔥</button>
+    <button onclick="sendEmoji('❤️')">❤️</button>
+    <button onclick="sendEmoji('💖')">💖</button>
+    <button onclick="sendEmoji('🎉')">🎉</button>
+    <button onclick="sendEmoji('👏')">👏</button>
+    <button onclick="sendEmoji('🌹')">🌹</button>
+    <button onclick="sendEmoji('💎')">💎</button>
+    <button onclick="sendEmoji('👑')">👑</button>
+
   </div>
 </div>
 
-<!-- Gift Popup -->
+<!-- GIFT POPUP -->
 
 <div class="popup" id="giftPopup">
-  <button class="popup-close"
-    onclick="closePopups()">✕</button>
 
-  <h3>🎁 Send a Gift</h3>
+  <div class="popup-title">
+    <b>🎁 Huka Gift Store</b>
+    <button onclick="closePopups()">✕</button>
+  </div>
+
+  <div class="coins" id="giftCoins">
+    🪙 0 Coins
+  </div>
+
+  <label>Send Gift To</label>
+
+  <select id="giftReceiver">
+    <option value="Everyone">Everyone</option>
+  </select>
 
   <div class="popup-grid">
-    <button onclick="sendGift('Rose')">🌹<small>Rose</small></button>
-    <button onclick="sendGift('Heart')">❤️<small>Heart</small></button>
-    <button onclick="sendGift('Love')">💝<small>Love</small></button>
-    <button onclick="sendGift('Teddy')">🧸<small>Teddy</small></button>
-    <button onclick="sendGift('Crown')">👑<small>Crown</small></button>
-    <button onclick="sendGift('Diamond')">💎<small>Diamond</small></button>
-    <button onclick="sendGift('Car')">🚗<small>Car</small></button>
-    <button onclick="sendGift('Castle')">🏰<small>Castle</small></button>
+
+    <button onclick="sendGift('Rose')">
+      🌹<small>Rose</small><small>10 Coins</small>
+    </button>
+
+    <button onclick="sendGift('Heart')">
+      ❤️<small>Heart</small><small>50 Coins</small>
+    </button>
+
+    <button onclick="sendGift('Crown')">
+      👑<small>Crown</small><small>100 Coins</small>
+    </button>
+
+    <button onclick="sendGift('Diamond')">
+      💎<small>Diamond</small><small>500 Coins</small>
+    </button>
+
+    <button onclick="sendGift('Rocket')">
+      🚀<small>Rocket</small><small>1000 Coins</small>
+    </button>
+
+    <button onclick="sendGift('Castle')">
+      🏰<small>Castle</small><small>5000 Coins</small>
+    </button>
+
+    <button onclick="sendGift('Galaxy')">
+      🌌<small>Galaxy</small><small>10000 Coins</small>
+    </button>
+
   </div>
 </div>
+
+<!-- INBOX POPUP -->
+
+<div class="popup" id="inboxPopup">
+
+  <div class="popup-title">
+    <b>📩 Private Inbox</b>
+    <button onclick="closePopups()">✕</button>
+  </div>
+
+  <select id="inboxReceiver">
+    <option value="">Select a member</option>
+  </select>
+
+  <div class="chat-messages" id="inboxMessages"></div>
+
+  <input id="inboxInput"
+    placeholder="Private message..."
+    maxlength="500">
+
+  <button class="popup-action"
+    onclick="sendInboxMessage()">Send Message</button>
+
+</div>
+
+<!-- MEMBER POPUP -->
+
+<div class="popup" id="memberPopup">
+
+  <div class="popup-title">
+    <b>👤 Member Details</b>
+    <button onclick="closePopups()">✕</button>
+  </div>
+
+  <div id="memberDetails"></div>
+
+</div>
+
+<div id="giftAnimation">🎁</div>
 
 <script>
 
@@ -529,190 +700,458 @@ const socket = io();
 
 const params = new URLSearchParams(location.search);
 
-const roomId = params.get("roomId") ||
-               localStorage.getItem("hukaRoomId") ||
-               "200001";
+const roomId =
+  params.get("room") ||
+  params.get("roomId") ||
+  localStorage.getItem("hukaMyRoom") ||
+  "";
 
-const username =
-  localStorage.getItem("hukaUsername") || "Huka User";
-
-const avatar =
-  localStorage.getItem("hukaAvatar") || "👤";
-
-let seatCount = 9;
+let user = null;
+let roomData = null;
 let members = [];
-let roomJoined = false;
-let micOn = true;
+let messages = [];
+let myId = "";
+let micOn = false;
 let speakerOn = true;
+let roomJoined = false;
+let inboxMessages = [];
 
-document.getElementById("roomIdText").textContent = roomId;
-document.getElementById("ownerName").textContent = username;
-document.getElementById("ownerAvatar").innerHTML =
-  makeAvatar(avatar);
+const giftPrices = {
+  Rose:10,
+  Heart:50,
+  Crown:100,
+  Diamond:500,
+  Rocket:1000,
+  Castle:5000,
+  Galaxy:10000
+};
 
-function makeAvatar(value) {
-  if (/^https?:\/\//i.test(value)) {
+const giftEmojis = {
+  Rose:"🌹",
+  Heart:"❤️",
+  Crown:"👑",
+  Diamond:"💎",
+  Rocket:"🚀",
+  Castle:"🏰",
+  Galaxy:"🌌"
+};
+
+document.getElementById("roomIdText").textContent =
+  roomId || "------";
+
+const savedName =
+  localStorage.getItem("hukaName") || "Huka User";
+
+const savedId =
+  localStorage.getItem("hukaUserId") || "";
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g,c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[c]);
+}
+
+function avatarHTML(value){
+
+  if(value && /^https?:\/\//i.test(value)){
     return `<img src="${escapeHTML(value)}" alt="Avatar">`;
   }
 
   return escapeHTML(value || "👤");
 }
 
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
+function notice(message){
+
+  const el = document.getElementById("notice");
+
+  el.textContent = message;
+
+  clearTimeout(window.noticeTimer);
+
+  window.noticeTimer = setTimeout(()=>{
+    el.textContent = "";
+  },3500);
+
 }
 
-// Socket connection
+function updateCoins(){
 
-socket.on("connect", () => {
+  const coins = user?.coins ?? 0;
 
-  document.getElementById("connectionStatus").textContent =
-    "Connected to Huka ❤️";
+  document.getElementById("coinBalance").textContent =
+    "🪙 " + coins + " Coins";
 
-  socket.emit("user:update", {
-    name: username,
-    avatar: avatar
-  }, () => {
+  document.getElementById("giftCoins").textContent =
+    "🪙 " + coins + " Coins";
 
-    socket.emit("room:join", {
-      roomId: roomId,
-      roomName: "Huka Friends Club",
-      category: "Friends"
-    }, response => {
+}
 
-      if (!response || !response.success) {
-        showNotice(response?.error || "Room join failed");
-      } else {
-        roomJoined = true;
-      }
+// REGISTER AND JOIN
 
-    });
+socket.on("connect",()=>{
+
+  document.getElementById("onlineStatus").textContent =
+    "Registering Huka Profile...";
+
+  if(!roomId){
+    notice("Room ID missing. Please open a room from Home.");
+    return;
+  }
+
+  socket.emit("register",{
+    name:savedName,
+    userId:savedId
+  },response=>{
+
+    if(!response || !response.ok){
+      notice(response?.message || "Registration failed");
+      return;
+    }
+
+    user = response.user;
+    myId = user.id;
+
+    localStorage.setItem("hukaUserId",user.id);
+    localStorage.setItem("hukaName",user.name);
+
+    updateCoins();
+
+    document.getElementById("ownerAvatar").innerHTML =
+      avatarHTML(user.avatar);
+
+    joinRoom();
 
   });
 
 });
 
-socket.on("disconnect", () => {
-  roomJoined = false;
+function joinRoom(){
 
-  document.getElementById("connectionStatus").textContent =
-    "Connection lost. Reconnecting...";
-});
+  socket.emit("join-room",{
+    roomId:roomId
+  },response=>{
 
-socket.on("connect_error", () => {
-  document.getElementById("connectionStatus").textContent =
-    "Server connection problem";
-});
+    if(!response || !response.ok){
 
-// Room joined
+      document.getElementById("onlineStatus").textContent =
+        response?.message || "Room join failed";
 
-socket.on("room:joined", data => {
+      notice(response?.message || "Unable to join room");
 
-  roomJoined = true;
+      return;
+    }
 
-  if (data.messages) {
-    data.messages.forEach(addMessage);
-  }
+    roomJoined = true;
 
-});
+    roomData = response.room;
 
-// Live room members
+    members = response.members || [];
 
-socket.on("room:state", data => {
+    messages = response.messages || [];
 
-  if (!data || !data.members) return;
+    document.getElementById("roomName").textContent =
+      roomData.name || "Huka Friends Room";
 
-  members = data.members;
+    renderMembers();
+    renderChat();
+    updateSeatSettings();
 
-  renderSeats();
+    document.getElementById("onlineStatus").textContent =
+      "🟢 " + members.length + " Members Online";
 
-  document.getElementById("connectionStatus").textContent =
+  });
+
+}
+
+// LIVE MEMBERS
+
+socket.on("members",data=>{
+
+  members = Array.isArray(data) ? data : [];
+
+  renderMembers();
+
+  updateGiftReceivers();
+  updateInboxReceivers();
+
+  document.getElementById("onlineStatus").textContent =
     "🟢 " + members.length + " Members Online";
 
 });
 
-socket.on("room:user-joined", user => {
-  showNotice(user.name + " joined the room ❤️");
+socket.on("room-update",data=>{
+
+  if(!data) return;
+
+  roomData = {
+    ...roomData,
+    ...data
+  };
+
+  document.getElementById("roomName").textContent =
+    roomData.name || "Huka Friends Room";
+
+  renderMembers();
+  updateSeatSettings();
+
 });
 
-socket.on("room:user-left", user => {
-  showNotice(user.name + " left the room");
+socket.on("disconnect",()=>{
+
+  roomJoined = false;
+
+  document.getElementById("onlineStatus").textContent =
+    "Connection lost. Reconnecting...";
+
 });
 
-// Seat rendering
+socket.on("connect_error",()=>{
 
-function renderSeats() {
+  document.getElementById("onlineStatus").textContent =
+    "Server connection problem";
+
+});
+
+// OWNER AND MEMBERS
+
+function renderMembers(){
+
+  const owner = members.find(member=>member.isOwner);
+
+  const ownerName =
+    owner?.name || user?.name || "Huka Owner";
+
+  const ownerAvatar =
+    owner?.avatar || user?.avatar || "👑";
+
+  document.getElementById("ownerName").textContent =
+    ownerName;
+
+  document.getElementById("ownerAvatar").innerHTML =
+    avatarHTML(ownerAvatar);
+
+  renderSeats();
+
+}
+
+// SEATS
+
+function renderSeats(){
 
   const container = document.getElementById("seats");
 
   container.innerHTML = "";
 
-  for (let i = 0; i < seatCount; i++) {
+  const count = Number(roomData?.seats || 9);
+
+  for(let i=1;i<=count;i++){
 
     const member = members.find(
-      item => Number(item.seat) === i
+      item=>Number(item.seat)===i
     );
 
     const div = document.createElement("div");
 
     div.className = "seat";
 
-    if (member) {
+    if(member){
 
-      const isMe = member.name === username;
+      const isMe = member.id === myId;
+
+      if(isMe) div.classList.add("me");
 
       div.innerHTML = `
-        <div class="seat-avatar ${isMe ? "me" : ""}">
-          ${makeAvatar(member.avatar)}
+        <div class="avatar">
+          ${avatarHTML(member.avatar)}
+          ${member.micOn ? "" : '<span class="mic-indicator">🔇</span>'}
         </div>
+
         <div class="seat-name">
           ${escapeHTML(member.name)}
         </div>
+
         <div class="seat-number">
-          ${i === 0 ? "👑 Host" : "Seat " + (i + 1)}
+          ${member.isOwner ? "👑 Owner" :
+            member.isAdmin ? "⭐ Admin" :
+            "Seat "+i}
         </div>
       `;
 
-    } else {
+      div.onclick = ()=>{
+        openMember(member);
+      };
+
+    }else{
 
       div.classList.add("empty");
 
       div.innerHTML = `
-        <div class="seat-avatar">🛋️</div>
+        <div class="avatar">🛋️</div>
         <div class="seat-name">Empty</div>
-        <div class="seat-number">${i + 1}</div>
+        <div class="seat-number">${i}</div>
       `;
+
+      div.onclick = ()=>{
+        joinSeat(i);
+      };
 
     }
 
     container.appendChild(div);
+
   }
 
 }
 
-function changeSeats(count, button) {
+// JOIN SEAT
 
-  seatCount = count;
+function joinSeat(seat){
 
-  document.querySelectorAll(".seat-settings button")
-    .forEach(btn => btn.classList.remove("active"));
+  if(!roomJoined){
+    notice("Join room first");
+    return;
+  }
 
-  button.classList.add("active");
+  socket.emit("join-seat",{seat},response=>{
 
-  renderSeats();
+    if(!response || !response.ok){
+      notice(response?.message || "Seat not available");
+      return;
+    }
+
+    notice("You joined seat "+seat+" ❤️");
+
+  });
+
 }
 
-// Chat
+// LEAVE SEAT
 
-socket.on("chat:message", addMessage);
+function leaveSeat(){
 
-function addMessage(message) {
+  socket.emit("leave-seat",response=>{
+
+    if(response?.ok){
+      notice("You left your seat");
+      closePopups();
+    }else{
+      notice(response?.message || "Unable to leave seat");
+    }
+
+  });
+
+}
+
+// CHANGE SEATS - OWNER ONLY
+
+function updateSeatSettings(){
+
+  const buttons =
+    document.querySelectorAll("#seatSettings button");
+
+  const isOwner = members.some(
+    member=>member.id===myId && member.isOwner
+  );
+
+  buttons.forEach(button=>{
+
+    const count = Number(
+      button.textContent.replace(" Seats","")
+    );
+
+    button.classList.toggle(
+      "active",
+      count===Number(roomData?.seats || 9)
+    );
+
+    button.disabled = !isOwner;
+
+  });
+
+}
+
+function changeSeats(count){
+
+  if(!members.some(member=>member.id===myId && member.isOwner)){
+    notice("Only room owner can change seats");
+    return;
+  }
+
+  socket.emit("update-room-settings",{
+    seats:count
+  },response=>{
+
+    if(!response || !response.ok){
+      notice(response?.message || "Seat update failed");
+      return;
+    }
+
+    notice(count+" seats activated");
+
+  });
+
+}
+
+// MIC
+
+function toggleMic(){
+
+  if(!roomJoined) return;
+
+  const newState = !micOn;
+
+  socket.emit("toggle-mic",{
+    micOn:newState
+  },response=>{
+
+    if(!response || !response.ok){
+      notice(response?.message || "Mic update failed");
+      return;
+    }
+
+    micOn = response.micOn;
+
+    const btn = document.getElementById("micBtn");
+
+    btn.innerHTML = micOn
+      ? '🎙️<span>MIC ON</span>'
+      : '🔇<span>MIC OFF</span>';
+
+    btn.classList.toggle("off",!micOn);
+
+  });
+
+}
+
+// SPEAKER
+
+function toggleSpeaker(){
+
+  speakerOn = !speakerOn;
+
+  const btn = document.getElementById("speakerBtn");
+
+  btn.innerHTML = speakerOn
+    ? '🔊<span>SPEAKER</span>'
+    : '🔈<span>MUTED</span>';
+
+  btn.classList.toggle("off",!speakerOn);
+
+}
+
+// CHAT
+
+socket.on("chatMessage",message=>{
+
+  addMessage(message);
+
+});
+
+function addMessage(message){
 
   const box = document.getElementById("chatMessages");
 
@@ -720,30 +1159,48 @@ function addMessage(message) {
 
   div.className = "message";
 
-  const name = document.createElement("strong");
-  name.textContent = message.name + ": ";
+  const strong = document.createElement("strong");
 
-  const content = document.createTextNode(message.text);
+  strong.textContent =
+    (message.username || "User") + ": ";
 
-  div.append(name, content);
+  const text = document.createTextNode(
+    message.message || ""
+  );
+
+  div.append(strong,text);
 
   box.appendChild(div);
 
   box.scrollTop = box.scrollHeight;
+
 }
 
-function sendMessage() {
+function renderChat(){
+
+  const box = document.getElementById("chatMessages");
+
+  box.innerHTML = "";
+
+  messages.forEach(addMessage);
+
+}
+
+function sendMessage(){
 
   const input = document.getElementById("chatInput");
 
-  const text = input.value.trim();
+  const message = input.value.trim();
 
-  if (!text || !roomJoined) return;
+  if(!message || !roomJoined) return;
 
-  socket.emit("chat:send", { text }, response => {
+  socket.emit("send-message",{
+    message
+  },response=>{
 
-    if (!response || !response.success) {
-      showNotice(response?.error || "Message failed");
+    if(!response || !response.ok){
+      notice(response?.message || "Message failed");
+      return;
     }
 
   });
@@ -753,15 +1210,23 @@ function sendMessage() {
 }
 
 document.getElementById("chatInput")
-  .addEventListener("keydown", event => {
+.addEventListener("keydown",event=>{
 
-    if (event.key === "Enter") {
-      sendMessage();
-    }
+  if(event.key==="Enter"){
+    sendMessage();
+  }
 
-  });
+});
 
-function toggleChat() {
+socket.on("chat-cleared",()=>{
+
+  document.getElementById("chatMessages").innerHTML = "";
+
+  notice("Chat cleared");
+
+});
+
+function toggleChat(){
 
   closePopups();
 
@@ -770,7 +1235,9 @@ function toggleChat() {
 
 }
 
-function mention() {
+function mention(){
+
+  closePopups();
 
   document.getElementById("chatBox")
     .classList.add("show");
@@ -778,94 +1245,303 @@ function mention() {
   const input = document.getElementById("chatInput");
 
   input.value = "@";
+
   input.focus();
 
 }
 
-// Emoji
+// EMOJI
 
-function insertEmoji(emoji) {
+function sendEmoji(emoji){
 
-  document.getElementById("chatBox")
-    .classList.add("show");
+  socket.emit("send-emoji",{
+    emoji
+  },response=>{
 
-  const input = document.getElementById("chatInput");
-
-  input.value += emoji;
-  input.focus();
-
-  closePopups();
-
-}
-
-// Gifts
-
-socket.on("gift:received", gift => {
-
-  showNotice(
-    "🎁 " + gift.senderName +
-    " sent " + gift.giftName
-  );
-
-});
-
-function sendGift(name) {
-
-  if (!roomJoined) {
-    showNotice("Join the room first");
-    return;
-  }
-
-  socket.emit("gift:send", {
-    giftName: name
-  }, response => {
-
-    if (response && response.success) {
-      showNotice("🎁 " + name + " sent!");
-      closePopups();
-    } else {
-      showNotice(response?.error || "Gift failed");
+    if(!response || !response.ok){
+      notice(response?.message || "Emoji failed");
+      return;
     }
+
+    closePopups();
 
   });
 
 }
 
-// Mic control
+socket.on("emoji-received",data=>{
 
-function toggleMic() {
+  const animation = document.getElementById("giftAnimation");
 
-  micOn = !micOn;
+  animation.textContent = data.emoji;
 
-  const button = document.getElementById("micBtn");
+  animation.classList.remove("show");
 
-  button.innerHTML = micOn
-    ? "🎙️<span>MIC ON</span>"
-    : "🔇<span>MIC OFF</span>";
+  void animation.offsetWidth;
 
-  button.classList.toggle("off", !micOn);
+  animation.classList.add("show");
+
+});
+
+// GIFTS
+
+function updateGiftReceivers(){
+
+  const select = document.getElementById("giftReceiver");
+
+  const previous = select.value || "Everyone";
+
+  select.innerHTML =
+    '<option value="Everyone">Everyone</option>';
+
+  members.forEach(member=>{
+
+    if(member.id===myId) return;
+
+    const option = document.createElement("option");
+
+    option.value = member.id;
+
+    option.textContent = member.name;
+
+    select.appendChild(option);
+
+  });
+
+  if([...select.options].some(o=>o.value===previous)){
+    select.value = previous;
+  }
 
 }
 
-// Speaker control
+function sendGift(gift){
 
-function toggleSpeaker() {
+  const receiverId =
+    document.getElementById("giftReceiver").value;
 
-  speakerOn = !speakerOn;
+  if(!roomJoined) return;
 
-  const button = document.getElementById("speakerBtn");
+  socket.emit("send-gift",{
+    gift,
+    receiverId
+  },response=>{
 
-  button.innerHTML = speakerOn
-    ? "🔊<span>SPEAKER</span>"
-    : "🔈<span>MUTED</span>";
+    if(!response || !response.ok){
 
-  button.classList.toggle("off", !speakerOn);
+      notice(response?.message || "Gift failed");
+
+      return;
+    }
+
+    if(user){
+      user.coins = response.coins;
+    }
+
+    updateCoins();
+
+    notice(gift+" sent successfully! 🎁");
+
+    closePopups();
+
+  });
 
 }
 
-// Popup controls
+socket.on("gift-received",data=>{
 
-function openPopup(id) {
+  const emoji =
+    giftEmojis[data.gift] || "🎁";
+
+  const animation =
+    document.getElementById("giftAnimation");
+
+  animation.textContent = emoji;
+
+  animation.classList.remove("show");
+
+  void animation.offsetWidth;
+
+  animation.classList.add("show");
+
+  notice(
+    data.senderName+" sent "+data.gift+" 🎁"
+  );
+
+});
+
+
+// INBOX
+
+function updateInboxReceivers(){
+
+  const select =
+    document.getElementById("inboxReceiver");
+
+  const previous = select.value;
+
+  select.innerHTML =
+    '<option value="">Select a member</option>';
+
+  members.forEach(member=>{
+
+    if(member.id===myId) return;
+
+    const option = document.createElement("option");
+
+    option.value = member.id;
+
+    option.textContent = member.name;
+
+    select.appendChild(option);
+
+  });
+
+  if([...select.options].some(o=>o.value===previous)){
+    select.value = previous;
+  }
+
+}
+
+function openInbox(){
+
+  closePopups();
+
+  openPopup("inboxPopup");
+
+  socket.emit("get-inbox",response=>{
+
+    if(!response || !response.ok){
+      notice(response?.message || "Inbox failed");
+      return;
+    }
+
+    inboxMessages = response.messages || [];
+
+    renderInbox();
+
+  });
+
+}
+
+function renderInbox(){
+
+  const box = document.getElementById("inboxMessages");
+
+  box.innerHTML = "";
+
+  inboxMessages.forEach(message=>{
+
+    const div = document.createElement("div");
+
+    div.className = "message";
+
+    const name = document.createElement("strong");
+
+    name.textContent =
+      message.senderName+": ";
+
+    const text = document.createTextNode(
+      message.message
+    );
+
+    div.append(name,text);
+
+    box.appendChild(div);
+
+  });
+
+}
+
+function sendInboxMessage(){
+
+  const receiverId =
+    document.getElementById("inboxReceiver").value;
+
+  const input =
+    document.getElementById("inboxInput");
+
+  const message = input.value.trim();
+
+  if(!receiverId){
+    notice("Select a member");
+    return;
+  }
+
+  if(!message) return;
+
+  socket.emit("send-inbox-message",{
+    receiverId,
+    message
+  },response=>{
+
+    if(!response || !response.ok){
+      notice(response?.message || "Message failed");
+      return;
+    }
+
+    notice("Private message sent");
+
+    input.value = "";
+
+    closePopups();
+
+  });
+
+}
+
+socket.on("inbox-message",message=>{
+
+  inboxMessages.push(message);
+
+  renderInbox();
+
+  notice("📩 New private message");
+
+});
+
+// MEMBER DETAILS
+
+function openMember(member){
+
+  const box = document.getElementById("memberDetails");
+
+  const isMe = member.id===myId;
+
+  box.innerHTML = `
+    <div style="text-align:center;padding:12px">
+
+      <div class="owner-avatar">
+        ${avatarHTML(member.avatar)}
+      </div>
+
+      <h3 style="margin-top:12px">
+        ${escapeHTML(member.name)}
+      </h3>
+
+      <p style="margin-top:8px;font-size:12px">
+        Profile ID: ${escapeHTML(member.id)}
+      </p>
+
+      <p style="margin-top:8px">
+        ${member.isOwner ? "👑 Room Owner" :
+          member.isAdmin ? "⭐ Admin" : "Member"}
+      </p>
+
+      ${isMe
+        ? '<button class="popup-action" onclick="leaveSeat()">Leave Seat</button>'
+        : ''
+      }
+
+    </div>
+  `;
+
+  openPopup("memberPopup");
+
+}
+
+// POPUPS
+
+function openPopup(id){
 
   closePopups();
 
@@ -874,56 +1550,45 @@ function openPopup(id) {
 
 }
 
-function closePopups() {
+function closePopups(){
 
   document.querySelectorAll(".popup")
-    .forEach(popup => popup.classList.remove("show"));
+    .forEach(p=>p.classList.remove("show"));
 
 }
 
-// Notice
+// LEAVE ROOM
 
-let noticeTimer;
+function leaveRoom(){
 
-function showNotice(message) {
-
-  const notice = document.getElementById("notice");
-
-  notice.textContent = message;
-
-  clearTimeout(noticeTimer);
-
-  noticeTimer = setTimeout(() => {
-    notice.textContent = "";
-  }, 3500);
-
-}
-
-// Leave Room
-
-function leaveRoom() {
-
-  if (roomJoined) {
-    socket.emit("room:leave");
+  if(!roomJoined){
+    location.href="/";
+    return;
   }
 
-  socket.disconnect();
+  socket.emit("leave-room",()=>{
 
-  location.href = "/";
+    roomJoined = false;
+
+    socket.disconnect();
+
+    location.href="/";
+
+  });
 
 }
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("beforeunload",()=>{
 
-  if (socket.connected && roomJoined) {
-    socket.emit("room:leave");
+  if(socket.connected && roomJoined){
+    socket.emit("leave-room");
   }
 
 });
 
-renderSeats();
+updateCoins();
 
 </script>
 
 </body>
-  </html>
+</html>
