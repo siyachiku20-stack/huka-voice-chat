@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<meta name="theme-color" content="#210044">
+
+<title>Huka Voice Chat — Profile</title>
+
+<style>
+
+:root {
+  --bg:#190039;
+  --panel:#2c0757;
+  --pink:#ef00d5;
+  --purple:#8136ff;
+  --muted:#bda9d5;
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  font-family:Arial,sans-serif;
+  background:radial-gradient(circle at 50% 0,#4b087c,#210047 50%,#100020);
+  color:#fff;
+  padding-bottom:85px;
+}
+
+.app {
+  max-width:620px;
+  margin:auto;
+  min-height:100vh;
+}
+
+header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:17px 16px;
+}
+
+header button {
+  border:1px solid #ffffff30;
+  background:#ffffff12;
+  color:white;
+  border-radius:50%;
+  width:41px;
+  height:41px;
+  font-size:20px;
+}
+
+header h1 {
+  font-size:19px;
+}
+
+.cover {
+  height:110px;
+  background:linear-gradient(120deg,#3b0879,#b600bd,#ef36a9);
+  position:relative;
+}
+
+.cover:after {
+  content:"HUKA ✦ VOICE CHAT";
+  position:absolute;
+  right:17px;
+  bottom:15px;
+  font-size:12px;
+  font-weight:bold;
+  letter-spacing:2px;
+}
+
+.profile-card {
+  margin:-48px 14px 18px;
+  position:relative;
+  background:linear-gradient(145deg,#330765,#230448);
+  border:1px solid #ffffff25;
+  border-radius:20px;
+  padding:0 15px 17px;
+}
+
+.profile-top {
+  display:flex;
+  gap:13px;
+  align-items:flex-end;
+}
+
+.avatar-wrap {
+  width:112px;
+  height:112px;
+  margin-top:-26px;
+  flex-shrink:0;
+  border-radius:50%;
+  padding:5px;
+  background:linear-gradient(135deg,#ffe08b,#ff36d5,#8b5bff);
+}
+
+.avatar {
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:linear-gradient(145deg,#553080,#16052c);
+  display:grid;
+  place-items:center;
+  font-size:49px;
+  overflow:hidden;
+}
+
+.avatar img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.identity {
+  padding:12px 0 6px;
+  min-width:0;
+}
+
+.identity h2 {
+  font-size:20px;
+  overflow-wrap:anywhere;
+}
+
+.identity p {
+  font-size:11px;
+  color:var(--muted);
+  margin-top:7px;
+}
+
+.badges {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:9px;
+}
+
+.badge {
+  font-size:10px;
+  padding:5px 8px;
+  border-radius:9px;
+  background:linear-gradient(90deg,#7e36d9,#e42fae);
+}
+
+.bio {
+  font-size:12px;
+  color:#d9c8e9;
+  margin-top:14px;
+  line-height:1.5;
+}
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  margin:0 14px 18px;
+  background:#ffffff0a;
+  border:1px solid #ffffff1b;
+  border-radius:15px;
+  padding:15px 3px;
+}
+
+.stat {
+  text-align:center;
+  border-right:1px solid #ffffff20;
+}
+
+.stat:last-child {
+  border:0;
+}
+
+.stat strong {
+  display:block;
+  font-size:16px;
+}
+
+.stat small {
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:7px;
+}
+
+.vip {
+  margin:0 14px 18px;
+  border-radius:15px;
+  padding:15px;
+  background:linear-gradient(100deg,#a900c8,#4b17bd);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+
+.vip strong {
+  font-size:14px;
+}
+
+.vip small {
+  display:block;
+  font-size:10px;
+  margin-top:5px;
+  color:#f1dafa;
+}
+
+.vip button {
+  background:#ffffff20;
+  color:#fff;
+  border:1px solid #ffffff55;
+  border-radius:20px;
+  padding:9px 12px;
+  font-weight:bold;
+}
+
+.wallet {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin:0 14px 21px;
+}
+
+.wallet-card {
+  border-radius:14px;
+  padding:15px;
+  background:linear-gradient(110deg,#057b19,#079b36);
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.wallet-card:nth-child(2) {
+  background:linear-gradient(110deg,#8e243b,#bf3151);
+}
+
+.section {
+  margin:0 14px 22px;
+}
+
+.section h3 {
+  font-size:16px;
+  margin-bottom:13px;
+}
+
+.menu {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:17px 7px;
+}
+
+.menu a {
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  font-size:10px;
+  min-width:0;
+}
+
+.menu a span {
+  display:block;
+  font-size:27px;
+  margin-bottom:7px;
+  filter:drop-shadow(0 3px 4px #0007);
+}
+
+.bottom {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:5;
+  background:#08070b;
+  border-top:1px solid #ffffff1b;
+  display:flex;
+  justify-content:space-around;
+  padding:9px 3px max(9px,env(safe-area-inset-bottom));
+}
+
+.bottom a {
+  color:#929096;
+  text-decoration:none;
+  text-align:center;
+  font-size:11px;
+  min-width:48px;
+}
+
+.bottom a span {
+  display:block;
+  font-size:21px;
+  margin-bottom:4px;
+}
+
+.bottom a.active {
+  color:#f000d7;
+}
+
+#toast {
+  position:fixed;
+  bottom:85px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#43245e;
+  padding:11px 15px;
+  border-radius:12px;
+  font-size:12px;
+  display:none;
+  z-index:8;
+}
+
+@media(min-width:600px) {
+
+  .bottom {
+    max-width:620px;
+    left:50%;
+    transform:translateX(-50%);
+    border-radius:16px 16px 0 0;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<main class="app">
+
+<header>
+
+<button onclick="location.href='index.html'">
+‹
+</button>
+
+<h1>My Profile</h1>
+
+<button onclick="editName()">
+✎
+</button>
+
+</header>
+
+<div class="cover"></div>
+
+<section class="profile-card">
+
+<div class="profile-top">
+
+<div class="avatar-wrap">
+
+<div class="avatar" id="avatar">
+👤
+</div>
+
+</div>
+
+<div class="identity">
+
+<h2 id="displayName">
+Huka User
+</h2>
+
+<p>
+ID: <b id="userId">--------</b> 🇮🇳
+</p>
+
+<div class="badges">
+
+<span class="badge" id="levelBadge">
+⭐ LV.1
+</span>
+
+<span class="badge">
+💜 Huka Member
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+<p class="bio">
+Making friends and sharing happy moments on Huka Voice Chat 💜
+</p>
+
+</section>
+
+<section class="stats">
+
+<div class="stat">
+<strong>0</strong>
+<small>Friend</small>
+</div>
+
+<div class="stat">
+<strong>0</strong>
+<small>Following</small>
+</div>
+
+<div class="stat">
+<strong>0</strong>
+<small>Followers</small>
+</div>
+
+<div class="stat">
+<strong>0</strong>
+<small>Visitors</small>
+</div>
+
+</section>
+
+<section class="vip">
+
+<div>
+
+<strong>👑 SVIP Club</strong>
+
+<small>
+Enjoy distinguished privileges
+</small>
+
+</div>
+
+<button onclick="location.href='vip.html'">
+Get SVIP
+</button>
+
+</section>
+
+<section class="wallet">
+
+<div class="wallet-card">
+💎
+<span id="diamonds">0</span>
+<small>Diamonds</small>
+</div>
+
+<div class="wallet-card">
+🪙
+<span id="coins">0</span>
+<small>Coins</small>
+</div>
+
+</section>
+
+<section class="section">
+
+<h3>My Huka Space</h3>
+
+<nav class="menu">
+
+<a href="rankings.html">
+<span>🏆</span>
+Level
+</a>
+
+<a href="vip.html">
+<span>🏬</span>
+Store
+</a>
+
+<a href="events.html">
+<span>📋</span>
+Tasks
+</a>
+
+<a href="family.html">
+<span>👨‍👩‍👧</span>
+Family
+</a>
+
+<a href="vip.html">
+<span>💎</span>
+VIP
+</a>
+
+<a href="family.html">
+<span>💞</span>
+CP
+</a>
+
+<a href="rankings.html">
+<span>🛡️</span>
+BD Center
+</a>
+
+<a href="family.html">
+<span>💼</span>
+Agency Center
+</a>
+
+<a href="inbox.html">
+<span>📝</span>
+My Post
+</a>
+
+<a href="vip.html">
+<span>⚡</span>
+Offline Recharge
+</a>
+
+<a href="events.html">
+<span>🎧</span>
+Host Center
+</a>
+
+<a href="games.html">
+<span>🎬</span>
+My Videos
+</a>
+
+</nav>
+
+</section>
+
+<div id="toast"></div>
+
+</main>
+
+<nav class="bottom">
+
+<a href="index.html">
+<span>⌂</span>
+Home
+</a>
+
+<a href="reel.html">
+<span>▶</span>
+Reel
+</a>
+
+<a href="room.html?room=100001">
+<span>🎙</span>
+Voice
+</a>
+
+<a href="inbox.html">
+<span>▣</span>
+Message
+</a>
+
+<a class="active" href="profile.html">
+<span>◉</span>
+Profile
+</a>
+
+</nav>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+function toast(msg) {
+
+  const t = $('toast');
+
+  t.textContent = msg;
+
+  t.style.display = 'block';
+
+  setTimeout(() => {
+    t.style.display = 'none';
+  },2300);
+
+}
+
+function showProfile(p) {
+
+  $('displayName').textContent =
+    p.name || 'Huka User';
+
+  $('userId').textContent =
+    p.id || '--------';
+
+  $('coins').textContent =
+    Number(p.coins || 0).toLocaleString('en-IN');
+
+  $('diamonds').textContent =
+    Number(p.diamonds || 0).toLocaleString('en-IN');
+
+  $('levelBadge').textContent =
+    '⭐ LV.' + (p.level || 1);
+
+}
+
+function editName() {
+
+  const old =
+    localStorage.getItem('hukaName') || 'Huka User';
+
+  const name = prompt(
+    'Enter your Huka name:',
+    old
+  );
+
+  if (!name || !name.trim()) return;
+
+  localStorage.setItem('hukaName',name.trim());
+
+  toast('Name updated. Refreshing profile...');
+
+  setTimeout(() => location.reload(),600);
+
+}
+
+const socket = io();
+
+socket.on('connect',() => {
+
+  const name =
+    localStorage.getItem('hukaName') || 'Huka User';
+
+  const id =
+    localStorage.getItem('hukaUserId') || '';
+
+  socket.emit('register',{
+
+    name,
+
+    profileId:id
+
+  },res => {
+
+    if (!res || !res.ok) {
+
+      toast(res?.error || 'Could not load profile');
+
+      return;
+    }
+
+    localStorage.setItem(
+      'hukaUserId',
+      res.user.id
+    );
+
+    localStorage.setItem(
+      'hukaName',
+      res.user.name
+    );
+
+    showProfile(res.user);
+
+    socket.emit('get-profile',{
+
+      userId:res.user.id
+
+    },data => {
+
+      if (data && data.ok) {
+
+        showProfile(data.profile);
+
+      }
+
+    });
+
+  });
+
+});
+
+socket.on('profile-update',data => {
+
+  const old = {
+
+    name:localStorage.getItem('hukaName') || 'Huka User',
+
+    ...data
+
+  };
+
+  showProfile(old);
+
+});
+
+</script>
+
+</body>
+</html>
