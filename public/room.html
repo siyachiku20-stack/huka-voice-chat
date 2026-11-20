@@ -1,928 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Huka Voice Room</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#190d2b">
 
-<script src="/socket.io/socket.io.js"></script>
+  <title>Huka Voice Chat - Room</title>
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  background: #090b20;
-  color: white;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.room {
-  min-height: 100vh;
-  position: relative;
-  padding: 18px 12px 105px;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse at 50% 30%, #54236f 0%, transparent 45%),
-    radial-gradient(ellipse at 15% 60%, #132d67 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 70%, #40105d 0%, transparent 45%),
-    linear-gradient(160deg,#111329,#090b20 70%);
-}
-
-.room::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .45;
-  background-image:
-    radial-gradient(circle, #ff61d8 2px, transparent 3px),
-    radial-gradient(circle, #39c9ff 2px, transparent 3px),
-    radial-gradient(circle, #b96bff 2px, transparent 3px);
-  background-size: 90px 110px, 130px 150px, 170px 180px;
-  background-position: 10px 20px, 40px 70px, 80px 30px;
-}
-
-.content {
-  position: relative;
-  z-index: 2;
-  max-width: 600px;
-  margin: auto;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.back {
-  font-size: 27px;
-  background: none;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.room-title {
-  font-size: 17px;
-  font-weight: bold;
-}
-
-.room-info {
-  text-align: right;
-  font-size: 12px;
-  color: #ddd;
-}
-
-.owner {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.owner-avatar {
-  width: 85px;
-  height: 85px;
-  margin: auto;
-  border-radius: 50%;
-  border: 3px solid #e6a5ff;
-  box-shadow: 0 0 20px #d34cff;
-  background: linear-gradient(135deg,#ff79d2,#654cff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 42px;
-  overflow: hidden;
-}
-
-.owner-avatar img,
-.seat-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.owner-name {
-  margin-top: 9px;
-  font-size: 14px;
-}
-
-.host-label {
-  display: inline-block;
-  background: #6447d9;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  margin-top: 7px;
-}
-
-.seat-settings {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.seat-settings button {
-  background: #ffffff15;
-  color: white;
-  border: 1px solid #ffffff35;
-  border-radius: 20px;
-  padding: 7px 13px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.seat-settings button.active {
-  background: linear-gradient(90deg,#a43bdf,#ed4fae);
-  border-color: transparent;
-}
-
-.seats {
-  display: grid;
-  grid-template-columns: repeat(5,1fr);
-  gap: 24px 8px;
-  justify-items: center;
-  margin: 0 auto 35px;
-}
-
-.seat {
-  text-align: center;
-  width: 100%;
-  cursor: pointer;
-}
-
-.seat-avatar {
-  width: 57px;
-  height: 57px;
-  margin: auto;
-  border-radius: 50%;
-  background: linear-gradient(135deg,#a24cdb,#4d6ee8);
-  border: 2px solid #d78aff;
-  box-shadow: 0 0 12px #8c4dff70;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 27px;
-  overflow: hidden;
-  position: relative;
-}
-
-.seat.empty .seat-avatar {
-  background: #ffffff18;
-  border: 1px solid #ffffff25;
-  color: #c9c5dc;
-  box-shadow: none;
-}
-
-.seat-name {
-  margin-top: 7px;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.seat-number {
-  color: #aaa;
-  font-size: 11px;
-  margin-top: 5px;
-}
-
-.seat.me .seat-avatar {
-  border: 2px solid #44f5b3;
-}
-
-.room-status {
-  text-align: center;
-  color: #c5b5e8;
-  font-size: 12px;
-  margin: 25px 0;
-}
-
-.chat-box {
-  background: #130e2dba;
-  border: 1px solid #ffffff20;
-  border-radius: 15px;
-  padding: 12px;
-  margin-top: 25px;
-  display: none;
-}
-
-.chat-box.show {
-  display: block;
-}
-
-.chat-heading {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.chat-messages {
-  height: 130px;
-  overflow-y: auto;
-  font-size: 13px;
-}
-
-.message {
-  padding: 5px 0;
-  color: #eee;
-  overflow-wrap: anywhere;
-}
-
-.message strong {
-  color: #ff8add;
-}
-
-.chat-input {
-  display: flex;
-  gap: 7px;
-  margin-top: 10px;
-}
-
-.chat-input input {
-  flex: 1;
-  min-width: 0;
-  background: #ffffff15;
-  border: 1px solid #ffffff30;
-  border-radius: 20px;
-  padding: 11px;
-  color: white;
-  outline: none;
-}
-
-.chat-input button {
-  border: none;
-  background: #b746e8;
-  color: white;
-  padding: 0 16px;
-  border-radius: 20px;
-}
-
-.bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
-  background: #100c27ed;
-  border-top: 1px solid #ffffff20;
-  padding: 12px 7px 18px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  backdrop-filter: blur(15px);
-}
-
-.control {
-  border: none;
-  background: none;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.control span {
-  font-size: 9px;
-}
-
-.control.off {
-  color: #ff5b9c;
-}
-
-.gift {
-  background: linear-gradient(135deg,#ff54bd,#9747ee);
-  width: 47px;
-  height: 47px;
-  border-radius: 50%;
-  font-size: 24px;
-  justify-content: center;
-}
-
-.popup {
-  display: none;
-  position: fixed;
-  z-index: 20;
-  bottom: 85px;
-  left: 10px;
-  right: 10px;
-  background: #21153d;
-  border: 1px solid #b55aff;
-  border-radius: 18px;
-  padding: 17px;
-  box-shadow: 0 0 25px #0008;
-}
-
-.popup.show {
-  display: block;
-}
-
-.popup h3 {
-  margin-bottom: 15px;
-}
-
-.popup-grid {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 15px;
-}
-
-.popup-grid button {
-  background: #ffffff15;
-  border: 1px solid #ffffff20;
-  color: white;
-  border-radius: 12px;
-  padding: 12px 5px;
-  font-size: 23px;
-  cursor: pointer;
-}
-
-.popup-grid small {
-  display: block;
-  font-size: 10px;
-  margin-top: 5px;
-}
-
-.popup-close {
-  float: right;
-  background: none;
-  color: white;
-  border: none;
-  font-size: 20px;
-}
-
-#notice {
-  text-align: center;
-  font-size: 12px;
-  color: #ffb8e9;
-  margin: 10px;
-}
-
-@media(max-width:360px) {
-  .seat-avatar {
-    width: 49px;
-    height: 49px;
-  }
-
-  .seats {
-    gap: 20px 5px;
-  }
-
-  .control {
-    font-size: 19px;
-  }
-
-  .control span {
-    font-size: 8px;
-  }
-}
-</style>
+  <link rel="stylesheet" href="room.css">
 </head>
 
 <body>
 
-<div class="room">
-<div class="content">
+<div class="room-container">
 
-  <div class="topbar">
-    <button class="back" onclick="leaveRoom()">‹</button>
+  <!-- HEADER -->
+  <header class="room-header">
+    <div class="room-header-left">
+      <a href="index.html" class="back-button">‹</a>
 
-    <div class="room-title">HUKA ♡</div>
-
-    <div class="room-info">
-      ROOM ID<br>
-      <b id="roomIdText">200001</b>
-    </div>
-  </div>
-
-  <div class="owner">
-    <div class="owner-avatar" id="ownerAvatar">👑</div>
-    <div class="owner-name" id="ownerName">Huka Owner</div>
-    <div class="host-label">👑 ROOM OWNER</div>
-  </div>
-
-  <div class="seat-settings">
-    <button class="active" onclick="changeSeats(9,this)">9 Seats</button>
-    <button onclick="changeSeats(11,this)">11 Seats</button>
-    <button onclick="changeSeats(15,this)">15 Seats</button>
-    <button onclick="changeSeats(20,this)">20 Seats</button>
-  </div>
-
-  <div class="seats" id="seats"></div>
-
-  <div class="room-status" id="connectionStatus">
-    Connecting to Huka Room...
-  </div>
-
-  <div id="notice"></div>
-
-  <div class="chat-box" id="chatBox">
-    <div class="chat-heading">
-      <b>💬 Room Chat</b>
-      <button onclick="toggleChat()">✕</button>
+      <div class="room-heading">
+        <h2 id="roomName">Huka Voice Room</h2>
+        <span id="roomId">Room ID: Loading...</span>
+      </div>
     </div>
 
-    <div class="chat-messages" id="chatMessages"></div>
+    <div class="room-header-right">
+      <span id="roomStatus">🟢 Online</span>
+      <button id="leaveRoom" class="leave-button">Leave</button>
+    </div>
+  </header>
 
-    <div class="chat-input">
-      <input id="chatInput"
+  <!-- ROOM INFORMATION -->
+  <section class="room-info">
+    <div>
+      <span>👑 Owner:</span>
+      <strong id="roomOwner">Loading...</strong>
+    </div>
+
+    <div>
+      <span>👥 Members:</span>
+      <strong id="memberCount">0</strong>
+    </div>
+
+    <div>
+      <span>🔌 Connection:</span>
+      <strong id="connectionStatus">Connecting...</strong>
+    </div>
+  </section>
+
+  <!-- ROOM BANNER -->
+  <section class="room-banner">
+    <div class="room-banner-content">
+      <h2>Welcome to Huka Voice Chat</h2>
+      <p>Meet friends, chat and enjoy together!</p>
+    </div>
+  </section>
+
+  <!-- SEATS -->
+  <section class="seats-section">
+    <div class="section-heading">
+      <h3>🎙️ Voice Seats</h3>
+      <span>Choose your seat</span>
+    </div>
+
+    <div id="seats" class="seats-grid">
+      <!-- Seats will be added by room.js -->
+    </div>
+  </section>
+
+  <!-- MEMBERS -->
+  <section class="members-section">
+    <div class="section-heading">
+      <h3>👥 Room Members</h3>
+    </div>
+
+    <div id="members" class="members-list">
+      <!-- Members will be added by room.js -->
+    </div>
+  </section>
+
+  <!-- ADMIN PANEL -->
+  <section id="adminPanel" class="admin-panel" hidden>
+    <h3>🛡️ Room Admin Controls</h3>
+
+    <div class="admin-buttons">
+      <button id="settingsButton">⚙️ Room Settings</button>
+      <button id="clearChatButton">🧹 Clear Chat</button>
+    </div>
+  </section>
+
+  <!-- CHAT -->
+  <section class="chat-section">
+    <div class="section-heading">
+      <h3>💬 Room Chat</h3>
+    </div>
+
+    <div id="chatMessages" class="chat-messages">
+      <p class="empty-message">Welcome to Huka Voice Chat!</p>
+    </div>
+
+    <div class="chat-input-area">
+      <input
+        type="text"
+        id="chatInput"
         placeholder="Write a message..."
-        maxlength="500">
+        maxlength="500"
+        autocomplete="off"
+      >
 
-      <button onclick="sendMessage()">Send</button>
+      <button id="sendMessage">➤</button>
     </div>
-  </div>
+  </section>
+
+  <!-- YOUTUBE LINKS -->
+  <section class="youtube-section">
+    <h3>▶️ YouTube Sharing</h3>
+
+    <div class="youtube-input-area">
+      <input
+        type="url"
+        id="youtubeInput"
+        placeholder="Paste YouTube link..."
+      >
+
+      <button id="youtubeButton">Share</button>
+    </div>
+
+    <div id="youtubeLinks"></div>
+  </section>
+
+  <!-- GIFT RANKING -->
+  <section class="ranking-section">
+    <h3>🏆 Gift Ranking</h3>
+    <div id="giftRanking">
+      No gifts yet.
+    </div>
+  </section>
 
 </div>
-</div>
 
-<!-- Bottom Controls -->
+<!-- BOTTOM TOOLBAR -->
+<div class="bottom-toolbar">
 
-<div class="bottom-bar">
-
-  <button class="control" onclick="mention()">
+  <button id="mentionButton" title="Mention">
     @
-    <span>MENTION</span>
   </button>
 
-  <button class="control" onclick="openPopup('emojiPopup')">
+  <button id="emojiButton" title="Emoji">
     😊
-    <span>EMOJI</span>
   </button>
 
-  <button class="control" onclick="toggleSpeaker()" id="speakerBtn">
+  <button id="speakerButton" title="Speaker">
     🔊
-    <span>SPEAKER</span>
   </button>
 
-  <button class="control" onclick="toggleMic()" id="micBtn">
+  <button id="micButton" title="Microphone">
     🎙️
-    <span>MIC ON</span>
   </button>
 
-  <button class="control" onclick="toggleChat()">
-    📩
-    <span>INBOX</span>
+  <button id="inboxButton" title="Inbox">
+    ✉️
   </button>
 
-  <button class="control gift" onclick="openPopup('giftPopup')">
+  <button id="giftButton" title="Gifts">
     🎁
-    <span>GIFT</span>
   </button>
 
 </div>
 
-<!-- Emoji Popup -->
+<!-- EMOJI MODAL -->
+<div id="emojiModal" class="modal" hidden>
+  <div class="modal-content">
 
-<div class="popup" id="emojiPopup">
-  <button class="popup-close"
-    onclick="closePopups()">✕</button>
+    <div class="modal-header">
+      <h3>😊 Choose Emoji</h3>
+      <button type="button" data-close="emojiModal">✕</button>
+    </div>
 
-  <h3>😊 Stickers & Emoji</h3>
+    <div class="emoji-list">
+      <button type="button" data-emoji="😀">😀</button>
+      <button type="button" data-emoji="😂">😂</button>
+      <button type="button" data-emoji="😍">😍</button>
+      <button type="button" data-emoji="🥰">🥰</button>
+      <button type="button" data-emoji="😘">😘</button>
+      <button type="button" data-emoji="😎">😎</button>
+      <button type="button" data-emoji="❤️">❤️</button>
+      <button type="button" data-emoji="💕">💕</button>
+      <button type="button" data-emoji="🔥">🔥</button>
+      <button type="button" data-emoji="👏">👏</button>
+      <button type="button" data-emoji="🎉">🎉</button>
+      <button type="button" data-emoji="🌹">🌹</button>
+    </div>
 
-  <div class="popup-grid">
-    <button onclick="insertEmoji('❤️')">❤️</button>
-    <button onclick="insertEmoji('😍')">😍</button>
-    <button onclick="insertEmoji('😂')">😂</button>
-    <button onclick="insertEmoji('🥰')">🥰</button>
-    <button onclick="insertEmoji('🔥')">🔥</button>
-    <button onclick="insertEmoji('🌹')">🌹</button>
-    <button onclick="insertEmoji('🎉')">🎉</button>
-    <button onclick="insertEmoji('😘')">😘</button>
   </div>
 </div>
 
-<!-- Gift Popup -->
+<!-- GIFT MODAL -->
+<div id="giftModal" class="modal" hidden>
+  <div class="modal-content">
 
-<div class="popup" id="giftPopup">
-  <button class="popup-close"
-    onclick="closePopups()">✕</button>
+    <div class="modal-header">
+      <h3>🎁 Send Gift</h3>
+      <button type="button" data-close="giftModal">✕</button>
+    </div>
 
-  <h3>🎁 Send a Gift</h3>
+    <label for="giftReceiver">Select Member</label>
+    <select id="giftReceiver">
+      <option value="">Select a member</option>
+    </select>
 
-  <div class="popup-grid">
-    <button onclick="sendGift('Rose')">🌹<small>Rose</small></button>
-    <button onclick="sendGift('Heart')">❤️<small>Heart</small></button>
-    <button onclick="sendGift('Love')">💝<small>Love</small></button>
-    <button onclick="sendGift('Teddy')">🧸<small>Teddy</small></button>
-    <button onclick="sendGift('Crown')">👑<small>Crown</small></button>
-    <button onclick="sendGift('Diamond')">💎<small>Diamond</small></button>
-    <button onclick="sendGift('Car')">🚗<small>Car</small></button>
-    <button onclick="sendGift('Castle')">🏰<small>Castle</small></button>
+    <div id="giftList" class="gift-list">
+      <!-- Gifts will be loaded by room.js -->
+    </div>
+
+    <p id="giftMessage"></p>
+
   </div>
 </div>
+
+<!-- INBOX MODAL -->
+<div id="inboxModal" class="modal" hidden>
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h3>✉️ Inbox</h3>
+      <button type="button" data-close="inboxModal">✕</button>
+    </div>
+
+    <div id="inboxMessages">
+      No messages yet.
+    </div>
+
+  </div>
+</div>
+
+<!-- ROOM SETTINGS MODAL -->
+<div id="settingsModal" class="modal" hidden>
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h3>⚙️ Room Settings</h3>
+      <button type="button" data-close="settingsModal">✕</button>
+    </div>
+
+    <label for="settingRoomName">Room Name</label>
+    <input
+      type="text"
+      id="settingRoomName"
+      placeholder="Enter room name"
+      maxlength="50"
+    >
+
+    <label for="settingDescription">Room Description</label>
+    <textarea
+      id="settingDescription"
+      placeholder="Enter room description"
+      maxlength="250"
+    ></textarea>
+
+    <label class="setting-option">
+      <input type="checkbox" id="roomLocked">
+      Lock Room
+    </label>
+
+    <label class="setting-option">
+      <input type="checkbox" id="youtubeAllowed" checked>
+      Allow YouTube Sharing
+    </label>
+
+    <button id="saveRoomSettings" class="save-button">
+      Save Settings
+    </button>
+
+  </div>
+</div>
+
+<!-- SOCKET.IO -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- ROOM JAVASCRIPT -->
+<script src="room.js"></script>
 
 <script>
+  // Modal open and close controls
+  document.addEventListener("click", function(event) {
+    const closeButton = event.target.closest("[data-close]");
 
-const socket = io();
+    if (closeButton) {
+      const modal = document.getElementById(
+        closeButton.getAttribute("data-close")
+      );
 
-const params = new URLSearchParams(location.search);
-
-const roomId = params.get("roomId") ||
-               localStorage.getItem("hukaRoomId") ||
-               "200001";
-
-const username =
-  localStorage.getItem("hukaUsername") || "Huka User";
-
-const avatar =
-  localStorage.getItem("hukaAvatar") || "👤";
-
-let seatCount = 9;
-let members = [];
-let roomJoined = false;
-let micOn = true;
-let speakerOn = true;
-
-document.getElementById("roomIdText").textContent = roomId;
-document.getElementById("ownerName").textContent = username;
-document.getElementById("ownerAvatar").innerHTML =
-  makeAvatar(avatar);
-
-function makeAvatar(value) {
-  if (/^https?:\/\//i.test(value)) {
-    return `<img src="${escapeHTML(value)}" alt="Avatar">`;
-  }
-
-  return escapeHTML(value || "👤");
-}
-
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
-
-// Socket connection
-
-socket.on("connect", () => {
-
-  document.getElementById("connectionStatus").textContent =
-    "Connected to Huka ❤️";
-
-  socket.emit("user:update", {
-    name: username,
-    avatar: avatar
-  }, () => {
-
-    socket.emit("room:join", {
-      roomId: roomId,
-      roomName: "Huka Friends Club",
-      category: "Friends"
-    }, response => {
-
-      if (!response || !response.success) {
-        showNotice(response?.error || "Room join failed");
-      } else {
-        roomJoined = true;
-      }
-
-    });
-
-  });
-
-});
-
-socket.on("disconnect", () => {
-  roomJoined = false;
-
-  document.getElementById("connectionStatus").textContent =
-    "Connection lost. Reconnecting...";
-});
-
-socket.on("connect_error", () => {
-  document.getElementById("connectionStatus").textContent =
-    "Server connection problem";
-});
-
-// Room joined
-
-socket.on("room:joined", data => {
-
-  roomJoined = true;
-
-  if (data.messages) {
-    data.messages.forEach(addMessage);
-  }
-
-});
-
-// Live room members
-
-socket.on("room:state", data => {
-
-  if (!data || !data.members) return;
-
-  members = data.members;
-
-  renderSeats();
-
-  document.getElementById("connectionStatus").textContent =
-    "🟢 " + members.length + " Members Online";
-
-});
-
-socket.on("room:user-joined", user => {
-  showNotice(user.name + " joined the room ❤️");
-});
-
-socket.on("room:user-left", user => {
-  showNotice(user.name + " left the room");
-});
-
-// Seat rendering
-
-function renderSeats() {
-
-  const container = document.getElementById("seats");
-
-  container.innerHTML = "";
-
-  for (let i = 0; i < seatCount; i++) {
-
-    const member = members.find(
-      item => Number(item.seat) === i
-    );
-
-    const div = document.createElement("div");
-
-    div.className = "seat";
-
-    if (member) {
-
-      const isMe = member.name === username;
-
-      div.innerHTML = `
-        <div class="seat-avatar ${isMe ? "me" : ""}">
-          ${makeAvatar(member.avatar)}
-        </div>
-        <div class="seat-name">
-          ${escapeHTML(member.name)}
-        </div>
-        <div class="seat-number">
-          ${i === 0 ? "👑 Host" : "Seat " + (i + 1)}
-        </div>
-      `;
-
-    } else {
-
-      div.classList.add("empty");
-
-      div.innerHTML = `
-        <div class="seat-avatar">🛋️</div>
-        <div class="seat-name">Empty</div>
-        <div class="seat-number">${i + 1}</div>
-      `;
-
+      if (modal) modal.hidden = true;
     }
 
-    container.appendChild(div);
-  }
+    const openButtons = {
+      emojiButton: "emojiModal",
+      giftButton: "giftModal",
+      inboxButton: "inboxModal",
+      settingsButton: "settingsModal"
+    };
 
-}
+    const button = event.target.closest("button");
 
-function changeSeats(count, button) {
+    if (button && openButtons[button.id]) {
+      const modal = document.getElementById(openButtons[button.id]);
 
-  seatCount = count;
-
-  document.querySelectorAll(".seat-settings button")
-    .forEach(btn => btn.classList.remove("active"));
-
-  button.classList.add("active");
-
-  renderSeats();
-}
-
-// Chat
-
-socket.on("chat:message", addMessage);
-
-function addMessage(message) {
-
-  const box = document.getElementById("chatMessages");
-
-  const div = document.createElement("div");
-
-  div.className = "message";
-
-  const name = document.createElement("strong");
-  name.textContent = message.name + ": ";
-
-  const content = document.createTextNode(message.text);
-
-  div.append(name, content);
-
-  box.appendChild(div);
-
-  box.scrollTop = box.scrollHeight;
-}
-
-function sendMessage() {
-
-  const input = document.getElementById("chatInput");
-
-  const text = input.value.trim();
-
-  if (!text || !roomJoined) return;
-
-  socket.emit("chat:send", { text }, response => {
-
-    if (!response || !response.success) {
-      showNotice(response?.error || "Message failed");
+      if (modal) modal.hidden = false;
     }
-
   });
-
-  input.value = "";
-
-}
-
-document.getElementById("chatInput")
-  .addEventListener("keydown", event => {
-
-    if (event.key === "Enter") {
-      sendMessage();
-    }
-
-  });
-
-function toggleChat() {
-
-  closePopups();
-
-  document.getElementById("chatBox")
-    .classList.toggle("show");
-
-}
-
-function mention() {
-
-  document.getElementById("chatBox")
-    .classList.add("show");
-
-  const input = document.getElementById("chatInput");
-
-  input.value = "@";
-  input.focus();
-
-}
-
-// Emoji
-
-function insertEmoji(emoji) {
-
-  document.getElementById("chatBox")
-    .classList.add("show");
-
-  const input = document.getElementById("chatInput");
-
-  input.value += emoji;
-  input.focus();
-
-  closePopups();
-
-}
-
-// Gifts
-
-socket.on("gift:received", gift => {
-
-  showNotice(
-    "🎁 " + gift.senderName +
-    " sent " + gift.giftName
-  );
-
-});
-
-function sendGift(name) {
-
-  if (!roomJoined) {
-    showNotice("Join the room first");
-    return;
-  }
-
-  socket.emit("gift:send", {
-    giftName: name
-  }, response => {
-
-    if (response && response.success) {
-      showNotice("🎁 " + name + " sent!");
-      closePopups();
-    } else {
-      showNotice(response?.error || "Gift failed");
-    }
-
-  });
-
-}
-
-// Mic control
-
-function toggleMic() {
-
-  micOn = !micOn;
-
-  const button = document.getElementById("micBtn");
-
-  button.innerHTML = micOn
-    ? "🎙️<span>MIC ON</span>"
-    : "🔇<span>MIC OFF</span>";
-
-  button.classList.toggle("off", !micOn);
-
-}
-
-// Speaker control
-
-function toggleSpeaker() {
-
-  speakerOn = !speakerOn;
-
-  const button = document.getElementById("speakerBtn");
-
-  button.innerHTML = speakerOn
-    ? "🔊<span>SPEAKER</span>"
-    : "🔈<span>MUTED</span>";
-
-  button.classList.toggle("off", !speakerOn);
-
-}
-
-// Popup controls
-
-function openPopup(id) {
-
-  closePopups();
-
-  document.getElementById(id)
-    .classList.add("show");
-
-}
-
-function closePopups() {
-
-  document.querySelectorAll(".popup")
-    .forEach(popup => popup.classList.remove("show"));
-
-}
-
-// Notice
-
-let noticeTimer;
-
-function showNotice(message) {
-
-  const notice = document.getElementById("notice");
-
-  notice.textContent = message;
-
-  clearTimeout(noticeTimer);
-
-  noticeTimer = setTimeout(() => {
-    notice.textContent = "";
-  }, 3500);
-
-}
-
-// Leave Room
-
-function leaveRoom() {
-
-  if (roomJoined) {
-    socket.emit("room:leave");
-  }
-
-  socket.disconnect();
-
-  location.href = "/";
-
-}
-
-window.addEventListener("beforeunload", () => {
-
-  if (socket.connected && roomJoined) {
-    socket.emit("room:leave");
-  }
-
-});
-
-renderSeats();
-
 </script>
 
 </body>
