@@ -1,689 +1,761 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huka Voice Chat - Profile</title>
 
-<meta charset="UTF-8">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<meta name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover">
+    body {
+      margin: 0;
+      background: #160d24;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding-bottom: 85px;
+    }
 
-<meta name="theme-color" content="#210044">
+    button, input, textarea, select {
+      font-family: inherit;
+    }
 
-<title>Huka Voice Chat — Profile</title>
+    .header {
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #211333;
+    }
 
-<style>
+    .header h2 {
+      margin: 0;
+      color: #ff80d5;
+    }
 
-:root {
-  --bg:#190039;
-  --panel:#2c0757;
-  --pink:#ef00d5;
-  --purple:#8136ff;
-  --muted:#bda9d5;
-}
+    .header button {
+      background: transparent;
+      border: 0;
+      color: white;
+      font-size: 23px;
+      cursor: pointer;
+    }
 
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+    .profile-card {
+      margin: 18px;
+      padding: 22px 15px;
+      border-radius: 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #542078, #a52c88);
+    }
 
-body {
-  font-family:Arial,sans-serif;
-  background:radial-gradient(circle at 50% 0,#4b087c,#210047 50%,#100020);
-  color:#fff;
-  padding-bottom:85px;
-}
+    .avatar-area {
+      position: relative;
+      width: 105px;
+      height: 105px;
+      margin: auto;
+    }
 
-.app {
-  max-width:620px;
-  margin:auto;
-  min-height:100vh;
-}
+    #profileAvatar {
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #ffb4eb;
+      background: #32164a;
+    }
 
-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:17px 16px;
-}
+    .camera-button {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #ff4fc3;
+      border: 2px solid white;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      color: white;
+      cursor: pointer;
+    }
 
-header button {
-  border:1px solid #ffffff30;
-  background:#ffffff12;
-  color:white;
-  border-radius:50%;
-  width:41px;
-  height:41px;
-  font-size:20px;
-}
+    .profile-card h2 {
+      margin: 12px 0 5px;
+    }
 
-header h1 {
-  font-size:19px;
-}
+    .profile-id {
+      color: #f6c9ee;
+      font-size: 13px;
+    }
 
-.cover {
-  height:110px;
-  background:linear-gradient(120deg,#3b0879,#b600bd,#ef36a9);
-  position:relative;
-}
+    .frame-name {
+      color: #ffe58a;
+      font-size: 13px;
+      margin-top: 8px;
+    }
 
-.cover:after {
-  content:"HUKA ✦ VOICE CHAT";
-  position:absolute;
-  right:17px;
-  bottom:15px;
-  font-size:12px;
-  font-weight:bold;
-  letter-spacing:2px;
-}
+    .wallet {
+      margin: 15px 18px;
+      padding: 17px;
+      border-radius: 15px;
+      background: #29183b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.profile-card {
-  margin:-48px 14px 18px;
-  position:relative;
-  background:linear-gradient(145deg,#330765,#230448);
-  border:1px solid #ffffff25;
-  border-radius:20px;
-  padding:0 15px 17px;
-}
+    .wallet strong {
+      color: #ffd56b;
+      font-size: 19px;
+    }
 
-.profile-top {
-  display:flex;
-  gap:13px;
-  align-items:flex-end;
-}
+    .section {
+      margin: 18px;
+      padding: 17px;
+      background: #241633;
+      border-radius: 16px;
+    }
 
-.avatar-wrap {
-  width:112px;
-  height:112px;
-  margin-top:-26px;
-  flex-shrink:0;
-  border-radius:50%;
-  padding:5px;
-  background:linear-gradient(135deg,#ffe08b,#ff36d5,#8b5bff);
-}
+    .section h3 {
+      margin-top: 0;
+      color: #ff8bd9;
+    }
 
-.avatar {
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  background:linear-gradient(145deg,#553080,#16052c);
-  display:grid;
-  place-items:center;
-  font-size:49px;
-  overflow:hidden;
-}
+    .info-row {
+      padding: 12px 0;
+      border-bottom: 1px solid #49345c;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 14px;
+    }
 
-.avatar img {
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+    .info-row:last-child {
+      border-bottom: 0;
+    }
 
-.identity {
-  padding:12px 0 6px;
-  min-width:0;
-}
+    .info-row span:last-child {
+      color: #e7b9ed;
+      text-align: right;
+    }
 
-.identity h2 {
-  font-size:20px;
-  overflow-wrap:anywhere;
-}
+    .edit-button,
+    .save-button,
+    .shop-button {
+      border: 0;
+      padding: 11px 17px;
+      border-radius: 20px;
+      color: white;
+      background: linear-gradient(90deg, #a52cdb, #f044a8);
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.identity p {
-  font-size:11px;
-  color:var(--muted);
-  margin-top:7px;
-}
+    .edit-button {
+      width: 100%;
+      margin-top: 12px;
+    }
 
-.badges {
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  margin-top:9px;
-}
+    .form-group {
+      margin-bottom: 14px;
+    }
 
-.badge {
-  font-size:10px;
-  padding:5px 8px;
-  border-radius:9px;
-  background:linear-gradient(90deg,#7e36d9,#e42fae);
-}
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      color: #e7b9ed;
+      font-size: 14px;
+    }
 
-.bio {
-  font-size:12px;
-  color:#d9c8e9;
-  margin-top:14px;
-  line-height:1.5;
-}
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #614477;
+      border-radius: 10px;
+      background: #160d24;
+      color: white;
+      outline: none;
+    }
 
-.stats {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  margin:0 14px 18px;
-  background:#ffffff0a;
-  border:1px solid #ffffff1b;
-  border-radius:15px;
-  padding:15px 3px;
-}
+    .form-group textarea {
+      resize: vertical;
+      min-height: 75px;
+    }
 
-.stat {
-  text-align:center;
-  border-right:1px solid #ffffff20;
-}
+    .hidden {
+      display: none;
+    }
 
-.stat:last-child {
-  border:0;
-}
+    .frame-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
 
-.stat strong {
-  display:block;
-  font-size:16px;
-}
+    .frame-item {
+      background: #342044;
+      padding: 13px 8px;
+      border-radius: 13px;
+      text-align: center;
+    }
 
-.stat small {
-  display:block;
-  color:var(--muted);
-  font-size:10px;
-  margin-top:7px;
-}
+    .frame-preview {
+      width: 65px;
+      height: 65px;
+      margin: auto auto 9px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      background: #160d24;
+    }
 
-.vip {
-  margin:0 14px 18px;
-  border-radius:15px;
-  padding:15px;
-  background:linear-gradient(100deg,#a900c8,#4b17bd);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-}
+    .frame-item p {
+      font-size: 13px;
+      margin: 5px;
+    }
 
-.vip strong {
-  font-size:14px;
-}
+    .frame-item button {
+      margin-top: 8px;
+      border: 0;
+      border-radius: 15px;
+      padding: 8px 12px;
+      background: #d83fae;
+      color: white;
+      cursor: pointer;
+    }
 
-.vip small {
-  display:block;
-  font-size:10px;
-  margin-top:5px;
-  color:#f1dafa;
-}
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 67px;
+      background: #211333;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #49345c;
+    }
 
-.vip button {
-  background:#ffffff20;
-  color:#fff;
-  border:1px solid #ffffff55;
-  border-radius:20px;
-  padding:9px 12px;
-  font-weight:bold;
-}
+    .bottom-nav a {
+      color: #c9b4d8;
+      text-decoration: none;
+      text-align: center;
+      font-size: 12px;
+    }
 
-.wallet {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-  margin:0 14px 21px;
-}
+    .bottom-nav a.active {
+      color: #ff75d0;
+    }
 
-.wallet-card {
-  border-radius:14px;
-  padding:15px;
-  background:linear-gradient(110deg,#057b19,#079b36);
-  display:flex;
-  align-items:center;
-  gap:9px;
-  font-size:20px;
-  font-weight:bold;
-}
+    .bottom-nav span {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 3px;
+    }
 
-.wallet-card:nth-child(2) {
-  background:linear-gradient(110deg,#8e243b,#bf3151);
-}
-
-.section {
-  margin:0 14px 22px;
-}
-
-.section h3 {
-  font-size:16px;
-  margin-bottom:13px;
-}
-
-.menu {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:17px 7px;
-}
-
-.menu a {
-  color:#fff;
-  text-decoration:none;
-  text-align:center;
-  font-size:10px;
-  min-width:0;
-}
-
-.menu a span {
-  display:block;
-  font-size:27px;
-  margin-bottom:7px;
-  filter:drop-shadow(0 3px 4px #0007);
-}
-
-.bottom {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  z-index:5;
-  background:#08070b;
-  border-top:1px solid #ffffff1b;
-  display:flex;
-  justify-content:space-around;
-  padding:9px 3px max(9px,env(safe-area-inset-bottom));
-}
-
-.bottom a {
-  color:#929096;
-  text-decoration:none;
-  text-align:center;
-  font-size:11px;
-  min-width:48px;
-}
-
-.bottom a span {
-  display:block;
-  font-size:21px;
-  margin-bottom:4px;
-}
-
-.bottom a.active {
-  color:#f000d7;
-}
-
-#toast {
-  position:fixed;
-  bottom:85px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#43245e;
-  padding:11px 15px;
-  border-radius:12px;
-  font-size:12px;
-  display:none;
-  z-index:8;
-}
-
-@media(min-width:600px) {
-
-  .bottom {
-    max-width:620px;
-    left:50%;
-    transform:translateX(-50%);
-    border-radius:16px 16px 0 0;
-  }
-
-}
-
-</style>
-
+    .note {
+      color: #cbb7d8;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 
 <body>
 
-<main class="app">
-
-<header>
-
-<button onclick="location.href='index.html'">
-‹
-</button>
-
-<h1>My Profile</h1>
-
-<button onclick="editName()">
-✎
-</button>
-
-</header>
-
-<div class="cover"></div>
-
-<section class="profile-card">
-
-<div class="profile-top">
-
-<div class="avatar-wrap">
-
-<div class="avatar" id="avatar">
-👤
-</div>
-
-</div>
-
-<div class="identity">
-
-<h2 id="displayName">
-Huka User
-</h2>
-
-<p>
-ID: <b id="userId">--------</b> 🇮🇳
-</p>
-
-<div class="badges">
-
-<span class="badge" id="levelBadge">
-⭐ LV.1
-</span>
-
-<span class="badge">
-💜 Huka Member
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-<p class="bio">
-Making friends and sharing happy moments on Huka Voice Chat 💜
-</p>
-
-</section>
-
-<section class="stats">
-
-<div class="stat">
-<strong>0</strong>
-<small>Friend</small>
-</div>
-
-<div class="stat">
-<strong>0</strong>
-<small>Following</small>
-</div>
-
-<div class="stat">
-<strong>0</strong>
-<small>Followers</small>
-</div>
-
-<div class="stat">
-<strong>0</strong>
-<small>Visitors</small>
-</div>
-
-</section>
-
-<section class="vip">
-
-<div>
-
-<strong>👑 SVIP Club</strong>
-
-<small>
-Enjoy distinguished privileges
-</small>
-
-</div>
-
-<button onclick="location.href='vip.html'">
-Get SVIP
-</button>
-
-</section>
-
-<section class="wallet">
-
-<div class="wallet-card">
-💎
-<span id="diamonds">0</span>
-<small>Diamonds</small>
-</div>
-
-<div class="wallet-card">
-🪙
-<span id="coins">0</span>
-<small>Coins</small>
-</div>
-
-</section>
-
-<section class="section">
-
-<h3>My Huka Space</h3>
-
-<nav class="menu">
-
-<a href="rankings.html">
-<span>🏆</span>
-Level
-</a>
-
-<a href="vip.html">
-<span>🏬</span>
-Store
-</a>
-
-<a href="events.html">
-<span>📋</span>
-Tasks
-</a>
-
-<a href="family.html">
-<span>👨‍👩‍👧</span>
-Family
-</a>
-
-<a href="vip.html">
-<span>💎</span>
-VIP
-</a>
-
-<a href="family.html">
-<span>💞</span>
-CP
-</a>
-
-<a href="rankings.html">
-<span>🛡️</span>
-BD Center
-</a>
-
-<a href="family.html">
-<span>💼</span>
-Agency Center
-</a>
-
-<a href="inbox.html">
-<span>📝</span>
-My Post
-</a>
-
-<a href="vip.html">
-<span>⚡</span>
-Offline Recharge
-</a>
-
-<a href="events.html">
-<span>🎧</span>
-Host Center
-</a>
-
-<a href="games.html">
-<span>🎬</span>
-My Videos
-</a>
-
-</nav>
-
-</section>
-
-<div id="toast"></div>
-
-</main>
-
-<nav class="bottom">
-
-<a href="index.html">
-<span>⌂</span>
-Home
-</a>
-
-<a href="reel.html">
-<span>▶</span>
-Reel
-</a>
-
-<a href="room.html?room=100001">
-<span>🎙</span>
-Voice
-</a>
-
-<a href="inbox.html">
-<span>▣</span>
-Message
-</a>
-
-<a class="active" href="profile.html">
-<span>◉</span>
-Profile
-</a>
-
-</nav>
-
-<script src="/socket.io/socket.io.js"></script>
-
-<script>
-
-const $ = id => document.getElementById(id);
-
-function toast(msg) {
-
-  const t = $('toast');
-
-  t.textContent = msg;
-
-  t.style.display = 'block';
-
-  setTimeout(() => {
-    t.style.display = 'none';
-  },2300);
-
-}
-
-function showProfile(p) {
-
-  $('displayName').textContent =
-    p.name || 'Huka User';
-
-  $('userId').textContent =
-    p.id || '--------';
-
-  $('coins').textContent =
-    Number(p.coins || 0).toLocaleString('en-IN');
-
-  $('diamonds').textContent =
-    Number(p.diamonds || 0).toLocaleString('en-IN');
-
-  $('levelBadge').textContent =
-    '⭐ LV.' + (p.level || 1);
-
-}
-
-function editName() {
-
-  const old =
-    localStorage.getItem('hukaName') || 'Huka User';
-
-  const name = prompt(
-    'Enter your Huka name:',
-    old
-  );
-
-  if (!name || !name.trim()) return;
-
-  localStorage.setItem('hukaName',name.trim());
-
-  toast('Name updated. Refreshing profile...');
-
-  setTimeout(() => location.reload(),600);
-
-}
-
-const socket = io();
-
-socket.on('connect',() => {
-
-  const name =
-    localStorage.getItem('hukaName') || 'Huka User';
-
-  const id =
-    localStorage.getItem('hukaUserId') || '';
-
-  socket.emit('register',{
-
-    name,
-
-    profileId:id
-
-  },res => {
-
-    if (!res || !res.ok) {
-
-      toast(res?.error || 'Could not load profile');
-
-      return;
+  <header class="header">
+    <button onclick="history.back()">‹</button>
+    <h2>My Profile</h2>
+    <button onclick="showEdit()">⚙️</button>
+  </header>
+
+  <section class="profile-card">
+    <div class="avatar-area">
+      <img id="profileAvatar"
+           src="https://placehold.co/200x200/542078/ffffff?text=H"
+           alt="Profile Photo">
+
+      <button class="camera-button"
+              onclick="document.getElementById('avatarInput').click()">
+        📷
+      </button>
+
+      <input type="file"
+             id="avatarInput"
+             accept="image/*"
+             hidden>
+    </div>
+
+    <h2 id="displayName">Huka User</h2>
+    <div class="profile-id">
+      ID: <span id="displayId">100011</span>
+    </div>
+
+    <div class="frame-name" id="activeFrameName">
+      No Frame Selected
+    </div>
+  </section>
+
+  <section class="wallet">
+    <div>
+      🪙 My Coins
+      <br>
+      <strong id="coinBalance">0</strong>
+    </div>
+
+    <button class="shop-button" onclick="showShop()">
+      Get Frames
+    </button>
+  </section>
+
+  <section class="section">
+    <h3>👤 Personal Information</h3>
+
+    <div class="info-row">
+      <span>Name</span>
+      <span id="infoName">Huka User</span>
+    </div>
+
+    <div class="info-row">
+      <span>Bio</span>
+      <span id="infoBio">Hello Huka Friends!</span>
+    </div>
+
+    <div class="info-row">
+      <span>Country</span>
+      <span id="infoCountry">Not Set</span>
+    </div>
+
+    <div class="info-row">
+      <span>Gender</span>
+      <span id="infoGender">Not Set</span>
+    </div>
+
+    <div class="info-row">
+      <span>Age Group</span>
+      <span id="infoAge">Not Set</span>
+    </div>
+
+    <div class="info-row">
+      <span>Language</span>
+      <span id="infoLanguage">English</span>
+    </div>
+
+    <button class="edit-button" onclick="showEdit()">
+      ✏️ Edit Profile
+    </button>
+  </section>
+
+  <section class="section hidden" id="editSection">
+    <h3>✏️ Edit Profile</h3>
+
+    <div class="form-group">
+      <label>Profile Name</label>
+      <input id="editName" maxlength="25" placeholder="Enter your name">
+    </div>
+
+    <div class="form-group">
+      <label>Bio</label>
+      <textarea id="editBio" maxlength="150"
+                placeholder="Write something about yourself"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Country</label>
+      <select id="editCountry">
+        <option value="">Select Country</option>
+        <option>India</option>
+        <option>Nepal</option>
+        <option>Bangladesh</option>
+        <option>Pakistan</option>
+        <option>United States</option>
+        <option>United Kingdom</option>
+        <option>United Arab Emirates</option>
+        <option>Saudi Arabia</option>
+        <option>Indonesia</option>
+        <option>Philippines</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Gender</label>
+      <select id="editGender">
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+        <option>Prefer not to say</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Age Group (Private)</label>
+      <select id="editAge">
+        <option value="">Select Age Group</option>
+        <option>Under 18</option>
+        <option>18-24</option>
+        <option>25-34</option>
+        <option>35-44</option>
+        <option>45+</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>App Language</label>
+      <select id="editLanguage">
+        <option value="English">English</option>
+        <option value="Hindi">हिन्दी</option>
+        <option value="Urdu">اردو</option>
+        <option value="Arabic">العربية</option>
+        <option value="Bengali">বাংলা</option>
+        <option value="Nepali">नेपाली</option>
+        <option value="Indonesian">Bahasa Indonesia</option>
+        <option value="Filipino">Filipino</option>
+      </select>
+    </div>
+
+    <button class="save-button" onclick="saveProfile()">
+      Save Changes
+    </button>
+  </section>
+
+  <section class="section" id="bagSection">
+    <h3>🎒 My Frame Bag</h3>
+    <div class="frame-grid" id="myFrames"></div>
+  </section>
+
+  <section class="section hidden" id="shopSection">
+    <h3>🛍️ Frame Shop</h3>
+    <p class="note">Coins se frames kharid sakte ho.</p>
+    <div class="frame-grid" id="shopFrames"></div>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="index.html">
+      <span>🏠</span>Home
+    </a>
+
+    <a href="index.html">
+      <span>🎬</span>Reel
+    </a>
+
+    <a href="index.html">
+      <span>🎙️</span>Voice
+    </a>
+
+    <a href="index.html">
+      <span>✉️</span>Message
+    </a>
+
+    <a href="profile.html" class="active">
+      <span>👤</span>Profile
+    </a>
+  </nav>
+
+  <script>
+    const defaultFrames = [
+      {
+        id: "free",
+        name: "Free Frame",
+        price: 0,
+        emoji: "⭐",
+        free: true
+      },
+      {
+        id: "pink",
+        name: "Pink Frame",
+        price: 100,
+        emoji: "💗"
+      },
+      {
+        id: "gold",
+        name: "Gold Frame",
+        price: 250,
+        emoji: "👑"
+      },
+      {
+        id: "love",
+        name: "Love Frame",
+        price: 400,
+        emoji: "💖"
+      },
+      {
+        id: "diamond",
+        name: "Diamond Frame",
+        price: 700,
+        emoji: "💎"
+      },
+      {
+        id: "royal",
+        name: "Royal Frame",
+        price: 1000,
+        emoji: "🏆"
+      }
+    ];
+
+    function getSaved(key, fallback) {
+      try {
+        const value = localStorage.getItem(key);
+        return value === null ? fallback : JSON.parse(value);
+      } catch {
+        return fallback;
+      }
     }
 
-    localStorage.setItem(
-      'hukaUserId',
-      res.user.id
+    let profile = getSaved("hukaProfile", {});
+
+    let coins = Number(
+      localStorage.getItem("hukaCoins") || "0"
     );
 
-    localStorage.setItem(
-      'hukaName',
-      res.user.name
-    );
+    let ownedFrames = getSaved("hukaOwnedFrames", ["free"]);
 
-    showProfile(res.user);
+    let selectedFrame =
+      localStorage.getItem("hukaSelectedFrame") || "free";
 
-    socket.emit('get-profile',{
+    let avatar =
+      localStorage.getItem("hukaAvatar") || "";
 
-      userId:res.user.id
+    function loadProfile() {
+      const name =
+        profile.name ||
+        localStorage.getItem("hukaName") ||
+        localStorage.getItem("hukaUsername") ||
+        "Huka User";
 
-    },data => {
+      const bio = profile.bio || "Hello Huka Friends!";
+      const country = profile.country || "Not Set";
+      const gender = profile.gender || "Not Set";
+      const age = profile.age || "Not Set";
+      const language = profile.language || "English";
 
-      if (data && data.ok) {
+      const userId =
+        profile.userId ||
+        localStorage.getItem("hukaUserId") ||
+        "100011";
 
-        showProfile(data.profile);
+      document.getElementById("displayName").textContent = name;
+      document.getElementById("displayId").textContent = userId;
 
+      document.getElementById("infoName").textContent = name;
+      document.getElementById("infoBio").textContent = bio;
+      document.getElementById("infoCountry").textContent = country;
+      document.getElementById("infoGender").textContent = gender;
+      document.getElementById("infoAge").textContent = age;
+      document.getElementById("infoLanguage").textContent = language;
+
+      document.getElementById("coinBalance").textContent = coins;
+
+      document.getElementById("editName").value = name;
+      document.getElementById("editBio").value = bio;
+
+      document.getElementById("editCountry").value =
+        country === "Not Set" ? "" : country;
+
+      document.getElementById("editGender").value =
+        gender === "Not Set" ? "" : gender;
+
+      document.getElementById("editAge").value =
+        age === "Not Set" ? "" : age;
+
+      document.getElementById("editLanguage").value = language;
+
+      if (avatar) {
+        document.getElementById("profileAvatar").src = avatar;
       }
 
-    });
+      const frame = defaultFrames.find(f => f.id === selectedFrame);
+      document.getElementById("activeFrameName").textContent =
+        frame ? frame.name : "No Frame Selected";
 
-  });
+      renderFrames();
+    }
 
-});
+    function showEdit() {
+      const section = document.getElementById("editSection");
+      section.classList.toggle("hidden");
 
-socket.on('profile-update',data => {
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
 
-  const old = {
+    function saveProfile() {
+      const name =
+        document.getElementById("editName").value.trim();
 
-    name:localStorage.getItem('hukaName') || 'Huka User',
+      if (!name) {
+        alert("Please enter your name.");
+        return;
+      }
 
-    ...data
+      profile.name = name;
+      profile.bio =
+        document.getElementById("editBio").value.trim();
 
-  };
+      profile.country =
+        document.getElementById("editCountry").value;
 
-  showProfile(old);
+      profile.gender =
+        document.getElementById("editGender").value;
 
-});
+      profile.age =
+        document.getElementById("editAge").value;
 
-</script>
+      profile.language =
+        document.getElementById("editLanguage").value;
+
+      localStorage.setItem("hukaProfile", JSON.stringify(profile));
+      localStorage.setItem("hukaName", name);
+      localStorage.setItem("hukaUsername", name);
+      localStorage.setItem("hukaLanguage", profile.language);
+
+      document.getElementById("editSection").classList.add("hidden");
+
+      loadProfile();
+      alert("Profile saved!");
+    }
+
+    document.getElementById("avatarInput")
+      .addEventListener("change", function(event) {
+        const file = event.target.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+          alert("Please select an image.");
+          return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image must be smaller than 2 MB.");
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          avatar = e.target.result;
+
+          localStorage.setItem("hukaAvatar", avatar);
+
+          document.getElementById("profileAvatar").src = avatar;
+        };
+
+        reader.readAsDataURL(file);
+      });
+
+    function renderFrames() {
+      const bag = document.getElementById("myFrames");
+      const shop = document.getElementById("shopFrames");
+
+      bag.innerHTML = "";
+      shop.innerHTML = "";
+
+      defaultFrames.forEach(frame => {
+        const owned = ownedFrames.includes(frame.id);
+
+        if (owned) {
+          const item = document.createElement("div");
+          item.className = "frame-item";
+
+          item.innerHTML = `
+            <div class="frame-preview">${frame.emoji}</div>
+            <p>${frame.name}</p>
+            <button onclick="selectFrame('${frame.id}')">
+              ${selectedFrame === frame.id ? "Selected ✓" : "Use Frame"}
+            </button>
+          `;
+
+          bag.appendChild(item);
+        } else {
+          const item = document.createElement("div");
+          item.className = "frame-item";
+
+          item.innerHTML = `
+            <div class="frame-preview">${frame.emoji}</div>
+            <p>${frame.name}</p>
+            <p>🪙 ${frame.price} Coins</p>
+            <button onclick="buyFrame('${frame.id}')">
+              Buy Frame
+            </button>
+          `;
+
+          shop.appendChild(item);
+        }
+      });
+    }
+
+    function selectFrame(id) {
+      if (!ownedFrames.includes(id)) {
+        alert("You don't own this frame.");
+        return;
+      }
+
+      selectedFrame = id;
+      localStorage.setItem("hukaSelectedFrame", id);
+
+      const frame = defaultFrames.find(f => f.id === id);
+
+      document.getElementById("activeFrameName").textContent =
+        frame ? frame.name : "";
+
+      renderFrames();
+    }
+
+    function buyFrame(id) {
+      const frame = defaultFrames.find(f => f.id === id);
+
+      if (!frame) return;
+
+      if (ownedFrames.includes(id)) {
+        alert("You already own this frame.");
+        return;
+      }
+
+      if (coins < frame.price) {
+        alert("Not enough coins!");
+        return;
+      }
+
+      coins -= frame.price;
+
+      ownedFrames.push(id);
+
+      localStorage.setItem("hukaCoins", coins);
+      localStorage.setItem(
+        "hukaOwnedFrames",
+        JSON.stringify(ownedFrames)
+      );
+
+      document.getElementById("coinBalance").textContent = coins;
+
+      renderFrames();
+
+      alert(frame.name + " purchased successfully!");
+    }
+
+    function showShop() {
+      const section = document.getElementById("shopSection");
+
+      section.classList.toggle("hidden");
+
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    loadProfile();
+  </script>
 
 </body>
 </html>
