@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#190d2b">
-
+  <meta name="theme-color" content="#160d24">
   <title>Huka Voice Chat - Room</title>
 
   <link rel="stylesheet" href="room.css">
@@ -17,55 +16,55 @@
   <!-- HEADER -->
   <header class="room-header">
     <div class="room-header-left">
-      <a href="index.html" class="back-button">‹</a>
+      <button class="back-button" onclick="leaveRoom()">‹</button>
 
-      <div class="room-heading">
-        <h2 id="roomName">Huka Voice Room</h2>
-        <span id="roomId">Room ID: Loading...</span>
+      <div>
+        <div class="room-title" id="roomName">Huka Voice Room</div>
+        <div class="room-subtitle">
+          Room ID: <span id="roomId">Loading...</span>
+        </div>
       </div>
     </div>
 
     <div class="room-header-right">
-      <span id="roomStatus">🟢 Online</span>
-      <button id="leaveRoom" class="leave-button">Leave</button>
+      <button class="header-button" id="inboxButton">✉️</button>
+      <button class="header-button" id="youtubeButton">▶️</button>
     </div>
   </header>
 
   <!-- ROOM INFORMATION -->
   <section class="room-info">
     <div>
-      <span>👑 Owner:</span>
-      <strong id="roomOwner">Loading...</strong>
+      <h2 id="roomTitle">🎙️ Welcome to Huka</h2>
+      <p id="roomDescription">Meet friends and enjoy your time.</p>
+      <p>Owner: <span id="roomOwner">Huka</span></p>
+      <div id="roomStatus">Online</div>
+      <div id="connectionStatus">Connecting...</div>
     </div>
 
-    <div>
-      <span>👥 Members:</span>
-      <strong id="memberCount">0</strong>
-    </div>
-
-    <div>
-      <span>🔌 Connection:</span>
-      <strong id="connectionStatus">Connecting...</strong>
-    </div>
-  </section>
-
-  <!-- ROOM BANNER -->
-  <section class="room-banner">
-    <div class="room-banner-content">
-      <h2>Welcome to Huka Voice Chat</h2>
-      <p>Meet friends, chat and enjoy together!</p>
+    <div class="room-owner">
+      👑 Room Owner
     </div>
   </section>
 
   <!-- SEATS -->
-  <section class="seats-section">
+  <section class="seat-section">
     <div class="section-heading">
       <h3>🎙️ Voice Seats</h3>
-      <span>Choose your seat</span>
+      <span class="seat-count">
+        Members: <span id="memberCount">0</span>
+      </span>
     </div>
 
-    <div id="seats" class="seats-grid">
-      <!-- Seats will be added by room.js -->
+    <div class="seat-controls">
+      <button data-seats="9">9 Seats</button>
+      <button data-seats="11">11 Seats</button>
+      <button data-seats="15">15 Seats</button>
+      <button data-seats="20">20 Seats</button>
+    </div>
+
+    <div id="seats">
+      <div class="empty-seat">Loading seats...</div>
     </div>
   </section>
 
@@ -73,31 +72,23 @@
   <section class="members-section">
     <div class="section-heading">
       <h3>👥 Room Members</h3>
+      <span class="seat-count" id="memberCountText">Online</span>
     </div>
 
-    <div id="members" class="members-list">
-      <!-- Members will be added by room.js -->
-    </div>
-  </section>
-
-  <!-- ADMIN PANEL -->
-  <section id="adminPanel" class="admin-panel" hidden>
-    <h3>🛡️ Room Admin Controls</h3>
-
-    <div class="admin-buttons">
-      <button id="settingsButton">⚙️ Room Settings</button>
-      <button id="clearChatButton">🧹 Clear Chat</button>
+    <div id="members">
+      <p class="empty-seat">Loading members...</p>
     </div>
   </section>
 
   <!-- CHAT -->
   <section class="chat-section">
-    <div class="section-heading">
-      <h3>💬 Room Chat</h3>
-    </div>
+    <h3>💬 Room Chat</h3>
 
-    <div id="chatMessages" class="chat-messages">
-      <p class="empty-message">Welcome to Huka Voice Chat!</p>
+    <div id="chatMessages">
+      <div class="chat-message">
+        <span class="username">Huka Bot</span>
+        Welcome to Huka Voice Chat!
+      </div>
     </div>
 
     <div class="chat-input-area">
@@ -109,170 +100,180 @@
         autocomplete="off"
       >
 
-      <button id="sendMessage">➤</button>
+      <button id="sendMessage">Send</button>
     </div>
   </section>
 
-  <!-- YOUTUBE LINKS -->
-  <section class="youtube-section">
-    <h3>▶️ YouTube Sharing</h3>
-
-    <div class="youtube-input-area">
-      <input
-        type="url"
-        id="youtubeInput"
-        placeholder="Paste YouTube link..."
-      >
-
-      <button id="youtubeButton">Share</button>
+  <!-- GIFT RANKING -->
+  <section class="members-section">
+    <div class="section-heading">
+      <h3>🏆 Gift Ranking</h3>
     </div>
+    <div id="giftRanking">
+      <p class="empty-seat">No gifts yet</p>
+    </div>
+  </section>
+
+  <!-- ADMIN PANEL -->
+  <section id="adminPanel" style="display:none;">
+    <h3>🛡️ Room Admin Panel</h3>
+
+    <button id="clearChatButton">Clear Chat</button>
+
+    <div>
+      <input id="adminUserId" placeholder="User ID">
+      <button id="addAdminButton">Add Admin</button>
+      <button id="removeAdminButton">Remove Admin</button>
+      <button id="kickMemberButton">Kick Member</button>
+      <button id="forceMuteButton">Force Mute</button>
+    </div>
+  </section>
+
+  <!-- YOUTUBE -->
+  <section class="youtube-section">
+    <h3>▶️ Share YouTube Link</h3>
+
+    <input
+      type="url"
+      id="youtubeInput"
+      placeholder="Paste YouTube link"
+    >
+
+    <button id="shareYoutubeButton">Share Link</button>
 
     <div id="youtubeLinks"></div>
   </section>
 
-  <!-- GIFT RANKING -->
-  <section class="ranking-section">
-    <h3>🏆 Gift Ranking</h3>
-    <div id="giftRanking">
-      No gifts yet.
-    </div>
-  </section>
+  <!-- ROOM SETTINGS -->
+  <section class="settings-section">
+    <h3>⚙️ Room Settings</h3>
 
-</div>
+    <label>
+      Room Name
+      <input
+        type="text"
+        id="settingRoomName"
+        placeholder="Room name"
+        maxlength="50"
+      >
+    </label>
 
-<!-- BOTTOM TOOLBAR -->
-<div class="bottom-toolbar">
+    <label>
+      Description
+      <textarea
+        id="settingDescription"
+        placeholder="Room description"
+      ></textarea>
+    </label>
 
-  <button id="mentionButton" title="Mention">
-    @
-  </button>
-
-  <button id="emojiButton" title="Emoji">
-    😊
-  </button>
-
-  <button id="speakerButton" title="Speaker">
-    🔊
-  </button>
-
-  <button id="micButton" title="Microphone">
-    🎙️
-  </button>
-
-  <button id="inboxButton" title="Inbox">
-    ✉️
-  </button>
-
-  <button id="giftButton" title="Gifts">
-    🎁
-  </button>
-
-</div>
-
-<!-- EMOJI MODAL -->
-<div id="emojiModal" class="modal" hidden>
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h3>😊 Choose Emoji</h3>
-      <button type="button" data-close="emojiModal">✕</button>
-    </div>
-
-    <div class="emoji-list">
-      <button type="button" data-emoji="😀">😀</button>
-      <button type="button" data-emoji="😂">😂</button>
-      <button type="button" data-emoji="😍">😍</button>
-      <button type="button" data-emoji="🥰">🥰</button>
-      <button type="button" data-emoji="😘">😘</button>
-      <button type="button" data-emoji="😎">😎</button>
-      <button type="button" data-emoji="❤️">❤️</button>
-      <button type="button" data-emoji="💕">💕</button>
-      <button type="button" data-emoji="🔥">🔥</button>
-      <button type="button" data-emoji="👏">👏</button>
-      <button type="button" data-emoji="🎉">🎉</button>
-      <button type="button" data-emoji="🌹">🌹</button>
-    </div>
-
-  </div>
-</div>
-
-<!-- GIFT MODAL -->
-<div id="giftModal" class="modal" hidden>
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h3>🎁 Send Gift</h3>
-      <button type="button" data-close="giftModal">✕</button>
-    </div>
-
-    <label for="giftReceiver">Select Member</label>
-    <select id="giftReceiver">
-      <option value="">Select a member</option>
-    </select>
-
-    <div id="giftList" class="gift-list">
-      <!-- Gifts will be loaded by room.js -->
-    </div>
-
-    <p id="giftMessage"></p>
-
-  </div>
-</div>
-
-<!-- INBOX MODAL -->
-<div id="inboxModal" class="modal" hidden>
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h3>✉️ Inbox</h3>
-      <button type="button" data-close="inboxModal">✕</button>
-    </div>
-
-    <div id="inboxMessages">
-      No messages yet.
-    </div>
-
-  </div>
-</div>
-
-<!-- ROOM SETTINGS MODAL -->
-<div id="settingsModal" class="modal" hidden>
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h3>⚙️ Room Settings</h3>
-      <button type="button" data-close="settingsModal">✕</button>
-    </div>
-
-    <label for="settingRoomName">Room Name</label>
-    <input
-      type="text"
-      id="settingRoomName"
-      placeholder="Enter room name"
-      maxlength="50"
-    >
-
-    <label for="settingDescription">Room Description</label>
-    <textarea
-      id="settingDescription"
-      placeholder="Enter room description"
-      maxlength="250"
-    ></textarea>
-
-    <label class="setting-option">
+    <label>
       <input type="checkbox" id="roomLocked">
       Lock Room
     </label>
 
-    <label class="setting-option">
+    <label>
       <input type="checkbox" id="youtubeAllowed" checked>
-      Allow YouTube Sharing
+      Allow YouTube Links
     </label>
 
-    <button id="saveRoomSettings" class="save-button">
+    <button class="primary-button" id="saveRoomSettings">
       Save Settings
     </button>
+  </section>
 
+  <!-- LEAVE ROOM -->
+  <button class="leave-room-button" id="leaveRoom">
+    🚪 Leave Room
+  </button>
+
+</div>
+
+<!-- BOTTOM TOOLBAR -->
+<nav class="room-bottom-bar">
+
+  <button id="mentionButton" title="Mention"> @ </button>
+
+  <button id="emojiButton" title="Emoji">😊</button>
+
+  <button id="speakerButton" title="Speaker">🔊</button>
+
+  <button id="micButton" title="Microphone">🎙️</button>
+
+  <button id="inboxBottomButton" title="Inbox">✉️</button>
+
+  <button id="giftButton" title="Gift">🎁</button>
+
+</nav>
+
+<!-- EMOJI MODAL -->
+<div id="emojiModal">
+  <div class="modal-content">
+    <h3>😊 Choose Emoji</h3>
+
+    <div class="emoji-grid" id="emojiList">
+      <button>😀</button>
+      <button>😍</button>
+      <button>🥰</button>
+      <button>😂</button>
+      <button>🤣</button>
+      <button>😘</button>
+      <button>❤️</button>
+      <button>💕</button>
+      <button>🔥</button>
+      <button>👏</button>
+      <button>🎉</button>
+      <button>🌹</button>
+      <button>👍</button>
+      <button>🥳</button>
+      <button>😎</button>
+      <button>💖</button>
+      <button>✨</button>
+      <button>🤗</button>
+    </div>
+
+    <button class="secondary-button" id="closeEmoji">
+      Close
+    </button>
+  </div>
+</div>
+
+<!-- GIFT MODAL -->
+<div id="giftModal">
+  <div class="modal-content">
+    <h3>🎁 Send Gift</h3>
+
+    <p>
+      My Coins:
+      <strong id="coinBalance">0</strong>
+    </p>
+
+    <label for="giftReceiver">Select Member</label>
+    <select id="giftReceiver">
+      <option value="">Select member</option>
+    </select>
+
+    <div id="giftList">
+      <p class="empty-seat">Loading gifts...</p>
+    </div>
+
+    <button class="secondary-button" id="closeGift">
+      Close
+    </button>
+  </div>
+</div>
+
+<!-- INBOX MODAL -->
+<div id="inboxModal">
+  <div class="modal-content">
+    <h3>✉️ Inbox</h3>
+
+    <div id="inboxMessages">
+      <p class="empty-seat">No messages</p>
+    </div>
+
+    <button class="secondary-button" id="closeInbox">
+      Close
+    </button>
   </div>
 </div>
 
@@ -281,36 +282,6 @@
 
 <!-- ROOM JAVASCRIPT -->
 <script src="room.js"></script>
-
-<script>
-  // Modal open and close controls
-  document.addEventListener("click", function(event) {
-    const closeButton = event.target.closest("[data-close]");
-
-    if (closeButton) {
-      const modal = document.getElementById(
-        closeButton.getAttribute("data-close")
-      );
-
-      if (modal) modal.hidden = true;
-    }
-
-    const openButtons = {
-      emojiButton: "emojiModal",
-      giftButton: "giftModal",
-      inboxButton: "inboxModal",
-      settingsButton: "settingsModal"
-    };
-
-    const button = event.target.closest("button");
-
-    if (button && openButtons[button.id]) {
-      const modal = document.getElementById(openButtons[button.id]);
-
-      if (modal) modal.hidden = false;
-    }
-  });
-</script>
 
 </body>
 </html>
