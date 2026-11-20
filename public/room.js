@@ -1,809 +1,1573 @@
-"use strict";
-
-/* =========================================
+/* ==========================================
    HUKA VOICE CHAT - ROOM JAVASCRIPT
-========================================= */
+   Galaxy Room + Live Chat + Gifts + Seats
+   Socket.IO + WebRTC Voice
+========================================== */
 
 const socket = io();
 
+const $ = id => document.getElementById(id);
+
 const params = new URLSearchParams(location.search);
 
-const ROOM_ID =
+const roomId =
   params.get("room") ||
   params.get("roomId") ||
   localStorage.getItem("hukaRoomId") ||
   "";
 
-const USER_ID = localStorage.getItem("hukaUserId") || "";
+let userId =
+  localStorage.getItem("hukaUserId") ||
+  localStorage.getItem("hukaProfileId") ||
+  "";
 
-const USER_NAME =
+let username =
   localStorage.getItem("hukaName") ||
   localStorage.getItem("hukaUsername") ||
-  "Guest";
+  "Huka User";
 
 let currentRoom = null;
-let roomMembers = [];
-let currentSeats = {};
-let currentSeatCount = 9;
-let selectedGift = null;
-let selectedGiftPrice = 0;
-let isMicOn = false;
-let isSpeakerOn = true;
-let isAdmin = false;
-let myCoins = 0;
+let currentMembers = [];
+let currentSeats = [];
+let currentSettings = {};
+let currentCoins = 0;
 
-const $ = (id) => document.getElementById(id);
+let selectedGift = "";
+let selectedTab = "all";
 
-function showMessage(message) {
-  alert(message);
+let micStream = null;
+let micEnabled = false;
+let speakerEnabled = true;
+
+let giftPrices = {};
+
+const peerConnections = new Map();
+const remoteAudioElements = new Map();
+
+let toastTimer;
+let notificationTimer;
+
+/* ==========================================
+   HELPERS
+========================================== */
+
+function toast(message) {
+  const box = $("toast");
+
+  if (!box) {
+    alert(message);
+    return;
+  }
+
+  box.textContent = message;
+  box.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    box.classList.remove("show");
+  }, 2500);
+}
+
+function showModal(id) {
+  const modal = $(id);
+
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
+}
+
+function hideModal(id) {
+  const modal = $(id);
+
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+}
+
+function emitWithReply(eventName, data = {}) {
+  return new Promise(resolve => {
+    socket.emit(eventName, data, response => {
+      resolve(response || {
+        ok: false,
+        error: "Server response nahi mila."
+      });
+    });
+  });
 }
 
 function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[char]
+  );
 }
 
-function safeImage(value) {
-  if (typeof value !== "string") return "";
-  if (/^https?:\/\//i.test(value)) return value;
-  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(value)) {
-    return value;
-  }
-  return "";
-}
-
-function setText(id, value) {
-  const element = $(id);
-  if (element) element.textContent = value ?? "";
-}
-
-function emitWithAck(eventName, data = {}) {
-  return new Promise((resolve) => {
-    socket.timeout(8000).emit(eventName, data, (error, response) => {
-      if (error) {
-        resolve({ ok: false, message: "Server response timeout" });
-      } else {
-        resolve(response || { ok: true });
-      }
+function getTime(time) {
+  return new Date(time || Date.now())
+    .toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
     });
-  });
 }
 
-/* =========================================
-   CONNECTION
-========================================= */
+/* ==========================================
+   REGISTER USER
+========================================== */
 
-socket.on("connect", () => {
-  setText("connectionStatus", "Connected");
-
-  if (!USER_ID) {
-    showMessage("User ID nahi mila. Pehle profile se login karein.");
-    return;
-  }
-
-  if (!ROOM_ID) {
-    showMessage("Room ID nahi mili.");
-    return;
-  }
-
+function registerUser() {
   socket.emit("register", {
-    userId: USER_ID,
-    name: USER_NAME
-  }, (response) => {
+    name: username,
+    profileId: userId
+  }, response => {
+
     if (!response || !response.ok) {
-      showMessage(response?.message || "Registration failed");
+      toast(response?.error || "Registration failed.");
       return;
     }
 
-    if (response.user) {
-      myCoins = Number(response.user.coins || 0);
-      setText("coinBalance", myCoins);
-    }
+    const user = response.user;
+
+    userId = user.id;
+    username = user.name;
+
+    currentCoins = Number(user.coins || 0);
+
+    localStorage.setItem("hukaUserId", user.id);
+    localStorage.setItem("hukaProfileId", user.id);
+    localStorage.setItem("hukaName", user.name);
+    localStorage.setItem("hukaUsername", user.name);
+
+    updateCoins();
 
     joinRoom();
   });
-});
-
-socket.on("disconnect", () => {
-  setText("connectionStatus", "Disconnected");
-});
-
-socket.on("connect_error", () => {
-  setText("connectionStatus", "Connection error");
-});
-
-/* =========================================
-   JOIN ROOM
-========================================= */
-
-function joinRoom() {
-  socket.emit("join-room", {
-    roomId: ROOM_ID
-  }, (response) => {
-    if (response && response.ok === false) {
-      showMessage(response.message || "Room join nahi hua");
-      return;
-    }
-
-    setText("roomId", ROOM_ID);
-    setText("roomStatus", "Online");
-  });
 }
 
-/* =========================================
-   ROOM MEMBERS
-========================================= */
+/* ==========================================
+   JOIN ROOM
+========================================== */
 
-socket.on("members-update", (data) => {
-  if (Array.isArray(data)) {
-    roomMembers = data;
-  } else if (data && Array.isArray(data.members)) {
-    roomMembers = data.members;
-    currentRoom = data;
-    currentSeats = data.seats || {};
-  } else {
+function joinRoom() {
+  if (!roomId) {
+    toast("Room ID missing.");
+
+    setTimeout(() => {
+      location.href = "index.html";
+    }, 1500);
+
     return;
   }
 
-  renderMembers();
-  renderSeats();
-  updateGiftReceivers();
-});
+  localStorage.setItem("hukaRoomId", roomId);
 
-socket.on("room-update", (room) => {
-  if (!room) return;
+  socket.emit("join-room", {
+    roomId: roomId
+  }, response => {
 
-  currentRoom = room;
-  currentSeats = room.seats || currentSeats;
+    if (!response || !response.ok) {
+      toast(response?.error || "Room join nahi hua.");
 
-  setText("roomName", room.name || "Huka Voice Room");
-  setText("roomTitle", room.name || "Huka Voice Room");
-  setText("roomOwner", room.ownerName || room.owner || "Room Owner");
-  setText("roomDescription", room.description || "");
+      setTimeout(() => {
+        location.href = "index.html";
+      }, 2000);
 
-  renderSeats();
-});
-
-function renderMembers() {
-  const container = $("members");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  setText("memberCount", roomMembers.length);
-  setText("memberCountText", roomMembers.length + " Online");
-
-  roomMembers.forEach((member) => {
-    const name = typeof member === "string"
-      ? member
-      : member.name || member.username || "Guest";
-
-    const item = document.createElement("div");
-    item.className = "member-item";
-
-    const avatar = safeImage(member.avatar);
-
-    item.innerHTML = `
-      <img src="${avatar || "https://placehold.co/80x80/49305f/ffffff?text=H"}"
-           alt="Avatar">
-      <div class="member-name">${escapeHTML(name)}</div>
-      <span class="member-status">Online</span>
-    `;
-
-    container.appendChild(item);
-  });
-
-  if (!roomMembers.length) {
-    container.innerHTML = '<p class="empty-seat">No members yet</p>';
-  }
-}
-
-function renderSeats() {
-  const container = $("seats");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  const seatEntries = Object.entries(currentSeats || {});
-
-  for (let i = 1; i <= currentSeatCount; i++) {
-    const occupant = currentSeats[i] || currentSeats[String(i)];
-
-    const seat = document.createElement("div");
-    seat.className = "seat";
-
-    if (occupant) {
-      const name = typeof occupant === "string"
-        ? occupant
-        : occupant.name || occupant.username || "Member";
-
-      seat.innerHTML = `
-        <div class="seat-number">Seat ${i}</div>
-        <div class="seat-avatar">🎙️</div>
-        <div class="seat-name">${escapeHTML(name)}</div>
-      `;
-    } else {
-      seat.innerHTML = `
-        <div class="seat-number">Seat ${i}</div>
-        <div class="seat-avatar">＋</div>
-        <div class="empty-seat">Empty</div>
-      `;
-    }
-
-    seat.addEventListener("click", () => {
-      if (!occupant) takeSeat(i);
-      else showMessage("This seat is already occupied.");
-    });
-
-    container.appendChild(seat);
-  }
-}
-
-/* =========================================
-   SEAT MANAGEMENT
-========================================= */
-
-async function takeSeat(seatNumber) {
-  const response = await emitWithAck("take-seat", {
-    roomId: ROOM_ID,
-    seat: seatNumber
-  });
-
-  if (response.ok === false) {
-    showMessage(response.message || "Seat nahi mil saki");
-  }
-}
-
-async function leaveSeat() {
-  const response = await emitWithAck("leave-seat", {
-    roomId: ROOM_ID
-  });
-
-  if (response.ok === false) {
-    showMessage(response.message || "Seat leave nahi hui");
-  }
-}
-
-document.querySelectorAll("[data-seats]").forEach((button) => {
-  button.addEventListener("click", async () => {
-    const count = Number(button.dataset.seats);
-
-    if (![9, 11, 15, 20].includes(count)) return;
-
-    const response = await emitWithAck("update-room-settings", {
-      roomId: ROOM_ID,
-      seats: count
-    });
-
-    if (response.ok === false) {
-      showMessage(response.message || "Seat settings update nahi hui");
       return;
     }
 
-    currentSeatCount = count;
+    currentRoom = response.room;
 
-    document.querySelectorAll("[data-seats]").forEach((item) => {
-      item.classList.toggle(item === button ? "active" : "inactive", item === button);
-    });
+    currentSeats = response.seats || [];
+    currentMembers = response.members || [];
+    currentSettings = response.settings || {};
+
+    $("roomName").textContent =
+      currentRoom.name || "Huka Room";
+
+    $("roomId").textContent = currentRoom.id;
+
+    $("roomStatus").textContent = "🟢 Connected";
 
     renderSeats();
-  });
-});
+    renderMembers();
+    renderChatHistory(response.messages || []);
 
-/* =========================================
-   CHAT
-========================================= */
+    updateRoomSettings(currentSettings);
 
-function addChatMessage(username, message) {
-  const container = $("chatMessages");
-  if (!container) return;
-
-  const item = document.createElement("div");
-  item.className = "chat-message";
-
-  const name = document.createElement("span");
-  name.className = "username";
-  name.textContent = username;
-
-  const text = document.createElement("span");
-  text.textContent = message;
-
-  item.appendChild(name);
-  item.appendChild(text);
-
-  container.appendChild(item);
-  container.scrollTop = container.scrollHeight;
-}
-
-function sendChatMessage() {
-  const input = $("chatInput");
-  if (!input) return;
-
-  const message = input.value.trim();
-  if (!message) return;
-
-  socket.emit("room-message", {
-    roomId: ROOM_ID,
-    message
-  }, (response) => {
-    if (response && response.ok === false) {
-      showMessage(response.message || "Message send nahi hua");
-    }
-  });
-
-  input.value = "";
-}
-
-$("sendMessage")?.addEventListener("click", sendChatMessage);
-
-$("chatInput")?.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") sendChatMessage();
-});
-
-socket.on("room-message", (data) => {
-  if (!data) return;
-
-  addChatMessage(
-    data.username || data.name || "Guest",
-    data.message || ""
-  );
-});
-
-/* =========================================
-   CLEAR CHAT
-========================================= */
-
-$("clearChatButton")?.addEventListener("click", () => {
-  if (!confirm("Clear room chat?")) return;
-
-  socket.emit("clear-chat", {
-    roomId: ROOM_ID
-  });
-});
-
-socket.on("chat-cleared", () => {
-  const container = $("chatMessages");
-  if (container) container.innerHTML = "";
-});
-
-/* =========================================
-   EMOJI
-========================================= */
-
-function openEmoji() {
-  if ($("emojiModal")) $("emojiModal").style.display = "flex";
-}
-
-function closeEmoji() {
-  if ($("emojiModal")) $("emojiModal").style.display = "none";
-}
-
-$("emojiButton")?.addEventListener("click", openEmoji);
-$("closeEmoji")?.addEventListener("click", closeEmoji);
-
-$("emojiList")?.addEventListener("click", (event) => {
-  const button = event.target.closest("button");
-  if (!button) return;
-
-  socket.emit("send-emoji", {
-    roomId: ROOM_ID,
-    emoji: button.textContent
-  });
-
-  closeEmoji();
-});
-
-socket.on("emoji-event", (data) => {
-  if (!data) return;
-
-  addChatMessage(
-    data.username || "Guest",
-    data.emoji || "😊"
-  );
-});
-
-/* =========================================
-   MIC BUTTON
-========================================= */
-
-function toggleMic() {
-  isMicOn = !isMicOn;
-
-  const buttons = [$("micButton"), $("bottomMicButton"), $("micBtn")];
-
-  buttons.forEach((button) => {
-    if (button) {
-      button.textContent = isMicOn ? "🎙️" : "🔇";
-      button.classList.toggle("active", isMicOn);
-    }
-  });
-
-  socket.emit("mic-state", {
-    roomId: ROOM_ID,
-    muted: !isMicOn
-  });
-
-  if (isMicOn) {
-    showMessage("Mic state ON. Voice calling ke liye WebRTC setup zaroori hai.");
-  }
-}
-
-$("micButton")?.addEventListener("click", toggleMic);
-$("bottomMicButton")?.addEventListener("click", toggleMic);
-$("micBtn")?.addEventListener("click", toggleMic);
-
-/* =========================================
-   SPEAKER BUTTON
-========================================= */
-
-function toggleSpeaker() {
-  isSpeakerOn = !isSpeakerOn;
-
-  const button = $("speakerButton") || $("speakerBtn");
-
-  if (button) {
-    button.textContent = isSpeakerOn ? "🔊" : "🔇";
-    button.classList.toggle("active", isSpeakerOn);
-  }
-}
-
-$("speakerButton")?.addEventListener("click", toggleSpeaker);
-$("speakerBtn")?.addEventListener("click", toggleSpeaker);
-
-/* =========================================
-   GIFT SYSTEM
-========================================= */
-
-function openGift() {
-  if ($("giftModal")) $("giftModal").style.display = "flex";
-
-  socket.emit("get-gifts");
-}
-
-function closeGift() {
-  if ($("giftModal")) $("giftModal").style.display = "none";
-}
-
-$("giftButton")?.addEventListener("click", openGift);
-$("closeGift")?.addEventListener("click", closeGift);
-
-socket.on("gift-list", (gifts) => {
-  const container = $("giftList");
-  if (!container || !Array.isArray(gifts)) return;
-
-  container.innerHTML = "";
-
-  gifts.forEach((gift) => {
-    const item = document.createElement("div");
-    item.className = "gift-item";
-
-    const icon = gift.icon || gift.emoji || "🎁";
-    const name = gift.name || "Gift";
-    const price = Number(gift.price || gift.coins || 0);
-
-    item.innerHTML = `
-      <div class="gift-icon">${escapeHTML(icon)}</div>
-      <div class="gift-name">${escapeHTML(name)}</div>
-      <div class="gift-price">🪙 ${price}</div>
-      <button type="button">Send</button>
-    `;
-
-    item.querySelector("button").addEventListener("click", () => {
-      selectedGift = gift;
-      selectedGiftPrice = price;
-      sendGift();
+    // Server mic state ko initially off rakho.
+    socket.emit("mic-state", {
+      micOn: false
     });
 
-    container.appendChild(item);
+    micEnabled = false;
+    updateMicButton();
+
+    loadGifts();
+    loadInbox();
+
+    toast("Welcome to Huka Room!");
   });
-});
+}
+
+/* ==========================================
+   ROOM DETAILS
+========================================== */
+
+function updateRoomSettings(settings) {
+  currentSettings = {
+    ...currentSettings,
+    ...settings
+  };
+
+  if (settings.name) {
+    $("roomName").textContent = settings.name;
+  }
+
+  if ($("roomDescription")) {
+    $("roomDescription").textContent =
+      settings.description || "Welcome to Huka Lounge";
+  }
+
+  if ($("settingRoomName")) {
+    $("settingRoomName").value =
+      settings.name || currentRoom?.name || "";
+  }
+
+  if ($("settingDescription")) {
+    $("settingDescription").value =
+      settings.description || "";
+  }
+
+  if ($("settingLocked")) {
+    $("settingLocked").checked =
+      Boolean(settings.locked);
+  }
+
+  if ($("settingYoutube")) {
+    $("settingYoutube").checked =
+      settings.allowYoutube !== false;
+  }
+}
+
+/* ==========================================
+   SEAT RENDERING
+========================================== */
+
+function renderSeats() {
+  const vipContainer = $("vipSeats");
+  const normalContainer = $("normalSeats");
+
+  if (!vipContainer || !normalContainer) return;
+
+  vipContainer.innerHTML = "";
+  normalContainer.innerHTML = "";
+
+  const count = currentSeats.length || 9;
+
+  for (let i = 0; i < count; i++) {
+    const seat = currentSeats[i];
+
+    const member = seat
+      ? currentMembers.find(
+          item => item.socketId === seat.socketId
+        )
+      : null;
+
+    const card = document.createElement("div");
+
+    card.className =
+      "seat-card " +
+      (seat ? "occupied" : "empty-seat") +
+      (i === 0 ? " host" : "") +
+      (i < 5 ? " vip" : "");
+
+    card.dataset.seat = i;
+
+    const avatar = document.createElement("div");
+    avatar.className = "seat-avatar";
+
+    avatar.textContent = seat ? "👤" : "🎙️";
+
+    const name = document.createElement("b");
+
+    name.textContent = seat
+      ? seat.name
+      : i === 0
+        ? "Host Seat"
+        : `No.${i + 1}`;
+
+    const status = document.createElement("small");
+
+    status.textContent = seat
+      ? member?.micOn === false
+        ? "🔇 Muted"
+        : "🎙️ Online"
+      : "Tap to Join";
+
+    card.appendChild(avatar);
+    card.appendChild(name);
+    card.appendChild(status);
+
+    card.addEventListener("click", () => {
+      handleSeatClick(i);
+    });
+
+    if (i < 5) {
+      vipContainer.appendChild(card);
+    } else {
+      normalContainer.appendChild(card);
+    }
+  }
+}
+
+async function handleSeatClick(index) {
+  const seat = currentSeats[index];
+
+  if (seat && seat.socketId !== socket.id) {
+    toast("This seat is already occupied.");
+    return;
+  }
+
+  if (seat && seat.socketId === socket.id) {
+    const result = await emitWithReply("leave-seat");
+
+    if (result.ok) {
+      toast("You left the seat.");
+    } else {
+      toast(result.error || "Unable to leave seat.");
+    }
+
+    return;
+  }
+
+  const result = await emitWithReply(
+    "take-seat",
+    index
+  );
+
+  if (result.ok) {
+    toast("Seat joined!");
+  } else {
+    toast(result.error || "Seat join failed.");
+  }
+}
+
+/* ==========================================
+   MEMBERS
+========================================== */
+
+function renderMembers() {
+  const list = $("membersList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  currentMembers.forEach(member => {
+    const row = document.createElement("div");
+
+    row.className = "member-item";
+
+    const name = document.createElement("span");
+
+    name.textContent =
+      (member.isOwner ? "👑 " : "") +
+      (member.isAdmin ? "🛡️ " : "") +
+      member.name;
+
+    const status = document.createElement("span");
+
+    status.textContent =
+      member.micOn === false ? "🔇" : "🎙️";
+
+    row.appendChild(name);
+    row.appendChild(status);
+
+    list.appendChild(row);
+  });
+
+  $("memberCount").textContent =
+    currentMembers.length;
+
+  $("membersTotal").textContent =
+    currentMembers.length;
+
+  updateGiftReceivers();
+}
 
 function updateGiftReceivers() {
   const select = $("giftReceiver");
+
   if (!select) return;
 
   const oldValue = select.value;
-  select.innerHTML = '<option value="">Select member</option>';
 
-  roomMembers.forEach((member) => {
-    if (typeof member === "string") return;
+  select.innerHTML =
+    '<option value="">Everyone</option>';
 
-    const id = member.userId || member.id;
-    const name = member.name || member.username || "Member";
-
-    if (!id || id === USER_ID) return;
+  currentMembers.forEach(member => {
+    if (member.id === userId) return;
 
     const option = document.createElement("option");
-    option.value = id;
-    option.textContent = name;
+
+    option.value = member.id;
+    option.textContent =
+      member.name + " (ID: " + member.id + ")";
+
     select.appendChild(option);
   });
 
-  if (oldValue) select.value = oldValue;
+  select.value = oldValue;
 }
 
-async function sendGift() {
-  if (!selectedGift) return;
+/* ==========================================
+   CHAT HISTORY
+========================================== */
 
-  const receiver = $("giftReceiver")?.value;
+function renderChatHistory(messages) {
+  const box = $("chatMessages");
 
-  if (!receiver) {
-    showMessage("Pehle gift receiver select karein.");
-    return;
-  }
+  if (!box) return;
 
-  if (myCoins < selectedGiftPrice) {
-    showMessage("Aapke paas enough coins nahi hain.");
-    return;
-  }
+  box.innerHTML = "";
 
-  const response = await emitWithAck("send-gift", {
-    roomId: ROOM_ID,
-    receiverId: receiver,
-    giftId: selectedGift.id,
-    quantity: 1
+  messages.forEach(message => {
+    appendChatMessage(message);
   });
-
-  if (response.ok === false) {
-    showMessage(response.message || "Gift send nahi hua");
-    return;
-  }
-
-  if (response.coins !== undefined) {
-    myCoins = Number(response.coins);
-    setText("coinBalance", myCoins);
-  }
-
-  closeGift();
 }
 
-socket.on("gift-event", (data) => {
-  if (!data) return;
+function appendChatMessage(message) {
+  const box = $("chatMessages");
 
-  addChatMessage(
-    "🎁 " + (data.senderName || data.username || "Member"),
-    "sent a gift: " + (data.giftName || "Gift")
-  );
-});
+  if (!box) return;
 
-/* =========================================
-   GIFT RANKING
-========================================= */
+  const row = document.createElement("div");
 
-socket.on("gift-ranking", (ranking) => {
-  const container = $("giftRanking");
-  if (!container || !Array.isArray(ranking)) return;
+  row.className = "chat-message";
 
-  container.innerHTML = "";
+  const name = document.createElement("span");
 
-  ranking.forEach((item, index) => {
-    const row = document.createElement("div");
-    row.className = "ranking-item";
+  name.className = "message-name";
+  name.textContent = message.name || "Huka User";
 
-    row.textContent =
-      `${index + 1}. ${item.name || "Member"} — ${item.coins || 0} coins`;
+  const text = document.createElement("span");
 
-    container.appendChild(row);
-  });
-});
+  text.textContent = message.text || "";
 
-/* =========================================
-   INBOX
-========================================= */
+  const time = document.createElement("small");
 
-function openInbox() {
-  if ($("inboxModal")) $("inboxModal").style.display = "flex";
+  time.textContent = getTime(message.time);
 
-  socket.emit("get-inbox");
+  row.appendChild(name);
+  row.appendChild(text);
+  row.appendChild(time);
+
+  box.appendChild(row);
+
+  box.scrollTop = box.scrollHeight;
 }
 
-function closeInbox() {
-  if ($("inboxModal")) $("inboxModal").style.display = "none";
+function appendSystemMessage(message) {
+  const box = $("chatMessages");
+
+  if (!box) return;
+
+  const row = document.createElement("div");
+
+  row.className = "system-message";
+  row.textContent = message;
+
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
 }
 
-$("inboxButton")?.addEventListener("click", openInbox);
-$("inboxBottomButton")?.addEventListener("click", openInbox);
-$("closeInbox")?.addEventListener("click", closeInbox);
+function appendGiftMessage(event) {
+  const box = $("chatMessages");
 
-socket.on("inbox-messages", (messages) => {
-  const container = $("inboxMessages");
-  if (!container) return;
+  if (!box) return;
 
-  container.innerHTML = "";
+  const row = document.createElement("div");
 
-  if (!Array.isArray(messages) || !messages.length) {
-    container.textContent = "No messages";
-    return;
-  }
+  row.className = "chat-message gift-message";
 
-  messages.forEach((message) => {
-    const item = document.createElement("div");
-    item.className = "inbox-message";
-    item.textContent =
-      `${message.fromName || "Member"}: ${message.message || ""}`;
+  row.textContent =
+    `🎁 ${event.from} sent ${event.gift} to ${event.to} (${event.cost} Coins)`;
 
-    container.appendChild(item);
-  });
-});
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
 
-/* =========================================
-   YOUTUBE LINK SHARING
-========================================= */
+/* ==========================================
+   SEND CHAT
+========================================== */
 
-$("youtubeButton")?.addEventListener("click", () => {
-  $("youtubeInput")?.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
+$("chatForm").addEventListener("submit", event => {
+  event.preventDefault();
 
-  $("youtubeInput")?.focus();
-});
+  const input = $("chatInput");
+  const text = input.value.trim();
 
-$("shareYoutubeButton")?.addEventListener("click", () => {
-  const input = $("youtubeInput");
-  if (!input) return;
+  if (!text) return;
 
-  const link = input.value.trim();
-
-  let url;
-
-  try {
-    url = new URL(link);
-  } catch {
-    showMessage("Valid YouTube link enter karein.");
-    return;
-  }
-
-  const allowed =
-    url.hostname === "youtube.com" ||
-    url.hostname === "www.youtube.com" ||
-    url.hostname === "youtu.be" ||
-    url.hostname === "m.youtube.com";
-
-  if (!allowed) {
-    showMessage("Sirf YouTube link share karein.");
-    return;
-  }
-
-  socket.emit("share-youtube", {
-    roomId: ROOM_ID,
-    url: url.href
+  socket.emit("room-message", {
+    text: text
   });
 
   input.value = "";
 });
 
-socket.on("youtube-shared", (data) => {
-  if (!data || !data.url) return;
+/* ==========================================
+   CHAT TABS
+========================================== */
 
-  const container = $("youtubeLinks");
-  if (!container) return;
+document.querySelectorAll(".chat-tab").forEach(button => {
+  button.addEventListener("click", () => {
 
-  const link = document.createElement("a");
-  link.href = data.url;
-  link.target = "_blank";
-  link.rel = "noopener noreferrer";
-  link.textContent = "▶️ Open YouTube Link";
+    document.querySelectorAll(".chat-tab")
+      .forEach(item => item.classList.remove("active"));
 
-  const row = document.createElement("p");
-  row.appendChild(link);
-  container.appendChild(row);
-});
+    button.classList.add("active");
 
-/* =========================================
-   ROOM SETTINGS
-========================================= */
+    selectedTab = button.dataset.tab;
 
-$("saveRoomSettings")?.addEventListener("click", () => {
-  const name = $("settingRoomName")?.value.trim();
-  const description = $("settingDescription")?.value.trim();
+    document.querySelectorAll(
+      ".chat-message, .system-message"
+    ).forEach(message => {
 
-  const locked = Boolean($("roomLocked")?.checked);
-  const youtubeAllowed = Boolean($("youtubeAllowed")?.checked);
-
-  socket.emit("update-room-settings", {
-    roomId: ROOM_ID,
-    name,
-    description,
-    locked,
-    youtubeAllowed
-  }, (response) => {
-    if (response && response.ok === false) {
-      showMessage(response.message || "Settings save nahi hui");
-      return;
-    }
-
-    showMessage("Room settings update request sent.");
+      if (selectedTab === "all") {
+        message.style.display = "";
+      } else if (selectedTab === "chat") {
+        message.style.display =
+          message.classList.contains("gift-message")
+            ? "none"
+            : "";
+      } else {
+        message.style.display =
+          message.classList.contains("gift-message")
+            ? ""
+            : "none";
+      }
+    });
   });
 });
 
-/* =========================================
-   ADMIN BUTTONS
-========================================= */
+/* ==========================================
+   EMOJI PANEL
+========================================== */
 
-$("addAdminButton")?.addEventListener("click", () => {
-  const userId = $("adminUserId")?.value.trim();
-  if (!userId) return showMessage("User ID enter karein.");
-
-  socket.emit("add-room-admin", {
-    roomId: ROOM_ID,
-    userId
-  });
+$("emojiButton").addEventListener("click", () => {
+  $("emojiPanel").classList.toggle("hidden");
+  $("morePanel").classList.add("hidden");
 });
 
-$("removeAdminButton")?.addEventListener("click", () => {
-  const userId = $("adminUserId")?.value.trim();
-  if (!userId) return showMessage("User ID enter karein.");
+$("emojiPanel").addEventListener("click", event => {
+  const button = event.target.closest("[data-emoji]");
 
-  socket.emit("remove-room-admin", {
-    roomId: ROOM_ID,
-    userId
+  if (!button) return;
+
+  socket.emit("send-emoji", {
+    emoji: button.dataset.emoji
   });
+
+  $("emojiPanel").classList.add("hidden");
 });
 
-$("kickMemberButton")?.addEventListener("click", () => {
-  const userId = $("adminUserId")?.value.trim();
-  if (!userId) return showMessage("User ID enter karein.");
+function showEmojiEvent(data) {
+  appendSystemMessage(
+    `${data.name}: ${data.emoji}`
+  );
+}
 
-  socket.emit("kick-member", {
-    roomId: ROOM_ID,
-    userId
+/* ==========================================
+   GIFT SYSTEM
+========================================== */
+
+function loadGifts() {
+  socket.emit("get-gifts", response => {
+
+    if (!response || !response.ok) return;
+
+    giftPrices = response.gifts || {};
+
+    renderGiftList();
   });
+}
+
+function renderGiftList() {
+  const box = $("giftList");
+
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  const giftEmojis = {
+    Rose: "🌹",
+    Heart: "💗",
+    Crown: "👑",
+    Diamond: "💎",
+    Rocket: "🚀",
+    Castle: "🏰",
+    Galaxy: "🌌"
+  };
+
+  Object.entries(giftPrices).forEach(([name, price]) => {
+    const button = document.createElement("button");
+
+    button.dataset.gift = name;
+
+    button.innerHTML = `
+      ${giftEmojis[name] || "🎁"}<br>
+      ${escapeHTML(name)}<br>
+      ${Number(price)} Coins
+    `;
+
+    button.addEventListener("click", () => {
+
+      selectedGift = name;
+
+      box.querySelectorAll("button")
+        .forEach(item => item.classList.remove("selected"));
+
+      button.classList.add("selected");
+    });
+
+    box.appendChild(button);
+  });
+}
+
+$("giftButton").addEventListener("click", () => {
+  selectedGift = "";
+
+  $("giftCoins").textContent = currentCoins;
+
+  showModal("giftModal");
 });
 
-$("forceMuteButton")?.addEventListener("click", () => {
-  const userId = $("adminUserId")?.value.trim();
-  if (!userId) return showMessage("User ID enter karein.");
+$("sendGiftButton").addEventListener("click", async () => {
+  if (!selectedGift) {
+    toast("Pehle gift select karo.");
+    return;
+  }
 
-  socket.emit("force-mute", {
-    roomId: ROOM_ID,
-    userId
+  const receiver = $("giftReceiver").value || "";
+
+  const result = await emitWithReply("send-gift", {
+    gift: selectedGift,
+    to: receiver
   });
+
+  if (!result.ok) {
+    toast(result.error || "Gift send nahi hua.");
+    return;
+  }
+
+  currentCoins = Number(result.coins || 0);
+
+  updateCoins();
+
+  $("giftCoins").textContent = currentCoins;
+
+  toast("Gift sent successfully!");
+
+  hideModal("giftModal");
 });
 
-socket.on("admin-status", (data) => {
-  isAdmin = Boolean(data && data.isAdmin);
+function updateGiftRanking(ranking) {
+  const box = $("giftRanking");
 
-  if ($("adminPanel")) {
-    $("adminPanel").style.display = isAdmin ? "block" : "none";
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  (ranking || []).forEach((item, index) => {
+    const row = document.createElement("div");
+
+    row.className = "ranking-item";
+
+    row.textContent =
+      `${index + 1}. ${item.name} — ${item.coins} Coins`;
+
+    box.appendChild(row);
+  });
+}
+
+function showGiftNotification(event) {
+  const box = $("giftNotification");
+
+  $("giftNotificationText").textContent =
+    `🎁 ${event.from} sent ${event.gift} to ${event.to} × ${event.cost}`;
+
+  box.classList.remove("hidden");
+
+  clearTimeout(notificationTimer);
+
+  notificationTimer = setTimeout(() => {
+    box.classList.add("hidden");
+  }, 5000);
+
+  appendGiftMessage(event);
+}
+
+/* ==========================================
+   COINS
+========================================== */
+
+function updateCoins() {
+  if ($("giftCoins")) {
+    $("giftCoins").textContent = currentCoins;
+  }
+
+  localStorage.setItem("hukaCoins", currentCoins);
+}
+
+/* ==========================================
+   MIC BUTTON
+========================================== */
+
+function updateMicButton() {
+  const button = $("micButton");
+
+  if (!button) return;
+
+  button.textContent = micEnabled ? "🎙️" : "🔇";
+
+  button.title = micEnabled
+    ? "Microphone ON"
+    : "Microphone OFF";
+}
+
+async function enableMicrophone() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    toast("Microphone ke liye HTTPS connection zaroori hai.");
+    return false;
+  }
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      },
+      video: false
+    });
+
+    micStream.getAudioTracks().forEach(track => {
+      track.enabled = true;
+    });
+
+    micEnabled = true;
+
+    socket.emit("mic-state", {
+      micOn: true
+    });
+
+    updateMicButton();
+
+    // Existing room members ko audio offer bhejo.
+    peerConnections.forEach((pc, peerId) => {
+      micStream.getTracks().forEach(track => {
+        const alreadyAdded = pc.getSenders().some(
+          sender => sender.track?.id === track.id
+        );
+
+        if (!alreadyAdded) {
+          pc.addTrack(track, micStream);
+        }
+      });
+
+      makeOffer(peerId, pc);
+    });
+
+    toast("Microphone ON");
+    return true;
+
+  } catch (error) {
+    console.error("Microphone error:", error);
+
+    toast("Microphone permission allow karo.");
+    return false;
+  }
+}
+
+function disableMicrophone() {
+  if (micStream) {
+    micStream.getTracks().forEach(track => {
+      track.enabled = false;
+    });
+  }
+
+  micEnabled = false;
+
+  socket.emit("mic-state", {
+    micOn: false
+  });
+
+  updateMicButton();
+
+  toast("Microphone OFF");
+}
+
+$("micButton").addEventListener("click", async () => {
+  if (micEnabled) {
+    disableMicrophone();
+  } else {
+    await enableMicrophone();
   }
 });
 
-/* =========================================
-   LEAVE ROOM
-========================================= */
+/* ==========================================
+   SPEAKER BUTTON
+========================================== */
 
-async function leaveRoom() {
-  if (!confirm("Kya aap room se bahar jana chahte hain?")) return;
+$("speakerButton").addEventListener("click", () => {
+  speakerEnabled = !speakerEnabled;
 
-  socket.emit("leave-room", {
-    roomId: ROOM_ID
-  }, () => {
-    location.href = "index.html";
+  remoteAudioElements.forEach(audio => {
+    audio.muted = !speakerEnabled;
   });
 
-  setTimeout(() => {
-    location.href = "index.html";
-  }, 1500);
+  $("speakerButton").textContent =
+    speakerEnabled ? "🔊" : "🔇";
+
+  toast(
+    speakerEnabled
+      ? "Speaker ON"
+      : "Speaker OFF"
+  );
+});
+
+/* ==========================================
+   WEBRTC VOICE CHAT
+========================================== */
+
+const rtcConfig = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    },
+    {
+      urls: "stun:stun1.l.google.com:19302"
+    }
+  ]
+};
+
+function createPeer(peerId) {
+  if (peerConnections.has(peerId)) {
+    return peerConnections.get(peerId);
+  }
+
+  const pc = new RTCPeerConnection(rtcConfig);
+
+  peerConnections.set(peerId, pc);
+
+  if (micStream) {
+    micStream.getTracks().forEach(track => {
+      pc.addTrack(track, micStream);
+    });
+  }
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      socket.emit("voice-ice", {
+        to: peerId,
+        candidate: event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event => {
+    let audio = remoteAudioElements.get(peerId);
+
+    if (!audio) {
+      audio = document.createElement("audio");
+
+      audio.autoplay = true;
+      audio.playsInline = true;
+
+      audio.muted = !speakerEnabled;
+
+      document.body.appendChild(audio);
+
+      remoteAudioElements.set(peerId, audio);
+    }
+
+    audio.srcObject = event.streams[0];
+
+    audio.play().catch(error => {
+      console.log("Audio playback waiting:", error);
+    });
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (
+      pc.connectionState === "failed" ||
+      pc.connectionState === "closed"
+    ) {
+      removePeer(peerId);
+    }
+  };
+
+  return pc;
 }
 
-$("leaveRoom")?.addEventListener("click", leaveRoom);
+async function makeOffer(peerId, pc) {
+  if (!micStream) return;
 
-/* =========================================
-   INITIAL PAGE SETUP
-========================================= */
+  try {
+    const offer = await pc.createOffer();
 
-setText("roomId", ROOM_ID);
-setText("roomName", "Huka Voice Room");
-setText("roomTitle", "🎙️ Huka Voice Room");
+    await pc.setLocalDescription(offer);
 
-if (!ROOM_ID) {
-  setText("roomStatus", "Room ID missing");
+    socket.emit("voice-offer", {
+      to: peerId,
+      offer: pc.localDescription
+    });
+
+  } catch (error) {
+    console.error("Offer error:", error);
+  }
 }
 
-console.log("Huka Voice Chat Room JS Loaded");
+async function receiveOffer(data) {
+  try {
+    const pc = createPeer(data.from);
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(data.offer)
+    );
+
+    if (micStream) {
+      micStream.getTracks().forEach(track => {
+        const alreadyAdded = pc.getSenders().some(
+          sender => sender.track?.id === track.id
+        );
+
+        if (!alreadyAdded) {
+          pc.addTrack(track, micStream);
+        }
+      });
+    }
+
+    const answer = await pc.createAnswer();
+
+    await pc.setLocalDescription(answer);
+
+    socket.emit("voice-answer", {
+      to: data.from,
+      answer: pc.localDescription
+    });
+
+  } catch (error) {
+    console.error("Receive offer error:", error);
+  }
+}
+
+async function receiveAnswer(data) {
+  try {
+    const pc = peerConnections.get(data.from);
+
+    if (!pc) return;
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(data.answer)
+    );
+
+  } catch (error) {
+    console.error("Receive answer error:", error);
+  }
+}
+
+async function receiveIce(data) {
+  try {
+    const pc = peerConnections.get(data.from);
+
+    if (!pc || !data.candidate) return;
+
+    await pc.addIceCandidate(
+      new RTCIceCandidate(data.candidate)
+    );
+
+  } catch (error) {
+    console.error("ICE error:", error);
+  }
+}
+
+function removePeer(peerId) {
+  const pc = peerConnections.get(peerId);
+
+  if (pc) {
+    pc.close();
+    peerConnections.delete(peerId);
+  }
+
+  const audio = remoteAudioElements.get(peerId);
+
+  if (audio) {
+    audio.pause();
+    audio.srcObject = null;
+    audio.remove();
+
+    remoteAudioElements.delete(peerId);
+  }
+}
+
+function closeAllPeers() {
+  [...peerConnections.keys()].forEach(removePeer);
+}
+
+/* ==========================================
+   INBOX
+========================================== */
+
+function loadInbox() {
+  socket.emit("get-inbox");
+}
+
+$("inboxButton").addEventListener("click", () => {
+  loadInbox();
+  showModal("inboxModal");
+});
+
+function renderInbox(messages) {
+  const box = $("inboxMessages");
+
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  if (!messages || messages.length === 0) {
+    box.textContent = "No new messages.";
+    return;
+  }
+
+  messages.slice(-50).reverse().forEach(message => {
+    const row = document.createElement("div");
+
+    row.className = "system-message";
+
+    row.textContent =
+      `${message.from || "User"}: ${message.text || ""} (${getTime(message.time)})`;
+
+    box.appendChild(row);
+  });
+}
+
+/* ==========================================
+   MORE MENU
+========================================== */
+
+$("moreButton").addEventListener("click", () => {
+  $("morePanel").classList.toggle("hidden");
+  $("emojiPanel").classList.add("hidden");
+});
+
+$("membersButton").addEventListener("click", () => {
+  $("morePanel").classList.add("hidden");
+
+  $("membersList").scrollIntoView({
+    behavior: "smooth"
+  });
+});
+
+$("rankingButton").addEventListener("click", () => {
+  $("morePanel").classList.add("hidden");
+
+  $("giftRanking").scrollIntoView({
+    behavior: "smooth"
+  });
+});
+
+$("leaveSeatButton").addEventListener("click", async () => {
+  const result = await emitWithReply("leave-seat");
+
+  toast(
+    result.ok
+      ? "Seat left."
+      : result.error || "Unable to leave seat."
+  );
+
+  $("morePanel").classList.add("hidden");
+});
+
+$("clearChatButton").addEventListener("click", async () => {
+  const result = await emitWithReply("clear-chat");
+
+  if (!result.ok) {
+    toast(result.error || "Only Owner/Admin can clear chat.");
+  } else {
+    toast("Chat cleared.");
+  }
+
+  $("morePanel").classList.add("hidden");
+});
+
+/* ==========================================
+   YOUTUBE SHARING
+========================================== */
+
+$("youtubeButton").addEventListener("click", () => {
+  $("morePanel").classList.add("hidden");
+  showModal("youtubeModal");
+});
+
+$("shareYoutubeButton").addEventListener("click", async () => {
+  const url = $("youtubeInput").value.trim();
+
+  if (!url) {
+    toast("YouTube link paste karo.");
+    return;
+  }
+
+  const result = await emitWithReply("share-youtube", {
+    url
+  });
+
+  if (!result.ok) {
+    toast(result.error || "Link share nahi hua.");
+    return;
+  }
+
+  $("youtubeInput").value = "";
+
+  toast("YouTube link shared!");
+  hideModal("youtubeModal");
+});
+
+function showYoutubeLink(event) {
+  const box = $("youtubeLinks");
+
+  if (!box) return;
+
+  const row = document.createElement("div");
+
+  row.className = "system-message";
+
+  const link = document.createElement("a");
+
+  link.href = event.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "▶ Open YouTube link";
+
+  row.appendChild(link);
+
+  box.appendChild(row);
+
+  appendSystemMessage(
+    `${event.by} shared a YouTube link.`
+  );
+}
+
+/* ==========================================
+   ROOM SETTINGS
+========================================== */
+
+$("settingsButton").addEventListener("click", () => {
+  $("morePanel").classList.add("hidden");
+
+  updateRoomSettings(currentSettings);
+
+  // Add seat count option if not already present.
+  if (!$("settingSeats")) {
+    const label = document.createElement("label");
+
+    label.textContent = "Seat Count";
+    label.htmlFor = "settingSeats";
+
+    const select = document.createElement("select");
+
+    select.id = "settingSeats";
+
+    [9, 11, 15, 20].forEach(number => {
+      const option = document.createElement("option");
+
+      option.value = number;
+      option.textContent = number + " Seats";
+
+      select.appendChild(option);
+    });
+
+    select.value = currentSettings.seats || currentSeats.length || 9;
+
+    const saveButton = $("saveSettingsButton");
+
+    saveButton.parentNode.insertBefore(label, saveButton);
+    saveButton.parentNode.insertBefore(select, saveButton);
+  }
+
+  showModal("settingsModal");
+});
+
+$("saveSettingsButton").addEventListener("click", async () => {
+  const data = {
+    name: $("settingRoomName").value.trim(),
+    description: $("settingDescription").value.trim(),
+    locked: $("settingLocked").checked,
+    allowYoutube: $("settingYoutube").checked,
+    seats: Number($("settingSeats")?.value || currentSeats.length || 9)
+  };
+
+  const result = await emitWithReply(
+    "update-room-settings",
+    data
+  );
+
+  if (!result.ok) {
+    toast(result.error || "Settings save nahi hui.");
+    return;
+  }
+
+  toast("Room settings saved!");
+
+  hideModal("settingsModal");
+});
+
+/* ==========================================
+   ADMIN BUTTON
+========================================== */
+
+function addAdminButtonToMenu() {
+  if ($("adminMenuButton")) return;
+
+  const button = document.createElement("button");
+
+  button.id = "adminMenuButton";
+  button.textContent = "🛡️ Admin Panel";
+
+  button.addEventListener("click", () => {
+    $("morePanel").classList.add("hidden");
+    showModal("adminModal");
+  });
+
+  $("morePanel").appendChild(button);
+}
+
+addAdminButtonToMenu();
+
+$("addAdminButton").addEventListener("click", async () => {
+  const targetId = $("adminUserId").value.trim();
+
+  if (!targetId) {
+    toast("User ID enter karo.");
+    return;
+  }
+
+  const result = await emitWithReply(
+    "add-room-admin",
+    { userId: targetId }
+  );
+
+  toast(
+    result.ok
+      ? "Admin added."
+      : result.error || "Admin add nahi hua."
+  );
+});
+
+$("removeAdminButton").addEventListener("click", async () => {
+  const targetId = $("adminUserId").value.trim();
+
+  if (!targetId) {
+    toast("User ID enter karo.");
+    return;
+  }
+
+  const result = await emitWithReply(
+    "remove-room-admin",
+    { userId: targetId }
+  );
+
+  toast(
+    result.ok
+      ? "Admin removed."
+      : result.error || "Admin remove nahi hua."
+  );
+});
+
+$("kickUserButton").addEventListener("click", async () => {
+  const targetId = $("adminUserId").value.trim();
+
+  if (!targetId) {
+    toast("User ID enter karo.");
+    return;
+  }
+
+  const result = await emitWithReply(
+    "kick-member",
+    { userId: targetId }
+  );
+
+  toast(
+    result.ok
+      ? "Member removed."
+      : result.error || "Member remove nahi hua."
+  );
+});
+
+$("muteUserButton").addEventListener("click", async () => {
+  const targetId = $("adminUserId").value.trim();
+
+  if (!targetId) {
+    toast("User ID enter karo.");
+    return;
+  }
+
+  const result = await emitWithReply(
+    "force-mute",
+    { userId: targetId }
+  );
+
+  toast(
+    result.ok
+      ? "Member muted."
+      : result.error || "Mute nahi hua."
+  );
+});
+
+/* ==========================================
+   SHARE ROOM
+========================================== */
+
+$("shareButton").addEventListener("click", async () => {
+  const shareUrl = location.href;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "Huka Voice Chat",
+        text: "Join my Huka Voice Room!",
+        url: shareUrl
+      });
+    } catch (error) {
+      console.log("Share cancelled.");
+    }
+  } else if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast("Room link copied!");
+    } catch (error) {
+      toast("Link copy nahi hua.");
+    }
+  } else {
+    toast("Share is not available in this browser.");
+  }
+});
+
+/* ==========================================
+   EXIT ROOM
+========================================== */
+
+function exitRoom() {
+  socket.emit("leave-room");
+
+  disableMicrophone();
+  closeAllPeers();
+
+  if (micStream) {
+    micStream.getTracks().forEach(track => track.stop());
+    micStream = null;
+  }
+
+  localStorage.removeItem("hukaRoomId");
+
+  location.href = "index.html";
+}
+
+$("exitButton").addEventListener("click", exitRoom);
+
+$("backButton").addEventListener("click", exitRoom);
+
+/* ==========================================
+   MODAL CLOSE BUTTONS
+========================================== */
+
+document.querySelectorAll("[data-close]").forEach(button => {
+  button.addEventListener("click", () => {
+    hideModal(button.dataset.close);
+  });
+});
+
+document.querySelectorAll(".modal").forEach(modal => {
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      modal.classList.add("hidden");
+    }
+  });
+});
+
+/* ==========================================
+   SOCKET EVENTS
+========================================== */
+
+socket.on("connect", () => {
+  $("roomStatus").textContent = "🟢 Connected";
+
+  registerUser();
+});
+
+socket.on("disconnect", () => {
+  $("roomStatus").textContent = "🔴 Disconnected";
+});
+
+socket.on("connect_error", error => {
+  console.error("Socket error:", error);
+  $("roomStatus").textContent = "🔴 Connection error";
+});
+
+socket.on("members-update", data => {
+  currentMembers = data.members || [];
+
+  renderMembers();
+  renderSeats();
+});
+
+socket.on("seats-update", seats => {
+  currentSeats = seats || [];
+
+  renderSeats();
+});
+
+socket.on("room-settings-update", settings => {
+  updateRoomSettings(settings);
+});
+
+socket.on("room-message", message => {
+  appendChatMessage(message);
+});
+
+socket.on("system-message", message => {
+  appendSystemMessage(message);
+});
+
+socket.on("chat-cleared", data => {
+  $("chatMessages").innerHTML = "";
+
+  appendSystemMessage(
+    "Chat cleared by " + data.by
+  );
+});
+
+socket.on("emoji-event", data => {
+  showEmojiEvent(data);
+});
+
+socket.on("gift-event", event => {
+  showGiftNotification(event);
+});
+
+socket.on("gift-ranking", ranking => {
+  updateGiftRanking(ranking);
+});
+
+socket.on("profile-update", profile => {
+  currentCoins = Number(profile.coins || 0);
+
+  updateCoins();
+});
+
+socket.on("inbox-data", messages => {
+  renderInbox(messages);
+});
+
+socket.on("new-dm", message => {
+  toast("New inbox message from " + message.from);
+});
+
+socket.on("mic-update", data => {
+  const member = currentMembers.find(
+    item => item.socketId === data.socketId
+  );
+
+  if (member) {
+    member.micOn = data.micOn;
+    renderMembers();
+    renderSeats();
+  }
+});
+
+socket.on("force-mute", data => {
+  if (data.muted) {
+    disableMicrophone();
+    toast("Admin ne microphone mute kar diya.");
+  }
+});
+
+socket.on("kicked-from-room", data => {
+  toast(data.message || "You were removed from room.");
+
+  setTimeout(exitRoom, 1500);
+});
+
+socket.on("locked-seats-update", seats => {
+  appendSystemMessage(
+    "Seat lock settings updated."
+  );
+});
+
+socket.on("room-admins-update", admins => {
+  appendSystemMessage(
+    "Room admin list updated."
+  );
+});
+
+socket.on("youtube-link", event => {
+  showYoutubeLink(event);
+});
+
+/* ==========================================
+   WEBRTC SOCKET EVENTS
+========================================== */
+
+socket.on("voice-existing-peers", peerIds => {
+  (peerIds || []).forEach(peerId => {
+    if (micStream) {
+      const pc = createPeer(peerId);
+      makeOffer(peerId, pc);
+    }
+  });
+});
+
+socket.on("voice-peer-joined", data => {
+  if (!data?.socketId) return;
+
+  if (micStream) {
+    createPeer(data.socketId);
+  }
+});
+
+socket.on("voice-offer", data => {
+  receiveOffer(data);
+});
+
+socket.on("voice-answer", data => {
+  receiveAnswer(data);
+});
+
+socket.on("voice-ice", data => {
+  receiveIce(data);
+});
+
+socket.on("voice-peer-left", data => {
+  if (data?.socketId) {
+    removePeer(data.socketId);
+  }
+});
+
+/* ==========================================
+   CLEANUP
+========================================== */
+
+window.addEventListener("beforeunload", () => {
+  if (micStream) {
+    micStream.getTracks().forEach(track => track.stop());
+  }
+
+  closeAllPeers();
+});
