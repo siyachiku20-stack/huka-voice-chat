@@ -1,261 +1,444 @@
+/* =========================================
+   HUKA VOICE CHAT
+   MAIN WEBSITE DESIGN
+   PURPLE + PINK THEME
+========================================= */
+
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
+    margin: 0;
+    padding: 0;
+    background: #160d24;
+    color: #ffffff;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #170b35, #35105e, #68165f);
-    color: white;
     min-height: 100vh;
 }
 
-.app {
-    width: 100%;
-    max-width: 650px;
-    margin: auto;
-    padding: 18px;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 5px;
-    margin-bottom: 20px;
-}
-
-.logo {
-    font-size: 30px;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.logo span {
-    color: #ff65bd;
-}
-
-.online {
-    background: #32164e;
-    padding: 9px 15px;
-    border-radius: 25px;
-    font-size: 13px;
-}
-
-.dot {
-    display: inline-block;
-    height: 9px;
-    width: 9px;
-    background: #35e99a;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-.card,
-.profile-card {
-    background: rgba(255,255,255,0.09);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 20px;
-    padding: 22px;
-    margin-bottom: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-h1 {
-    font-size: 27px;
-    margin-bottom: 12px;
-}
-
-h2 {
-    margin-bottom: 18px;
-    color: #ff8bd0;
-}
-
-h3 {
-    margin: 20px 0 12px;
-}
-
-p {
-    color: #d9cce9;
-    line-height: 1.6;
-}
-
-input {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #8f52b9;
-    background: #24133e;
-    color: white;
-    border-radius: 12px;
-    margin-top: 16px;
-    outline: none;
-    font-size: 15px;
-}
-
-input:focus {
-    border-color: #ff65bd;
-}
-
-input::placeholder {
-    color: #b8a6ca;
+button,
+input,
+textarea,
+select {
+    font-family: inherit;
 }
 
 button {
-    background: linear-gradient(90deg, #8b35ed, #ed39a2);
-    border: none;
-    color: white;
-    border-radius: 12px;
-    padding: 14px 18px;
-    font-weight: bold;
-    font-size: 15px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.2s ease;
 }
 
 button:active {
     transform: scale(0.97);
 }
 
-#createProfile,
-#joinRoom {
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.top-header {
     width: 100%;
-    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #211333;
+    border-bottom: 1px solid #49345d;
 }
 
-.secondary {
-    background: #48245e;
-}
-
-.id-box {
-    background: #211136;
-    border: 1px solid #b44cda;
-    padding: 14px;
-    margin-top: 8px;
-    border-radius: 10px;
-    font-size: 20px;
+.logo {
+    font-size: 25px;
     font-weight: bold;
-    color: #ff85ce;
-    letter-spacing: 2px;
+    color: #ff62bd;
 }
 
-.room-buttons {
+.header-actions {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.room-buttons button {
-    flex: 1;
-    min-width: 130px;
-}
-
-#voiceStatus {
-    margin-top: 15px;
-    color: #ff8bd0;
-}
-
-#members {
-    display: flex;
-    flex-direction: column;
     gap: 9px;
 }
 
-.member {
-    background: #321b4d;
-    padding: 12px;
-    border-radius: 10px;
+.header-actions button {
+    border: none;
+    border-radius: 20px;
+    padding: 9px 13px;
+    color: white;
+    background: #39234e;
+}
+
+/* =========================================
+   PAGE
+========================================= */
+
+.page-content {
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+}
+
+.section {
+    padding: 15px;
+}
+
+.section-title {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-.messages {
-    height: 230px;
-    overflow-y: auto;
-    background: #1d1030;
-    padding: 12px;
-    border-radius: 12px;
+.section-title h3 {
+    margin: 0;
+    font-size: 18px;
 }
 
-.message {
-    background: #43215d;
-    padding: 11px;
-    border-radius: 10px;
-    margin-bottom: 9px;
-    overflow-wrap: anywhere;
+/* =========================================
+   TABS
+========================================= */
+
+.tabs {
+    display: flex;
+    gap: 25px;
+    padding: 17px;
+    border-bottom: 1px solid #392747;
 }
 
-.message strong {
-    color: #ff8bd0;
+.tabs button {
+    border: none;
+    background: none;
+    color: #b9a9c9;
+    font-size: 15px;
 }
 
-.message small {
-    display: block;
-    color: #c7b5d6;
-    font-size: 10px;
-    margin-top: 5px;
+.tabs button.active {
+    color: #ff62bd;
+    font-weight: bold;
 }
 
-.chat-input {
+/* =========================================
+   WELCOME BANNER
+========================================= */
+
+.welcome {
+    margin: 15px;
+    padding: 22px;
+    border-radius: 18px;
+    background: linear-gradient(120deg, #7629a8, #e63b9b);
+}
+
+.welcome h2 {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+.welcome p {
+    margin-bottom: 0;
+    color: #fff0fa;
+    line-height: 1.5;
+}
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.search-box {
     display: flex;
     gap: 8px;
-    align-items: center;
+    margin: 15px;
 }
 
-.chat-input input {
+.search-box input {
+    width: 100%;
+    padding: 13px;
+    color: white;
+    background: #291b38;
+    border: 1px solid #49345d;
+    border-radius: 12px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #ff62bd;
+}
+
+/* =========================================
+   COUNTRY FILTER
+========================================= */
+
+.country-list {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    padding: 5px 15px 15px;
+    scrollbar-width: none;
+}
+
+.country-list::-webkit-scrollbar {
+    display: none;
+}
+
+.country-list button {
+    white-space: nowrap;
+    padding: 9px 15px;
+    border: 1px solid #53356c;
+    border-radius: 20px;
+    color: white;
+    background: #291b38;
+}
+
+.country-list button:hover {
+    background: #7134a0;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.main-button,
+.join-room-button {
+    border: none;
+    border-radius: 22px;
+    padding: 11px 18px;
+    color: white;
+    font-weight: bold;
+    background: linear-gradient(120deg, #a12be0, #ed3c9d);
+}
+
+.main-button:hover,
+.join-room-button:hover {
+    opacity: 0.9;
+}
+
+/* =========================================
+   JOIN ROOM
+========================================= */
+
+.join-box,
+.create-box {
+    background: #291b38;
+    padding: 17px;
+    border: 1px solid #49345d;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+
+.join-box h3,
+.create-box h3 {
+    margin-top: 0;
+}
+
+.join-box input,
+.create-box input,
+.create-box select {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 11px;
+    color: white;
+    background: #1d1329;
+    border: 1px solid #49345d;
+    border-radius: 10px;
+    outline: none;
+}
+
+.join-box input:focus,
+.create-box input:focus,
+.create-box select:focus {
+    border-color: #ff62bd;
+}
+
+.create-box select option {
+    background: #291b38;
+    color: white;
+}
+
+.join-box button,
+.create-box button {
+    width: 100%;
+}
+
+/* =========================================
+   ROOM LIST
+========================================= */
+
+.room-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 13px;
+}
+
+.room-card {
+    background: #291b38;
+    border: 1px solid #483056;
+    border-radius: 15px;
+    padding: 14px;
+    overflow: hidden;
+}
+
+.room-card-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.room-card-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #47235f;
+    font-size: 30px;
+}
+
+.room-card-info {
     flex: 1;
     min-width: 0;
 }
 
-.chat-input button {
-    margin-top: 16px;
+.room-card-info h3 {
+    margin: 0 0 7px;
+    font-size: 16px;
+    overflow-wrap: anywhere;
 }
 
-.gifts {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+.room-card-info p {
+    margin: 4px 0;
+    color: #c9b9d7;
+    font-size: 13px;
 }
 
-.gifts button {
-    font-size: 24px;
-    min-width: 65px;
-    background: #54236c;
+.join-room-button {
+    flex-shrink: 0;
 }
 
-.error {
-    color: #ff8b9d;
-    margin-top: 10px;
-}
+/* =========================================
+   EMPTY ROOMS
+========================================= */
 
-footer {
+.empty-rooms {
     text-align: center;
-    padding: 25px 5px;
-    color: #bca9d0;
+    padding: 25px;
+    color: #c9b9d7;
+    background: #291b38;
+    border: 1px solid #49345d;
+    border-radius: 15px;
+}
+
+.empty-rooms h3 {
+    color: white;
+}
+
+/* =========================================
+   BOTTOM NAVIGATION
+========================================= */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    background: #211333;
+    border-top: 1px solid #49345d;
+    padding: 11px 5px;
+}
+
+.bottom-nav button {
+    flex: 1;
+    border: none;
+    background: none;
+    color: #bba9cc;
     font-size: 12px;
 }
 
-[hidden] {
-    display: none !important;
+.bottom-nav button span {
+    display: block;
+    font-size: 21px;
+    margin-bottom: 4px;
 }
 
-@media (max-width: 480px) {
+.bottom-nav button.active {
+    color: #ff62bd;
+}
 
-    .app {
-        padding: 12px;
+/* =========================================
+   PROFILE IMAGE
+========================================= */
+
+.profile-avatar,
+#profileAvatar,
+#userAvatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #7134a0;
+}
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #75428e;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #160d24;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (min-width: 650px) {
+    .room-list {
+        grid-template-columns: 1fr 1fr;
     }
 
-    .card,
-    .profile-card {
-        padding: 17px;
+    .welcome {
+        padding: 30px;
     }
 
-    h1 {
-        font-size: 23px;
+    .section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 380px) {
+    .logo {
+        font-size: 21px;
     }
 
-    .room-buttons {
-        flex-direction: column;
+    .header-actions {
+        gap: 5px;
     }
 
+    .header-actions button {
+        padding: 8px 10px;
+    }
+
+    .room-card-info h3 {
+        font-size: 14px;
+    }
 }
