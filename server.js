@@ -90,23 +90,196 @@ function saveDB() {
 
 const ALLOWED_SEATS = [9, 11, 15, 20];
 
-const GIFTS = [
-  { id: "rose", name: "Rose", icon: "🌹", price: 10 },
-  { id: "heart", name: "Heart", icon: "❤️", price: 50 },
-  { id: "love", name: "Love", icon: "💕", price: 100 },
-  { id: "crown", name: "Crown", icon: "👑", price: 500 },
-  { id: "diamond", name: "Diamond", icon: "💎", price: 1000 },
-  { id: "rocket", name: "Rocket", icon: "🚀", price: 2000 },
-  { id: "castle", name: "Castle", icon: "🏰", price: 5000 },
-  { id: "car", name: "Luxury Car", icon: "🚗", price: 10000 },
-  { id: "plane", name: "Airplane", icon: "✈️", price: 20000 },
-  { id: "universe", name: "Universe", icon: "🌌", price: 50000 }
+const GIFT_CATEGORIES = [
+  "All",
+  "Lucky",
+  "VIP",
+  "Love",
+  "Royal",
+  "Festival",
+  "Special"
 ];
+
+/*
+  500 gifts generated from 50 names and
+  10 price levels. Every gift has a unique ID.
+*/
+
+const GIFT_NAMES = [
+  ["Rose", "🌹", "Love"],
+  ["Heart", "❤️", "Love"],
+  ["Love", "💕", "Love"],
+  ["Kiss", "😘", "Love"],
+  ["Teddy", "🧸", "Love"],
+  ["Ring", "💍", "Love"],
+  ["Love Letter", "💌", "Love"],
+  ["Pink Heart", "🩷", "Love"],
+  ["Couple", "💑", "Love"],
+  ["Forever", "💖", "Love"],
+
+  ["Crown", "👑", "Royal"],
+  ["Castle", "🏰", "Royal"],
+  ["Throne", "🪑", "Royal"],
+  ["Royal Car", "🚗", "Royal"],
+  ["Royal Horse", "🐎", "Royal"],
+  ["Golden Crown", "👑", "Royal"],
+  ["Royal Palace", "🏯", "Royal"],
+  ["Royal Ring", "💍", "Royal"],
+  ["Royal King", "🤴", "Royal"],
+  ["Royal Queen", "👸", "Royal"],
+
+  ["Diamond", "💎", "VIP"],
+  ["Luxury Car", "🏎️", "VIP"],
+  ["Airplane", "✈️", "VIP"],
+  ["Yacht", "🛥️", "VIP"],
+  ["Private Jet", "🛩️", "VIP"],
+  ["Golden House", "🏡", "VIP"],
+  ["Luxury Watch", "⌚", "VIP"],
+  ["Golden Bag", "👜", "VIP"],
+  ["VIP Star", "🌟", "VIP"],
+  ["VIP Box", "🎁", "VIP"],
+
+  ["Lucky Clover", "🍀", "Lucky"],
+  ["Magic Lamp", "🪔", "Lucky"],
+  ["Lucky Star", "⭐", "Lucky"],
+  ["Rainbow", "🌈", "Lucky"],
+  ["Four Leaf", "☘️", "Lucky"],
+  ["Gold Coin", "🪙", "Lucky"],
+  ["Treasure", "💰", "Lucky"],
+  ["Magic Wand", "🪄", "Lucky"],
+  ["Lucky Bell", "🔔", "Lucky"],
+  ["Lucky Gift", "🎁", "Lucky"],
+
+  ["Birthday Cake", "🎂", "Festival"],
+  ["Fireworks", "🎆", "Festival"],
+  ["Party Popper", "🎉", "Festival"],
+  ["Christmas Tree", "🎄", "Festival"],
+  ["Pumpkin", "🎃", "Festival"],
+  ["Festival Lamp", "🏮", "Festival"],
+  ["Music", "🎵", "Festival"],
+  ["Dance", "💃", "Festival"],
+  ["Celebration", "🥳", "Festival"],
+  ["Universe", "🌌", "Special"]
+];
+
+const PRICE_LEVELS = [
+  10, 20, 50, 100, 200,
+  500, 1000, 2000, 5000, 10000
+];
+
+const GIFTS = [];
+
+for (let i = 0; i < GIFT_NAMES.length; i++) {
+  for (let j = 0; j < PRICE_LEVELS.length; j++) {
+    const item = GIFT_NAMES[i];
+
+    GIFTS.push({
+      id: `gift_${i + 1}_${j + 1}`,
+      name: `${item[0]} ${j + 1}`,
+      icon: item[1],
+      category: item[2],
+      price: PRICE_LEVELS[j]
+    });
+  }
+}
 
 const ALLOWED_EMOJIS = [
   "😀", "😍", "🥰", "😂", "🤣", "😘",
   "❤️", "💕", "🔥", "👏", "🎉", "🌹",
   "👍", "🥳", "😎", "💖", "✨", "🤗"
+];
+
+/* =========================================
+   FRAMES
+========================================= */
+
+const FRAMES = [
+  {
+    id: "frame_free",
+    name: "Basic Frame",
+    price: 0,
+    free: true,
+    icon: "🖼️"
+  },
+  {
+    id: "frame_pink",
+    name: "Pink Love",
+    price: 500,
+    free: false,
+    icon: "💗"
+  },
+  {
+    id: "frame_blue",
+    name: "Blue Galaxy",
+    price: 1000,
+    free: false,
+    icon: "🌌"
+  },
+  {
+    id: "frame_gold",
+    name: "Golden Royal",
+    price: 2500,
+    free: false,
+    icon: "👑"
+  },
+  {
+    id: "frame_diamond",
+    name: "Diamond Frame",
+    price: 5000,
+    free: false,
+    icon: "💎"
+  },
+  {
+    id: "frame_rainbow",
+    name: "Rainbow Frame",
+    price: 7500,
+    free: false,
+    icon: "🌈"
+  },
+  {
+    id: "frame_vip",
+    name: "VIP Frame",
+    price: 10000,
+    free: false,
+    icon: "⭐"
+  }
+];
+
+/* =========================================
+   ROOM TASKS
+========================================= */
+
+const ROOM_TASKS = [
+  {
+    id: "join_room",
+    name: "Join a Room",
+    description: "Join any voice room",
+    reward: 100
+  },
+  {
+    id: "send_message",
+    name: "Send a Message",
+    description: "Send a chat message",
+    reward: 100
+  },
+  {
+    id: "send_gift",
+    name: "Send a Gift",
+    description: "Send a gift to a user",
+    reward: 200
+  },
+  {
+    id: "take_seat",
+    name: "Take a Seat",
+    description: "Join a room seat",
+    reward: 100
+  },
+  {
+    id: "use_emoji",
+    name: "Send an Emoji",
+    description: "Send an emoji in a room",
+    reward: 100
+  }
 ];
 
 const online = new Map();
@@ -118,6 +291,7 @@ const rooms = new Map();
 
 function clean(value, max = 100) {
   return String(value ?? "")
+    .replace(/[<>]/g, "")
     .trim()
     .slice(0, max);
 }
@@ -159,7 +333,7 @@ function isMember(room, socket) {
 
 function findGift(giftId) {
   return GIFTS.find(gift =>
-    gift.id === giftId ||
+    gift.id === String(giftId) ||
     gift.name.toLowerCase() === String(giftId).toLowerCase()
   );
 }
@@ -178,6 +352,8 @@ function getMembers(room) {
       userId: user.id,
       name: user.name,
       avatar: user.avatar || "",
+      level: user.level || 1,
+      frame: user.frame || "frame_free",
       socketId,
       seat: seatIndex === -1 ? null : seatIndex + 1,
       micOn: room.micStates.get(socketId) !== false,
@@ -263,6 +439,60 @@ function removeFromSeat(room, socketId) {
   );
 }
 
+function completeTask(userId, taskId) {
+  const profile = db.profiles[userId];
+  const task = ROOM_TASKS.find(item => item.id === taskId);
+
+  if (!profile || !task) return;
+
+  profile.taskProgress ||= {};
+  profile.claimedTasks ||= [];
+
+  if (profile.claimedTasks.includes(taskId)) return;
+
+  profile.taskProgress[taskId] = true;
+}
+
+function claimTask(userId, taskId) {
+  const profile = db.profiles[userId];
+  const task = ROOM_TASKS.find(item => item.id === taskId);
+
+  if (!profile || !task) {
+    return {
+      ok: false,
+      message: "Task not found"
+    };
+  }
+
+  profile.taskProgress ||= {};
+  profile.claimedTasks ||= [];
+
+  if (!profile.taskProgress[taskId]) {
+    return {
+      ok: false,
+      message: "Complete the task first"
+    };
+  }
+
+  if (profile.claimedTasks.includes(taskId)) {
+    return {
+      ok: false,
+      message: "Reward already claimed"
+    };
+  }
+
+  profile.claimedTasks.push(taskId);
+  profile.coins += task.reward;
+
+  saveDB();
+
+  return {
+    ok: true,
+    reward: task.reward,
+    coins: profile.coins
+  };
+}
+
 function leaveRoom(socket) {
   const roomId = socket.data.roomId;
   if (!roomId) return;
@@ -328,16 +558,27 @@ io.on("connection", socket => {
         name,
         avatar: "",
         bio: "",
+        country: "",
+        gender: "",
         coins: 1000,
         diamonds: 0,
         level: 1,
         totalGifts: 0,
+        frame: "frame_free",
+        ownedFrames: ["frame_free"],
+        following: [],
+        taskProgress: {},
+        claimedTasks: [],
         createdAt: Date.now()
       };
 
       db.profiles[id] = profile;
     } else {
       profile.name = name;
+      profile.ownedFrames ||= ["frame_free"];
+      profile.following ||= [];
+      profile.taskProgress ||= {};
+      profile.claimedTasks ||= [];
     }
 
     socket.data.userId = id;
@@ -348,7 +589,8 @@ io.on("connection", socket => {
       avatar: profile.avatar || "",
       coins: Number(profile.coins) || 0,
       diamonds: Number(profile.diamonds) || 0,
-      level: Number(profile.level) || 1
+      level: Number(profile.level) || 1,
+      frame: profile.frame || "frame_free"
     };
 
     online.set(socket.id, user);
@@ -377,11 +619,24 @@ io.on("connection", socket => {
       });
     }
 
-    const profile = db.profiles[user.id];
+    const targetId = clean(data?.userId, 20);
+    const profile = db.profiles[targetId || user.id];
+
+    if (!profile) {
+      return reply(callback, {
+        ok: false,
+        message: "Profile not found"
+      });
+    }
+
+    const result = { ...profile };
+
+    // Do not expose private information.
+    delete result.taskProgress;
 
     reply(callback, {
       ok: true,
-      profile
+      profile: result
     });
   });
 
@@ -408,6 +663,23 @@ io.on("connection", socket => {
       profile.bio = clean(data.bio, 250);
     }
 
+    if (data.country !== undefined) {
+      profile.country = clean(data.country, 60);
+    }
+
+    if (data.gender !== undefined) {
+      const gender = clean(data.gender, 20);
+
+      if (!["Male", "Female", "Other", "Prefer not to say", ""].includes(gender)) {
+        return reply(callback, {
+          ok: false,
+          message: "Invalid gender selection"
+        });
+      }
+
+      profile.gender = gender;
+    }
+
     saveDB();
 
     reply(callback, {
@@ -416,6 +688,199 @@ io.on("connection", socket => {
     });
 
     socket.emit("profile-update", profile);
+  });
+
+  /* =======================================
+     FOLLOW
+  ======================================= */
+
+  socket.on("follow-user", (data, callback) => {
+    const user = getUser(socket);
+    const targetId = clean(data?.userId, 20);
+
+    if (!user || !db.profiles[targetId] || targetId === user.id) {
+      return reply(callback, {
+        ok: false,
+        message: "Invalid user"
+      });
+    }
+
+    const profile = db.profiles[user.id];
+    profile.following ||= [];
+
+    if (profile.following.includes(targetId)) {
+      profile.following = profile.following.filter(id => id !== targetId);
+
+      saveDB();
+
+      return reply(callback, {
+        ok: true,
+        following: false
+      });
+    }
+
+    profile.following.push(targetId);
+
+    saveDB();
+
+    reply(callback, {
+      ok: true,
+      following: true
+    });
+  });
+
+  /* =======================================
+     FRAMES / BAG
+  ======================================= */
+
+  socket.on("get-frames", callback => {
+    const user = getUser(socket);
+    const profile = getProfile(socket);
+
+    if (!user || !profile) {
+      return reply(callback, {
+        ok: false,
+        message: "Register first"
+      });
+    }
+
+    reply(callback, {
+      ok: true,
+      frames: FRAMES,
+      ownedFrames: profile.ownedFrames || ["frame_free"],
+      activeFrame: profile.frame || "frame_free",
+      coins: profile.coins
+    });
+  });
+
+  socket.on("buy-frame", (data, callback) => {
+    const user = getUser(socket);
+    const profile = getProfile(socket);
+
+    if (!user || !profile) {
+      return reply(callback, { ok: false });
+    }
+
+    const frame = FRAMES.find(item => item.id === data?.frameId);
+
+    if (!frame) {
+      return reply(callback, {
+        ok: false,
+        message: "Frame not found"
+      });
+    }
+
+    profile.ownedFrames ||= ["frame_free"];
+
+    if (profile.ownedFrames.includes(frame.id)) {
+      return reply(callback, {
+        ok: false,
+        message: "Frame already owned"
+      });
+    }
+
+    if (profile.coins < frame.price) {
+      return reply(callback, {
+        ok: false,
+        message: "Not enough coins"
+      });
+    }
+
+    profile.coins -= frame.price;
+    profile.ownedFrames.push(frame.id);
+
+    user.coins = profile.coins;
+
+    saveDB();
+
+    reply(callback, {
+      ok: true,
+      coins: profile.coins,
+      ownedFrames: profile.ownedFrames
+    });
+  });
+
+  socket.on("equip-frame", (data, callback) => {
+    const user = getUser(socket);
+    const profile = getProfile(socket);
+
+    if (!user || !profile) {
+      return reply(callback, { ok: false });
+    }
+
+    const frameId = clean(data?.frameId, 50);
+
+    profile.ownedFrames ||= ["frame_free"];
+
+    if (!profile.ownedFrames.includes(frameId)) {
+      return reply(callback, {
+        ok: false,
+        message: "You do not own this frame"
+      });
+    }
+
+    profile.frame = frameId;
+    user.frame = frameId;
+
+    saveDB();
+
+    reply(callback, {
+      ok: true,
+      frame: frameId
+    });
+  });
+
+  /* =======================================
+     ROOM TASKS
+  ======================================= */
+
+  socket.on("get-room-tasks", callback => {
+    const user = getUser(socket);
+    const profile = getProfile(socket);
+
+    if (!user || !profile) {
+      return reply(callback, { ok: false });
+    }
+
+    const tasks = ROOM_TASKS.map(task => ({
+      ...task,
+      completed: Boolean(profile.taskProgress?.[task.id]),
+      claimed: Boolean(profile.claimedTasks?.includes(task.id))
+    }));
+
+    reply(callback, {
+      ok: true,
+      tasks,
+      coins: profile.coins,
+      totalRewards: ROOM_TASKS.reduce(
+        (sum, task) => sum + task.reward,
+        0
+      )
+    });
+  });
+
+  socket.on("claim-room-task", (data, callback) => {
+    const user = getUser(socket);
+
+    if (!user) {
+      return reply(callback, { ok: false });
+    }
+
+    const result = claimTask(
+      user.id,
+      clean(data?.taskId, 50)
+    );
+
+    if (result.ok) {
+      user.coins = result.coins;
+
+      socket.emit("profile-update", {
+        id: user.id,
+        coins: result.coins
+      });
+    }
+
+    reply(callback, result);
   });
 
   /* =======================================
@@ -530,6 +995,8 @@ io.on("connection", socket => {
     room.members.add(socket.id);
     room.micStates.set(socket.id, true);
 
+    completeTask(user.id, "join_room");
+
     reply(callback, {
       ok: true,
       room: {
@@ -558,6 +1025,7 @@ io.on("connection", socket => {
     });
 
     updateRoom(room);
+    saveDB();
   });
 
   socket.on("leave-room", (data, callback) => {
@@ -580,7 +1048,6 @@ io.on("connection", socket => {
       });
     }
 
-    // room.js sends seat numbers from 1 to 20
     const seatNumber = typeof data === "object"
       ? Number(data.seat)
       : Number(data);
@@ -614,9 +1081,12 @@ io.on("connection", socket => {
       name: user.name
     };
 
+    completeTask(user.id, "take_seat");
+
     reply(callback, { ok: true });
 
     updateRoom(room);
+    saveDB();
   });
 
   socket.on("leave-seat", (data, callback) => {
@@ -671,8 +1141,11 @@ io.on("connection", socket => {
       room.messages.shift();
     }
 
+    completeTask(user.id, "send_message");
+
     io.to(room.id).emit("room-message", message);
 
+    saveDB();
     reply(callback, { ok: true });
   });
 
@@ -721,6 +1194,8 @@ io.on("connection", socket => {
       });
     }
 
+    completeTask(user.id, "use_emoji");
+
     io.to(room.id).emit("emoji-event", {
       username: user.name,
       name: user.name,
@@ -729,6 +1204,7 @@ io.on("connection", socket => {
       time: Date.now()
     });
 
+    saveDB();
     reply(callback, { ok: true });
   });
 
@@ -737,11 +1213,10 @@ io.on("connection", socket => {
   ======================================= */
 
   socket.on("get-gifts", callback => {
-    socket.emit("gift-list", GIFTS);
-
     reply(callback, {
       ok: true,
-      gifts: GIFTS
+      gifts: GIFTS,
+      categories: GIFT_CATEGORIES
     });
   });
 
@@ -785,7 +1260,6 @@ io.on("connection", socket => {
     }
 
     let receiver = null;
-    let receiverSocketId = null;
 
     if (receiverId && receiverId !== "Everyone") {
       for (const socketId of room.members) {
@@ -793,7 +1267,6 @@ io.on("connection", socket => {
 
         if (member?.id === receiverId) {
           receiver = db.profiles[receiverId];
-          receiverSocketId = socketId;
           break;
         }
       }
@@ -832,6 +1305,8 @@ io.on("connection", socket => {
 
     room.giftRanking.set(rankingId, ranking);
 
+    completeTask(user.id, "send_gift");
+
     const event = {
       senderName: user.name,
       username: user.name,
@@ -853,19 +1328,6 @@ io.on("connection", socket => {
       coins: profile.coins,
       diamonds: profile.diamonds
     });
-
-    if (receiverSocketId) {
-      const receiverSocket = io.sockets.sockets.get(receiverSocketId);
-
-      if (receiverSocket) {
-        receiverSocket.emit("profile-update", {
-          id: receiver.id,
-          name: receiver.name,
-          coins: receiver.coins,
-          diamonds: receiver.diamonds
-        });
-      }
-    }
 
     io.to(room.id).emit("gift-event", event);
     io.to(room.id).emit("gift-ranking", getRanking(room));
@@ -1351,5 +1813,7 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log("HUKA VOICE CHAT SERVER STARTED");
   console.log("Port:", PORT);
   console.log("Public folder:", PUBLIC_DIR);
+  console.log("Gifts:", GIFTS.length);
+  console.log("Frames:", FRAMES.length);
   console.log("=================================");
 });
