@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#061b48">
-  <title>Huka Voice Room</title>
+  <meta name="theme-color" content="#071b48">
+
+  <title>Huka Voice Chat - Room</title>
+
   <link rel="stylesheet" href="room.css">
 </head>
 
@@ -12,24 +14,20 @@
 
 <div class="room-app">
 
-  <!-- TOP ROOM HEADER -->
+  <!-- HEADER -->
   <header class="room-header">
 
-    <button class="back-btn" id="backButton">‹</button>
+    <button id="backButton" onclick="history.back()">←</button>
 
-    <div class="room-title-area">
-      <div class="room-logo">🌌</div>
-
-      <div>
-        <h2 id="roomName">Starlight Lounge 💙</h2>
-        <small>ID: <span id="roomId">100001</span></small>
-      </div>
+    <div class="header-info">
+      <h2 id="roomName">Huka Room</h2>
+      <small>ID: <span id="roomId">000000</span></small>
     </div>
 
-    <div class="header-actions">
-      <span class="online-count">🟢 <b id="memberCount">0</b></span>
-      <button id="shareButton">➦</button>
-      <button id="exitButton">⏻</button>
+    <div class="header-right">
+      <span>🟢 <span id="onlineCount">0</span></span>
+      <button id="shareButton">↗</button>
+      <button id="exitButton">✕</button>
     </div>
 
   </header>
@@ -37,297 +35,535 @@
   <!-- ROOM INFORMATION -->
   <section class="room-info">
 
-    <div class="room-description">
-      💎 <span id="roomDescription">Welcome to Huka Lounge</span>
+    <div>
+      <h3>🌌 Galaxy Voice Room</h3>
+      <p id="roomDescription">Welcome to Huka Voice Chat</p>
     </div>
 
-    <div class="room-status" id="roomStatus">
-      Connecting...
+    <div class="room-members-count">
+      👥 <span id="memberCount">0</span>
     </div>
 
   </section>
 
   <!-- GIFT NOTIFICATION -->
-  <div class="gift-notification hidden" id="giftNotification">
-    <span id="giftNotificationText">🎁 Gift received!</span>
-  </div>
+  <div id="giftNotification" class="gift-notification hidden"></div>
 
-  <!-- TOP VIP SEATS -->
-  <section class="vip-seats" id="vipSeats">
+  <!-- VIP SEATS -->
+  <section class="seats-section">
 
-    <div class="seat-card empty-seat" data-seat="0">
-      <div class="seat-avatar">🎙️</div>
-      <b>Host Seat</b>
-      <small>Tap to Join</small>
-    </div>
+    <h3>👑 VIP MIC SEATS</h3>
 
-    <div class="seat-card empty-seat" data-seat="1">
-      <div class="seat-avatar">🎙️</div>
-      <b>VIP Seat 2</b>
-      <small>Tap to Join</small>
-    </div>
+    <div id="vipSeats" class="vip-seats">
 
-    <div class="seat-card empty-seat" data-seat="2">
-      <div class="seat-avatar">🎙️</div>
-      <b>VIP Seat 3</b>
-      <small>Tap to Join</small>
-    </div>
+      <button class="seat empty-seat" data-seat="1">
+        <span>＋</span>
+        <small>Seat 1</small>
+      </button>
 
-    <div class="seat-card empty-seat" data-seat="3">
-      <div class="seat-avatar">🎙️</div>
-      <b>VIP Seat 4</b>
-      <small>Tap to Join</small>
-    </div>
+      <button class="seat empty-seat" data-seat="2">
+        <span>＋</span>
+        <small>Seat 2</small>
+      </button>
 
-    <div class="seat-card empty-seat" data-seat="4">
-      <div class="seat-avatar">🎙️</div>
-      <b>VIP Seat 5</b>
-      <small>Tap to Join</small>
+      <button class="seat empty-seat" data-seat="3">
+        <span>＋</span>
+        <small>Seat 3</small>
+      </button>
+
+      <button class="seat empty-seat" data-seat="4">
+        <span>＋</span>
+        <small>Seat 4</small>
+      </button>
+
+      <button class="seat empty-seat" data-seat="5">
+        <span>＋</span>
+        <small>Seat 5</small>
+      </button>
+
     </div>
 
   </section>
 
-  <!-- OTHER MICROPHONE SEATS -->
-  <section class="normal-seats" id="normalSeats"></section>
+  <!-- NORMAL SEATS -->
+  <section class="seats-section">
+
+    <h3>🎙️ ROOM SEATS</h3>
+
+    <div id="normalSeats" class="normal-seats"></div>
+
+  </section>
 
   <!-- ROOM CONTENT -->
   <section class="room-content">
 
     <!-- MEMBERS -->
-    <div class="members-panel">
-      <h3>👥 Members <span id="membersTotal">0</span></h3>
+    <div class="room-panel">
+
+      <h3>👥 Members</h3>
+
+      <div>
+        Total: <span id="membersTotal">0</span>
+      </div>
+
       <div id="membersList"></div>
+
     </div>
 
-    <!-- GIFT RANKING -->
-    <div class="ranking-panel">
+    <!-- RANKING -->
+    <div class="room-panel">
+
       <h3>🏆 Gift Ranking</h3>
+
       <div id="giftRanking"></div>
+
     </div>
 
   </section>
 
-  <!-- CHAT AREA -->
+  <!-- CHAT -->
   <section class="chat-section">
 
     <div class="chat-tabs">
-      <button class="chat-tab active" data-tab="all">All</button>
-      <button class="chat-tab" data-tab="chat">Chat</button>
-      <button class="chat-tab" data-tab="gift">Gift</button>
-    </div>
 
-    <div class="chat-messages" id="chatMessages">
-
-      <div class="system-message">
-        Welcome to Huka Voice Chat 💙
-      </div>
+      <button class="active">All</button>
+      <button>Chat</button>
+      <button>Gift</button>
 
     </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
 
   </section>
 
   <!-- EMOJI PANEL -->
-  <div class="popup-panel hidden" id="emojiPanel">
-    <button data-emoji="❤️">❤️</button>
-    <button data-emoji="😂">😂</button>
-    <button data-emoji="😍">😍</button>
-    <button data-emoji="🔥">🔥</button>
-    <button data-emoji="🥰">🥰</button>
-    <button data-emoji="👏">👏</button>
-    <button data-emoji="🎉">🎉</button>
-    <button data-emoji="😘">😘</button>
-    <button data-emoji="🌹">🌹</button>
-    <button data-emoji="💎">💎</button>
+  <div id="emojiPanel" class="emoji-panel hidden">
+
+    <button onclick="sendEmoji('😀')">😀</button>
+    <button onclick="sendEmoji('😍')">😍</button>
+    <button onclick="sendEmoji('🥰')">🥰</button>
+    <button onclick="sendEmoji('😂')">😂</button>
+    <button onclick="sendEmoji('🤣')">🤣</button>
+    <button onclick="sendEmoji('😘')">😘</button>
+    <button onclick="sendEmoji('❤️')">❤️</button>
+    <button onclick="sendEmoji('💕')">💕</button>
+    <button onclick="sendEmoji('🔥')">🔥</button>
+    <button onclick="sendEmoji('👏')">👏</button>
+    <button onclick="sendEmoji('🎉')">🎉</button>
+    <button onclick="sendEmoji('🌹')">🌹</button>
+
+  </div>
+
+  <!-- MORE PANEL -->
+  <div id="morePanel" class="more-panel hidden">
+
+    <button id="membersButton">👥 Members</button>
+    <button id="rankingButton">🏆 Ranking</button>
+    <button id="roomTasksButton">🎯 Room Tasks</button>
+    <button id="bagButton">🎒 My Bag</button>
+    <button id="youtubeButton">▶ YouTube</button>
+    <button id="settingsButton">⚙️ Settings</button>
+    <button id="clearChatButton">🗑 Clear Chat</button>
+    <button id="leaveSeatButton">🚪 Leave Seat</button>
+
   </div>
 
   <!-- BOTTOM TOOLBAR -->
   <footer class="bottom-toolbar">
 
-    <button id="emojiButton" title="Emoji">☺</button>
+    <button id="emojiButton">😊</button>
 
-    <form id="chatForm" class="message-box">
+    <form id="chatForm">
+
       <input
-        type="text"
         id="chatInput"
-        placeholder="Say something..."
+        type="text"
+        placeholder="Write a message..."
         maxlength="500"
-        autocomplete="off">
-      <button type="submit" id="sendButton">➤</button>
+        autocomplete="off"
+      >
+
+      <button id="sendButton" type="submit">➤</button>
+
     </form>
 
-    <button id="speakerButton" title="Speaker">🔊</button>
-
-    <button id="micButton" title="Microphone">🎙️</button>
-
-    <button id="inboxButton" title="Inbox">✉️</button>
-
-    <button id="moreButton" title="More">▦</button>
-
-    <button id="giftButton" class="gift-button" title="Gifts">🎁</button>
+    <button id="speakerButton">🔊</button>
+    <button id="micButton">🔇</button>
+    <button id="inboxButton">✉️</button>
+    <button id="moreButton">⋯</button>
+    <button id="giftButton">🎁</button>
 
   </footer>
 
-  <!-- MORE MENU -->
-  <div class="popup-panel more-panel hidden" id="morePanel">
+</div>
 
-    <button id="membersButton">👥 Members</button>
-    <button id="rankingButton">🏆 Ranking</button>
-    <button id="youtubeButton">▶ YouTube</button>
-    <button id="settingsButton">⚙️ Room Settings</button>
-    <button id="clearChatButton">🧹 Clear Chat</button>
-    <button id="leaveSeatButton">⬇ Leave Seat</button>
 
-  </div>
+<!-- =====================================
+     GIFT MODAL
+===================================== -->
 
-  <!-- GIFT PANEL -->
-  <div class="modal hidden" id="giftModal">
+<div id="giftModal" class="modal hidden">
 
-    <div class="modal-box">
+  <div class="modal-content">
 
-      <div class="modal-header">
-        <h3>🎁 Send Gifts</h3>
-        <button class="close-modal" data-close="giftModal">✕</button>
-      </div>
+    <div class="modal-header">
+      <h2>🎁 Gift Center</h2>
+      <button data-close-modal="giftModal">✕</button>
+    </div>
 
-      <p>🪙 Coins: <b id="giftCoins">0</b></p>
+    <div class="gift-balance">
+      🪙 My Coins:
+      <span id="giftCoins">0</span>
+    </div>
 
-      <label for="giftReceiver">Select Receiver</label>
-      <select id="giftReceiver">
-        <option value="">Select Member</option>
-      </select>
+    <label>Send Gift To</label>
 
-      <div class="gift-grid" id="giftList">
+    <select id="giftReceiver">
+      <option value="Everyone">Everyone</option>
+    </select>
 
-        <button data-gift="Rose">🌹<br>Rose<br>10 Coins</button>
-        <button data-gift="Heart">💗<br>Heart<br>50 Coins</button>
-        <button data-gift="Crown">👑<br>Crown<br>100 Coins</button>
-        <button data-gift="Diamond">💎<br>Diamond<br>500 Coins</button>
-        <button data-gift="Rocket">🚀<br>Rocket<br>1000 Coins</button>
-        <button data-gift="Castle">🏰<br>Castle<br>5000 Coins</button>
-        <button data-gift="Galaxy">🌌<br>Galaxy<br>10000 Coins</button>
+    <div id="giftCategories" class="gift-categories">
 
-      </div>
-
-      <button id="sendGiftButton" class="primary-button">
-        Send Gift
-      </button>
+      <button data-gift-category="All">All</button>
+      <button data-gift-category="Lucky">Lucky</button>
+      <button data-gift-category="VIP">VIP</button>
+      <button data-gift-category="Love">Love</button>
+      <button data-gift-category="Royal">Royal</button>
+      <button data-gift-category="Festival">Festival</button>
+      <button data-gift-category="Special">Special</button>
 
     </div>
-  </div>
 
-  <!-- INBOX MODAL -->
-  <div class="modal hidden" id="inboxModal">
+    <input
+      id="giftSearch"
+      type="search"
+      placeholder="Search gifts..."
+    >
 
-    <div class="modal-box">
+    <div id="giftList" class="gift-grid"></div>
 
-      <div class="modal-header">
-        <h3>✉️ Inbox</h3>
-        <button class="close-modal" data-close="inboxModal">✕</button>
-      </div>
-
-      <div id="inboxMessages">
-        No new messages.
-      </div>
-
+    <div id="selectedGiftInfo">
+      Select a gift
     </div>
+
+    <label>Quantity</label>
+
+    <select id="giftQuantity">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+    </select>
+
+    <button id="sendGiftButton" class="primary-button">
+      Send Gift 🎁
+    </button>
+
   </div>
-
-  <!-- YOUTUBE MODAL -->
-  <div class="modal hidden" id="youtubeModal">
-
-    <div class="modal-box">
-
-      <div class="modal-header">
-        <h3>▶ YouTube Sharing</h3>
-        <button class="close-modal" data-close="youtubeModal">✕</button>
-      </div>
-
-      <input
-        type="url"
-        id="youtubeInput"
-        placeholder="Paste YouTube link">
-
-      <button id="shareYoutubeButton" class="primary-button">
-        Share Link
-      </button>
-
-      <div id="youtubeLinks"></div>
-
-    </div>
-  </div>
-
-  <!-- ROOM SETTINGS MODAL -->
-  <div class="modal hidden" id="settingsModal">
-
-    <div class="modal-box">
-
-      <div class="modal-header">
-        <h3>⚙️ Room Settings</h3>
-        <button class="close-modal" data-close="settingsModal">✕</button>
-      </div>
-
-      <label for="settingRoomName">Room Name</label>
-      <input id="settingRoomName" maxlength="35">
-
-      <label for="settingDescription">Description</label>
-      <input id="settingDescription" maxlength="150">
-
-      <label>
-        <input type="checkbox" id="settingLocked">
-        Lock Room
-      </label>
-
-      <label>
-        <input type="checkbox" id="settingYoutube" checked>
-        Allow YouTube Sharing
-      </label>
-
-      <button id="saveSettingsButton" class="primary-button">
-        Save Settings
-      </button>
-
-    </div>
-  </div>
-
-  <!-- ADMIN PANEL -->
-  <div class="modal hidden" id="adminModal">
-
-    <div class="modal-box">
-
-      <div class="modal-header">
-        <h3>🛡️ Room Admin</h3>
-        <button class="close-modal" data-close="adminModal">✕</button>
-      </div>
-
-      <label for="adminUserId">User ID</label>
-      <input id="adminUserId" placeholder="Enter user ID">
-
-      <button id="addAdminButton" class="primary-button">
-        Add Admin
-      </button>
-
-      <button id="removeAdminButton" class="secondary-button">
-        Remove Admin
-      </button>
-
-      <button id="kickUserButton" class="secondary-button">
-        Kick Member
-      </button>
-
-      <button id="muteUserButton" class="secondary-button">
-        Force Mute
-      </button>
-
-    </div>
-  </div>
-
-  <!-- STATUS -->
-  <div class="toast" id="toast"></div>
 
 </div>
 
+
+<!-- =====================================
+     USER PROFILE MODAL
+===================================== -->
+
+<div id="userProfileModal" class="modal hidden">
+
+  <div class="modal-content profile-modal">
+
+    <div class="modal-header">
+      <h2>👤 User Profile</h2>
+      <button data-close-modal="userProfileModal">✕</button>
+    </div>
+
+    <div class="profile-avatar">
+      <img id="popupUserDP" alt="Profile Photo">
+    </div>
+
+    <h2 id="popupUserName">User</h2>
+
+    <p>
+      ID:
+      <span id="popupUserId"></span>
+    </p>
+
+    <p>
+      Level:
+      <span id="popupUserLevel">1</span>
+    </p>
+
+    <p>
+      Country:
+      <span id="popupUserCountry">Not set</span>
+    </p>
+
+    <p id="popupUserBio">No bio</p>
+
+    <div class="profile-actions">
+
+      <button id="followUserButton">Follow</button>
+      <button id="chatUserButton">Message</button>
+      <button id="profileGiftButton">Send Gift</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     EDIT PROFILE MODAL
+===================================== -->
+
+<div id="editProfileModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>Edit Profile</h2>
+      <button data-close-modal="editProfileModal">✕</button>
+    </div>
+
+    <label>Name</label>
+    <input id="editProfileName" maxlength="20">
+
+    <label>Bio</label>
+    <textarea id="editProfileBio" maxlength="250"></textarea>
+
+    <label>Profile Photo URL</label>
+    <input id="editProfileAvatar" placeholder="Image URL">
+
+    <label>Country</label>
+    <input id="editProfileCountry" maxlength="60">
+
+    <label>Gender (Optional)</label>
+
+    <select id="editProfileGender">
+      <option value="">Prefer not to say</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <button id="saveProfileButton" class="primary-button">
+      Save Profile
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     BAG / FRAMES
+===================================== -->
+
+<div id="bagModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>🎒 My Bag</h2>
+      <button data-close-modal="bagModal">✕</button>
+    </div>
+
+    <p>Choose your profile frame.</p>
+
+    <div id="bagFrames" class="frame-grid"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     ROOM TASKS
+===================================== -->
+
+<div id="roomTasksModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>🏆 Room Tasks</h2>
+      <button data-close-modal="roomTasksModal">✕</button>
+    </div>
+
+    <div class="task-balance">
+      🪙 Coins:
+      <span id="taskCoins">0</span>
+    </div>
+
+    <div>
+      Total Rewards:
+      <span id="taskTotalRewards">0</span>
+    </div>
+
+    <div id="roomTasksList"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     INBOX
+===================================== -->
+
+<div id="inboxModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>✉️ Inbox</h2>
+      <button data-close-modal="inboxModal">✕</button>
+    </div>
+
+    <div id="inboxMessages"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     YOUTUBE
+===================================== -->
+
+<div id="youtubeModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>▶ YouTube Sharing</h2>
+      <button data-close-modal="youtubeModal">✕</button>
+    </div>
+
+    <input
+      id="youtubeInput"
+      type="url"
+      placeholder="Paste YouTube link"
+    >
+
+    <button id="shareYoutubeButton">
+      Share Link
+    </button>
+
+    <div id="youtubeLinks"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     ROOM SETTINGS
+===================================== -->
+
+<div id="settingsModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>⚙️ Room Settings</h2>
+      <button data-close-modal="settingsModal">✕</button>
+    </div>
+
+    <label>Room Name</label>
+    <input id="settingRoomName" maxlength="35">
+
+    <label>Description</label>
+    <textarea id="settingDescription" maxlength="150"></textarea>
+
+    <label>
+      <input id="settingLocked" type="checkbox">
+      Lock Room
+    </label>
+
+    <label>
+      <input id="settingYoutube" type="checkbox" checked>
+      Allow YouTube Sharing
+    </label>
+
+    <button id="saveSettingsButton">
+      Save Settings
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     ADMIN PANEL
+===================================== -->
+
+<div id="adminModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>🛡 Admin Panel</h2>
+      <button data-close-modal="adminModal">✕</button>
+    </div>
+
+    <label>User ID</label>
+
+    <input
+      id="adminUserId"
+      type="text"
+      placeholder="Enter User ID"
+    >
+
+    <button id="addAdminButton">Add Admin</button>
+    <button id="removeAdminButton">Remove Admin</button>
+    <button id="kickUserButton">Kick User</button>
+    <button id="muteUserButton">Mute User</button>
+
+  </div>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+
+<!-- SOCKET.IO -->
 <script src="/socket.io/socket.io.js"></script>
+
+<!-- ROOM JAVASCRIPT -->
 <script src="room.js"></script>
+
+<script>
+  // Additional room page buttons
+  document.getElementById("saveProfileButton")
+    ?.addEventListener("click", saveProfile);
+
+  document.getElementById("membersButton")
+    ?.addEventListener("click", () => {
+      document.getElementById("membersList")
+        ?.scrollIntoView({ behavior: "smooth" });
+    });
+
+  document.getElementById("rankingButton")
+    ?.addEventListener("click", () => {
+      document.getElementById("giftRanking")
+        ?.scrollIntoView({ behavior: "smooth" });
+    });
+
+  document.getElementById("profileEditButton")
+    ?.addEventListener("click", () => {
+      showModal("editProfileModal");
+    });
+
+  document.getElementById("adminPanelButton")
+    ?.addEventListener("click", () => {
+      showModal("adminModal");
+    });
+</script>
 
 </body>
 </html>
