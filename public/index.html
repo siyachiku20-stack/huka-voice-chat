@@ -1,471 +1,476 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Huka Voice Chat</title>
-
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            background: #160d25;
-            color: white;
-            font-family: Arial, sans-serif;
-            padding-bottom: 85px;
-        }
-
-        button, input, select {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: #211333;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff62bd;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .header-actions button {
-            border: none;
-            border-radius: 20px;
-            padding: 9px 13px;
-            color: white;
-            background: #39234e;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 25px;
-            padding: 17px;
-            border-bottom: 1px solid #392747;
-        }
-
-        .tabs button {
-            border: none;
-            background: none;
-            color: #b9a9c9;
-            font-size: 15px;
-        }
-
-        .tabs button.active {
-            color: #ff62bd;
-            font-weight: bold;
-        }
-
-        .welcome {
-            margin: 15px;
-            padding: 22px;
-            border-radius: 18px;
-            background: linear-gradient(120deg, #7629a8, #e63b9b);
-        }
-
-        .welcome h2 {
-            margin-top: 0;
-        }
-
-        .welcome p {
-            margin-bottom: 0;
-        }
-
-        .section {
-            padding: 15px;
-        }
-
-        .section-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .section-title h3 {
-            margin: 0;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 8px;
-            margin: 15px;
-        }
-
-        .search-box input,
-        .join-box input,
-        .create-box input,
-        .create-box select {
-            width: 100%;
-            padding: 13px;
-            color: white;
-            background: #291b38;
-            border: 1px solid #49345d;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        .country-list {
-            display: flex;
-            gap: 9px;
-            overflow-x: auto;
-            padding: 5px 15px 15px;
-        }
-
-        .country-list button {
-            white-space: nowrap;
-            padding: 9px 15px;
-            border: 1px solid #53356c;
-            border-radius: 20px;
-            color: white;
-            background: #291b38;
-        }
-
-        .room-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .room-card {
-            background: #291b38;
-            border: 1px solid #483056;
-            border-radius: 15px;
-            padding: 14px;
-        }
-
-        .room-card-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .room-card-icon {
-            font-size: 34px;
-        }
-
-        .room-card-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .room-card-info h3 {
-            margin: 0 0 7px;
-            overflow-wrap: anywhere;
-        }
-
-        .room-card-info p {
-            margin: 4px 0;
-            color: #c9b9d7;
-            font-size: 13px;
-        }
-
-        .join-room-button,
-        .main-button {
-            border: none;
-            border-radius: 20px;
-            padding: 10px 17px;
-            color: white;
-            background: linear-gradient(120deg, #a12be0, #ed3c9d);
-        }
-
-        .join-box,
-        .create-box {
-            background: #291b38;
-            padding: 16px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
-        .join-box h3,
-        .create-box h3 {
-            margin-top: 0;
-        }
-
-        .create-box input,
-        .create-box select {
-            margin-bottom: 10px;
-        }
-
-        .create-box button,
-        .join-box button {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .empty-rooms {
-            text-align: center;
-            padding: 25px;
-            color: #c9b9d7;
-            background: #291b38;
-            border-radius: 15px;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            background: #211333;
-            border-top: 1px solid #49345d;
-            padding: 12px 5px;
-            z-index: 100;
-        }
-
-        .bottom-nav button {
-            background: none;
-            border: none;
-            color: #bba9cc;
-            font-size: 12px;
-        }
-
-        .bottom-nav button span {
-            display: block;
-            font-size: 21px;
-            margin-bottom: 4px;
-        }
-
-        .bottom-nav button.active {
-            color: #ff62bd;
-        }
-
-        @media (min-width: 650px) {
-            .room-list {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .page-content {
-                max-width: 1000px;
-                margin: auto;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#edf4ff">
+<title>Huka Voice Chat — Home</title>
+<style>
+:root{--ink:#17233c;--muted:#8994a8;--blue:#38c8dc;--purple:#7d52e8;--pink:#ed4aa9;--gold:#f3b94d;--line:#e9edf5}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5fb;color:var(--ink);font-family:Arial,sans-serif;padding-bottom:82px}
+.app{max-width:720px;margin:auto;min-height:100vh;background:#f5f6fb;padding:0 12px 18px}
+.top{height:65px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top-left{display:flex;align-items:center;gap:18px}
+.me-link{color:#778398;text-decoration:none;font-size:16px}
+.top h1{font-size:20px;margin:0}
+.top-actions{display:flex;align-items:center;gap:10px}
+.icon-btn{border:0;background:transparent;color:#17233c;font-size:24px;width:40px;height:40px}
+.home-btn{background:#fff;border-radius:17px;width:100px;height:46px;color:#41c7d5;font-size:23px;box-shadow:0 3px 12px #263d6612}
+.banner-wrap{height:190px;position:relative;overflow:hidden;border-radius:22px;margin:7px 0 16px;background:#142d63;box-shadow:0 7px 18px #1d39732b}
+.banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:22px 24px;color:#fff;opacity:0;transform:translateX(12px);transition:opacity .7s,transform .7s;background:linear-gradient(115deg,#09265b,#1657a7 48%,#7d46bb)}
+.banner.active{opacity:1;transform:translateX(0)}
+.banner.help{background:linear-gradient(115deg,#36125f,#a42b91 55%,#ef8a65)}
+.banner-copy{max-width:78%;position:relative;z-index:1}
+.banner small{font-size:11px;letter-spacing:1.5px;font-weight:bold}
+.banner h2{font-family:Georgia,serif;font-size:28px;line-height:1.08;margin:9px 0}
+.banner p{font-size:12px;line-height:1.4;margin:0}
+.banner-art{font-size:55px;filter:drop-shadow(0 7px 8px #0007)}
+.banner-cta{display:inline-block;margin-top:11px;padding:8px 14px;border-radius:20px;background:#ffffffeb;color:#492b85;text-decoration:none;font-weight:bold;font-size:11px;border:0}
+.dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:2}
+.dot{width:7px;height:7px;border-radius:50%;background:#ffffff70}
+.dot.active{width:20px;border-radius:8px;background:#fff}
+.reward-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
+.reward-card{border-radius:16px;padding:12px;color:#fff;min-height:92px;box-shadow:0 4px 12px #263d6615}
+.reward-card.new{background:linear-gradient(120deg,#a62d57,#f07869)}
+.reward-card.daily{background:linear-gradient(120deg,#087e9c,#36c5cb)}
+.reward-card b{display:block;font-size:13px}
+.reward-card strong{display:block;font-size:19px;margin:7px 0 3px}
+.reward-card small{font-size:10px;opacity:.9}
+.feature-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.tile{border:0;border-radius:19px;min-height:112px;color:white;text-align:left;padding:12px;position:relative;overflow:hidden;box-shadow:0 5px 14px #263d661a}
+.tile span{display:block;font-size:12px;font-weight:bold}
+.tile strong{display:block;font-size:25px;margin-top:15px}
+.tile small{font-size:10px}
+.tile.room{background:linear-gradient(145deg,#2ecb91,#087c69)}
+.tile.wealth{background:linear-gradient(145deg,#ffbd57,#bd6b22)}
+.tile.cp{background:linear-gradient(145deg,#a16af1,#6233bd)}
+.countries{display:flex;gap:8px;overflow:auto;padding:2px 0 15px;scrollbar-width:none}
+.countries::-webkit-scrollbar{display:none}
+.country{border:0;background:#fff;border-radius:22px;padding:9px 17px;white-space:nowrap;color:#9ba3b1;font-size:12px}
+.country.active{background:#42cbd7;color:#fff;font-weight:bold}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:7px 2px 10px}
+.section-head h3{font-size:16px;margin:0}
+.section-head button{border:0;background:transparent;color:#7e8ca5;font-size:11px}
+.featured{display:grid;gap:11px;margin-bottom:16px}
+.feature-room{display:flex;align-items:center;gap:12px;min-height:132px;padding:12px;border-radius:18px;background:#fff;border:1px solid #f0d8a5;box-shadow:0 4px 12px #273e6410;position:relative;overflow:hidden}
+.feature-room:before{content:"";position:absolute;inset:0;border:3px solid #eab95e;border-radius:18px;pointer-events:none}
+.feature-room img,.room-thumb{width:94px;height:94px;flex:0 0 94px;border-radius:14px;object-fit:cover;background:linear-gradient(135deg,#263c8b,#a23d9a);display:grid;place-items:center;font-size:38px}
+.feature-info{min-width:0;flex:1}
+.ribbon{font-size:10px;color:#a86b17;font-weight:bold;margin-bottom:9px}
+.feature-info b{font-size:13px;display:block}
+.feature-info small{font-size:11px;color:#9aa3b3;display:block;margin-top:9px}
+.room-count{font-size:11px;color:#477ce4;white-space:nowrap}
+.rooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.room-card{background:#fff;border-radius:16px;padding:10px;box-shadow:0 3px 12px #1f31520d;min-width:0}
+.room-art{height:88px;border-radius:12px;background:linear-gradient(135deg,#273d8e,#a84aab);display:grid;place-items:center;font-size:35px;margin-bottom:9px}
+.room-name{font-size:12px;font-weight:bold;overflow-wrap:anywhere}
+.room-meta{font-size:10px;color:#929bad;margin-top:5px}
+.room-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:9px;gap:4px}
+.room-type{font-size:9px;color:#8b70cb}
+.join{border:0;background:#40c6d4;color:#fff;padding:7px 12px;border-radius:15px;font-size:10px;font-weight:bold}
+.empty{grid-column:1/-1;text-align:center;background:#fff;border-radius:14px;padding:24px;color:#8d98aa;font-size:12px}
+.create{margin:15px 0;padding:15px;border-radius:16px;background:#fff}
+.create h3{margin:0 0 10px;font-size:15px}
+.create input,.create select{width:100%;padding:12px;border:1px solid #e1e6ef;border-radius:10px;margin:5px 0 9px;background:#fff;color:#25314a}
+.primary{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(90deg,#3fc8d7,#7a59e8);color:#fff;font-weight:bold}
+#status{text-align:center;font-size:11px;color:#8a95a8;margin:12px}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;justify-content:space-around;background:#fff;border-top:1px solid #e8ebf2;padding:8px 3px max(8px,env(safe-area-inset-bottom));box-shadow:0 -4px 15px #17233c0b}
+.bottom a{color:#9aa3b1;text-decoration:none;text-align:center;font-size:10px;min-width:48px}
+.bottom a span{display:block;font-size:21px;margin-bottom:3px}
+.bottom a.active{color:#38c7d5}
+.modal{position:fixed;inset:0;z-index:50;background:#0c153b80;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modal-card{background:#fff;color:#26334c;width:100%;max-width:420px;border-radius:20px;padding:20px;max-height:82vh;overflow:auto}
+.modal-card h3{margin:0 0 10px}
+.modal-card p{font-size:13px;line-height:1.5;color:#748096}
+.modal-card button{border:0;border-radius:12px;padding:11px 14px;background:#42c5d5;color:white;font-weight:bold}
+.modal-actions{display:flex;gap:8px;margin-top:15px}
+.modal-actions button{flex:1}
+.modal-card .secondary{background:#edf1f7;color:#4a5870}
+#toast{position:fixed;z-index:80;bottom:88px;left:50%;transform:translateX(-50%);background:#263b69;color:#fff;border-radius:22px;padding:11px 16px;font-size:12px;display:none;max-width:90%}
+@media(min-width:600px){.app{padding-left:20px;padding-right:20px}.banner-wrap{height:220px}.banner h2{font-size:34px}.rooms{grid-template-columns:repeat(3,minmax(0,1fr))}.bottom{max-width:720px;left:50%;transform:translateX(-50%);border-radius:16px 16px 0 0}}
+</style>
 </head>
-
 <body>
+<main class="app">
 
-    <!-- HEADER -->
-    <header class="top-header">
-        <div class="logo">HUKA♡</div>
+<header class="top">
+  <div class="top-left">
+    <a class="me-link" href="profile.html">Me</a>
+    <h1>Popular</h1>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" onclick="searchRooms()" aria-label="Search">⌕</button>
+    <button class="icon-btn home-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Home">⌂</button>
+  </div>
+</header>
 
-        <div class="header-actions">
-            <button type="button" id="searchNav">🔍</button>
-            <button type="button" id="vipButton">VIP</button>
-            <button type="button" id="profileBtn">👤</button>
-        </div>
-    </header>
+<section class="banner-wrap" aria-label="Huka announcements">
+  <article class="banner active" id="bannerWelcome">
+    <div class="banner-copy">
+      <small>WELCOME TO HUKA VOICE CHAT</small>
+      <h2>Meet • Talk • Play</h2>
+      <p>Discover new friends, enjoy voice rooms and have fun together.</p>
+    </div>
+    <div class="banner-art">💎</div>
+  </article>
 
-    <main class="page-content">
+  <article class="banner help" id="bannerHelp">
+    <div class="banner-copy">
+      <small>WE ARE HERE TO HELP</small>
+      <h2>Need Help?</h2>
+      <p>Contact the Huka Manager for support and assistance.</p>
+      <button class="banner-cta" onclick="contactManager()">Contact Manager</button>
+    </div>
+    <div class="banner-art">🎧</div>
+  </article>
 
-        <!-- HOME TABS -->
-        <nav class="tabs">
-            <button class="active" id="homeTab">Hot</button>
-            <button id="recommendTab">Recommend</button>
-        </nav>
+  <div class="dots">
+    <i class="dot active" id="dot1"></i>
+    <i class="dot" id="dot2"></i>
+  </div>
+</section>
 
-        <!-- WELCOME -->
-        <section class="welcome">
-            <h2>Welcome to Huka Voice Chat ♡</h2>
-            <p>Meet new people, make friends and enjoy voice rooms.</p>
-        </section>
+<section class="reward-strip">
+  <article class="reward-card new">
+    <b>🎁 New User Welcome Reward</b>
+    <strong>10,000,000 Coins</strong>
+    <small>One-time reward for every new account</small>
+  </article>
+  <article class="reward-card daily">
+    <b>☀️ Daily Check-in</b>
+    <strong>1,000,000 Coins</strong>
+    <small>Claim once every day</small>
+    <button class="banner-cta" style="margin-top:7px" onclick="claimDaily()">Claim Daily Reward</button>
+  </article>
+</section>
 
-        <!-- SEARCH -->
-        <div class="search-box" id="searchSection">
-            <input
-                type="search"
-                id="roomSearch"
-                placeholder="Search room name or ID..."
-            >
-        </div>
+<section class="feature-tiles">
+  <button class="tile room" onclick="document.getElementById('roomsHeading').scrollIntoView({behavior:'smooth'})">
+    <span>🎙 ROOM</span><strong>Live Rooms</strong><small>Meet and talk</small>
+  </button>
+  <button class="tile wealth" onclick="showInfo('Wealth','Your coin balance and gift activity are available in your Profile Wallet.')">
+    <span>👑 WEALTH</span><strong>Top Users</strong><small>Wealth ranking</small>
+  </button>
+  <button class="tile cp" onclick="showInfo('CP Space','CP Space is a social feature area. Pair and relationship features can be enabled when the CP module is connected.')">
+    <span>💞 CP</span><strong>CP Space</strong><small>Connect together</small>
+  </button>
+</section>
 
-        <!-- COUNTRY FILTER -->
-        <div class="country-list">
-            <button type="button" data-country="all">🌍 All</button>
-            <button type="button" data-country="India">🇮🇳 India</button>
-            <button type="button" data-country="Nepal">🇳🇵 Nepal</button>
-            <button type="button" data-country="Pakistan">🇵🇰 Pakistan</button>
-            <button type="button" data-country="Bangladesh">🇧🇩 Bangladesh</button>
-            <button type="button" data-country="USA">🇺🇸 USA</button>
-        </div>
+<section class="section-head"><h3>Explore by Country</h3></section>
+<nav class="countries">
+  <button class="country active" onclick="filterCountry('All',this)">🌐 All</button>
+  <button class="country" onclick="filterCountry('India',this)">🇮🇳 India</button>
+  <button class="country" onclick="filterCountry('KSA',this)">🇸🇦 KSA</button>
+  <button class="country" onclick="filterCountry('Bangladesh',this)">🇧🇩 Bangladesh</button>
+  <button class="country" onclick="filterCountry('Pakistan',this)">🇵🇰 Pakistan</button>
+</nav>
 
-        <!-- JOIN ROOM -->
-        <section class="section">
-            <div class="join-box">
-                <h3>Join a Room</h3>
+<section class="section-head" id="roomsHeading">
+  <h3>Hottest Voice Rooms</h3>
+  <button onclick="loadRooms()">Refresh ↻</button>
+</section>
+<section class="featured" id="featuredRooms">
+  <div class="empty">Loading popular rooms...</div>
+</section>
 
-                <input
-                    type="text"
-                    id="joinRoomId"
-                    placeholder="Enter Room ID"
-                >
+<section class="section-head">
+  <h3>Popular Rooms</h3>
+  <span id="roomCount" style="font-size:11px;color:#929bad">Live rooms</span>
+</section>
+<section class="rooms" id="roomsList">
+  <div class="empty">Connecting to Huka...</div>
+</section>
 
-                <button
-                    type="button"
-                    class="main-button"
-                    id="joinRoomBtn"
-                >
-                    Join Room
-                </button>
-            </div>
-        </section>
+<section class="create">
+  <h3>＋ Create Your Room</h3>
+  <input id="newRoomName" maxlength="35" placeholder="Enter room name">
+  <select id="seatCount">
+    <option value="9">9 Seats</option>
+    <option value="11">11 Seats</option>
+    <option value="15">15 Seats</option>
+    <option value="20">20 Seats</option>
+  </select>
+  <button class="primary" onclick="createRoom()">Create Room</button>
+</section>
 
-        <!-- CREATE ROOM -->
-        <section class="section">
-            <div class="create-box">
-                <h3>🎙️ Create Voice Room</h3>
+<div id="status">Connecting to Huka...</div>
+</main>
 
-                <input
-                    type="text"
-                    id="createRoomName"
-                    placeholder="Enter Room Name"
-                    maxlength="40"
-                >
+<nav class="bottom">
+  <a class="active" href="index.html"><span>⌂</span>Home</a>
+  <a href="profile.html"><span>◉</span>Me</a>
+  <a href="room.html?room=100001"><span>🎙</span>Voice</a>
+  <a href="profile.html#help"><span>▣</span>Help</a>
+  <a href="profile.html"><span>👤</span>Profile</a>
+</nav>
 
-                <select id="createRoomSeats">
-                    <option value="9">9 Seats</option>
-                    <option value="11">11 Seats</option>
-                    <option value="15">15 Seats</option>
-                    <option value="20">20 Seats</option>
-                </select>
+<div class="modal" id="infoModal" onclick="if(event.target===this)closeInfo()">
+  <div class="modal-card">
+    <h3 id="infoTitle">Huka</h3>
+    <p id="infoText"></p>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeInfo()">Close</button>
+      <button id="infoAction" onclick="closeInfo()">OK</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
 
-                <button
-                    type="button"
-                    class="main-button"
-                    id="createRoomBtn"
-                >
-                    + Create Room
-                </button>
-            </div>
-        </section>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket=io();
+let currentUser=null,allRooms=[],activeCountry='All',bannerIndex=0,managerUrl='';
+const $=id=>document.getElementById(id);
 
-        <!-- VOICE ROOMS -->
-        <section class="section">
-            <div class="section-title">
-                <h3>🔥 Popular Voice Rooms</h3>
+function status(t){$('status').textContent=t}
+function toast(t){
+  const e=$('toast');
+  e.textContent=t;
+  e.style.display='block';
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>e.style.display='none',2600);
+}
+function showInfo(title,text){
+  $('infoTitle').textContent=title;
+  $('infoText').textContent=text;
+  $('infoModal').classList.add('show');
+}
+function closeInfo(){$('infoModal').classList.remove('show')}
 
-                <button
-                    type="button"
-                    id="refreshRooms"
-                    class="main-button"
-                >
-                    Refresh
-                </button>
-            </div>
+function contactManager(){
+  if(managerUrl){
+    window.open(managerUrl,'_blank','noopener');
+    return;
+  }
+  showInfo('Contact Huka Manager','The manager contact link has not been configured yet. The Huka app owner must add HUKA_MANAGER_URL in the hosting environment.');
+}
 
-            <div id="roomList" class="room-list">
-                <div class="empty-rooms">
-                    Loading rooms...
-                </div>
-            </div>
-        </section>
+function rotateBanners(){
+  bannerIndex=1-bannerIndex;
+  $('bannerWelcome').classList.toggle('active',bannerIndex===0);
+  $('bannerHelp').classList.toggle('active',bannerIndex===1);
+  $('dot1').classList.toggle('active',bannerIndex===0);
+  $('dot2').classList.toggle('active',bannerIndex===1);
+}
+setInterval(rotateBanners,5500);
 
-    </main>
+fetch('/api/config')
+  .then(r=>r.json())
+  .then(d=>managerUrl=d.managerUrl||'')
+  .catch(()=>{});
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="bottom-nav">
+function register(){
+  let name=localStorage.getItem('hukaName');
+  if(!name){
+    name=prompt('Enter your Huka name:')||'Huka User';
+    name=name.trim()||'Huka User';
+    localStorage.setItem('hukaName',name);
+  }
 
-        <button type="button" class="active" id="homeBtn">
-            <span>🏠</span>
-            Home
-        </button>
+  socket.emit('register',{
+    name,
+    profileId:localStorage.getItem('hukaUserId')||''
+  },res=>{
+    if(!res||!res.ok){
+      status(res?.error||'Profile registration failed');
+      return;
+    }
 
-        <button type="button" id="reelButton">
-            <span>🎬</span>
-            Reel
-        </button>
+    currentUser=res.user;
+    localStorage.setItem('hukaUserId',res.user.id);
+    localStorage.setItem('hukaName',res.user.name);
+    status('Welcome, '+res.user.name+'!');
 
-        <button type="button" id="voiceButton">
-            <span>🎙️</span>
-            Voice
-        </button>
+    if(res.user.newUserReward&&!localStorage.getItem('hukaWelcomeShown_'+res.user.id)){
+      toast('Welcome! 10,000,000 bonus coins added to your wallet.');
+      localStorage.setItem('hukaWelcomeShown_'+res.user.id,'1');
+    }
 
-        <button type="button" id="messageButton">
-            <span>💬</span>
-            Message
-        </button>
+    socket.emit('get-rooms');
+    loadDailyTask();
+  });
+}
 
-        <button type="button" id="profileNav">
-            <span>👤</span>
-            Profile
-        </button>
+socket.on('connect',register);
+socket.on('disconnect',()=>status('Connection lost. Reconnecting...'));
+socket.on('connect_error',()=>status('Could not connect. Please refresh.'));
+socket.on('room-list',rooms=>{
+  allRooms=Array.isArray(rooms)?rooms:[];
+  renderRooms();
+});
+socket.on('profile-update',p=>{
+  if(currentUser)Object.assign(currentUser,p);
+});
 
-    </nav>
+function loadRooms(){
+  if(socket.connected)socket.emit('get-rooms');
+  else toast('Reconnecting to Huka...');
+}
 
-    <!-- SOCKET.IO -->
-    <script src="/socket.io/socket.io.js"></script>
+function loadDailyTask(){
+  socket.emit('get-daily-tasks',res=>{
+    if(!res||!res.ok)return;
+    const task=res.tasks?.[0];
+    if(task?.claimed)toast('Today’s 1,000,000 coin reward is already claimed.');
+  });
+}
 
-    <!-- HOME SCRIPT -->
-    <script src="script.js"></script>
+function claimDaily(){
+  if(!currentUser){
+    toast('Please wait for connection.');
+    return;
+  }
 
-    <script>
-        // Country filter
-        document.querySelectorAll("[data-country]").forEach(button => {
-            button.addEventListener("click", () => {
-                const country = button.dataset.country;
-                const select = document.getElementById("countryFilter");
+  socket.emit('claim-daily-task',{taskId:'daily_checkin'},res=>{
+    if(!res||!res.ok){
+      toast(res?.error||'Could not claim daily reward.');
+      return;
+    }
+    toast('Daily reward claimed: 1,000,000 coins!');
+    currentUser.coins=res.coins;
+  });
+}
 
-                if (select) {
-                    select.value = country;
-                    select.dispatchEvent(new Event("change"));
-                }
-            });
-        });
+function filterCountry(c,btn){
+  activeCountry=c;
+  document.querySelectorAll('.country').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
+  renderRooms();
+}
 
-        // Search shortcut
-        document.getElementById("searchNav").addEventListener("click", () => {
-            document.getElementById("roomSearch").focus();
-        });
+function roomMatches(r){
+  if(activeCountry==='All')return true;
+  return String(r.country||'').toLowerCase()===activeCountry.toLowerCase();
+}
 
-        // Home tabs
-        document.getElementById("homeTab").addEventListener("click", () => {
-            document.getElementById("homeTab").classList.add("active");
-            document.getElementById("recommendTab").classList.remove("active");
-        });
+function renderRooms(){
+  const rooms=allRooms.filter(roomMatches).sort((a,b)=>(b.members||0)-(a.members||0));
+  $('roomCount').textContent=rooms.length+' rooms';
 
-        document.getElementById("recommendTab").addEventListener("click", () => {
-            document.getElementById("recommendTab").classList.add("active");
-            document.getElementById("homeTab").classList.remove("active");
-        });
+  const featured=$('featuredRooms');
+  featured.innerHTML='';
 
-        // Navigation placeholders
-        document.getElementById("voiceButton").addEventListener("click", () => {
-            document.getElementById("roomList").scrollIntoView({
-                behavior: "smooth"
-            });
-        });
+  rooms.slice(0,2).forEach((r,i)=>{
+    const card=document.createElement('article');
+    card.className='feature-room';
 
-        document.getElementById("vipButton").addEventListener("click", () => {
-            alert("VIP section will be connected next.");
-        });
+    const art=document.createElement('div');
+    art.className='room-thumb';
+    art.textContent=i===0?'🎤':'💞';
 
-        document.getElementById("reelButton").addEventListener("click", () => {
-            alert("Reel section will be connected next.");
-        });
+    const info=document.createElement('div');
+    info.className='feature-info';
 
-        document.getElementById("messageButton").addEventListener("click", () => {
-            alert("Message section will be connected next.");
-        });
-    </script>
+    const ribbon=document.createElement('div');
+    ribbon.className='ribbon';
+    ribbon.textContent=i===0?'🔥 HOTTEST ROOM TOP 1':'✨ HOTTEST ROOM TOP 2';
 
+    const name=document.createElement('b');
+    name.textContent=r.name||'Huka Room';
+
+    const owner=document.createElement('small');
+    owner.textContent='👑 '+(r.owner||'Room Host');
+
+    const count=document.createElement('span');
+    count.className='room-count';
+    count.textContent='👥 '+(r.members||0);
+
+    info.append(ribbon,name,owner);
+    card.append(art,info,count);
+    card.onclick=()=>joinRoom(r.id);
+    featured.append(card);
+  });
+
+  if(!rooms.length){
+    featured.innerHTML='<div class="empty">No live rooms yet. Create the first Huka room!</div>';
+  }
+
+  const list=$('roomsList');
+  list.innerHTML='';
+
+  if(!rooms.length){
+    list.innerHTML='<div class="empty">No rooms found. Create a room and invite friends!</div>';
+    return;
+  }
+
+  rooms.forEach((r,i)=>{
+    const card=document.createElement('article');
+    card.className='room-card';
+
+    const art=document.createElement('div');
+    art.className='room-art';
+    art.textContent=['🎤','🎧','🎵','💜','🌟','🎮'][i%6];
+
+    const name=document.createElement('div');
+    name.className='room-name';
+    name.textContent=r.name||'Huka Room';
+
+    const meta=document.createElement('div');
+    meta.className='room-meta';
+    meta.textContent='👑 '+(r.owner||'Host')+' · 👥 '+(r.members||0)+'/'+(r.seats||9);
+
+    const bottom=document.createElement('div');
+    bottom.className='room-bottom';
+
+    const type=document.createElement('span');
+    type.className='room-type';
+    type.textContent='🎙 Voice Room';
+
+    const join=document.createElement('button');
+    join.className='join';
+    join.textContent='Join';
+    join.onclick=()=>joinRoom(r.id);
+
+    bottom.append(type,join);
+    card.append(art,name,meta,bottom);
+    list.append(card);
+  });
+}
+
+function joinRoom(id){
+  if(id)location.href='room.html?room='+encodeURIComponent(id);
+}
+
+function createRoom(){
+  if(!currentUser){
+    status('Please wait for profile connection.');
+    return;
+  }
+
+  const name=$('newRoomName').value.trim();
+  if(!name){
+    toast('Enter a room name first.');
+    return;
+  }
+
+  socket.emit('create-room',{
+    name,
+    seats:Number($('seatCount').value)
+  },res=>{
+    if(!res||!res.ok){
+      toast(res?.error||'Could not create room.');
+      return;
+    }
+    location.href='room.html?room='+encodeURIComponent(res.id);
+  });
+}
+
+function searchRooms(){
+  const q=prompt('Search room name or host:');
+  if(q===null)return;
+  const term=q.trim().toLowerCase();
+  const found=allRooms.filter(r=>
+    (r.name||'').toLowerCase().includes(term)||
+    (r.owner||'').toLowerCase().includes(term)
+  );
+  const old=allRooms;
+  allRooms=found;
+  renderRooms();
+  allRooms=old;
+  if(!found.length)toast('No matching rooms found.');
+}
+</script>
 </body>
 </html>
