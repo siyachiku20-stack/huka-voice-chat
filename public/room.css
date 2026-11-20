@@ -1,20 +1,33 @@
-css
-/* ==================================
+/* =========================================
    HUKA VOICE CHAT - ROOM DESIGN
    Purple + Pink Theme
-================================== */
+========================================= */
 
 * {
   box-sizing: border-box;
 }
 
+:root {
+  --bg: #10091c;
+  --panel: #1d1230;
+  --panel-light: #29183e;
+  --purple: #8b42e8;
+  --pink: #f044a2;
+  --text: #ffffff;
+  --muted: #b9a9ca;
+  --border: rgba(255,255,255,0.09);
+  --green: #35d58a;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background: #160d24;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, #392052 0, transparent 38%),
+    var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
 }
 
 button,
@@ -22,11 +35,13 @@ input,
 textarea,
 select {
   font-family: inherit;
+  font-size: 14px;
 }
 
 button {
-  cursor: pointer;
   border: none;
+  cursor: pointer;
+  color: white;
   transition: 0.2s ease;
 }
 
@@ -34,303 +49,487 @@ button:active {
   transform: scale(0.96);
 }
 
+input,
+textarea,
+select {
+  outline: none;
+}
+
 /* MAIN ROOM */
 
-.room-container,
-main {
+.room-container {
   width: 100%;
   max-width: 900px;
+  min-height: 100vh;
   margin: auto;
-  padding: 12px;
+  padding-bottom: 85px;
+  position: relative;
 }
 
 /* HEADER */
 
-header,
 .room-header {
-  background: linear-gradient(135deg, #7026b9, #e735a6);
-  padding: 16px;
-  border-radius: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 5px 20px #00000055;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(29,18,48,0.96);
+  border-bottom: 1px solid var(--border);
 }
 
-h1,
-h2,
-h3 {
-  margin-top: 8px;
+.room-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-#roomName {
-  font-size: 21px;
+.back-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--panel-light);
+  font-size: 20px;
+}
+
+.room-title {
+  font-size: 17px;
   font-weight: bold;
 }
 
-#roomId,
-#roomOwner,
-#connectionStatus {
-  font-size: 13px;
-  margin-top: 5px;
+.room-subtitle {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
 }
 
-/* STATUS */
-
-#roomStatus,
-#voiceStatus {
-  background: #291638;
-  color: #ff9add;
-  padding: 10px;
-  border-radius: 10px;
-  margin: 10px 0;
-  font-size: 13px;
-}
-
-/* SEAT BUTTONS */
-
-#seats,
-.seats,
-.seat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 15px 0;
-}
-
-.seat {
-  min-height: 85px;
-  border-radius: 14px;
-  background: linear-gradient(145deg, #342047, #51276c);
-  border: 1px solid #a34bc7;
-  color: white;
-  padding: 10px 5px;
-  font-size: 13px;
+.room-header-right {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
 }
 
-.seat small {
-  color: #e6b5f5;
-}
-
-.seat strong {
-  overflow-wrap: anywhere;
-}
-
-.seat:hover {
-  background: linear-gradient(135deg, #7b32bd, #d936a3);
-}
-
-.seat.locked {
-  background: #29202e;
-  border-color: #777;
-  color: #aaa;
-}
-
-/* GENERAL BUTTONS */
-
-button {
-  background: linear-gradient(135deg, #8538c7, #e23a9e);
-  color: white;
-  padding: 10px 14px;
+.header-button {
+  padding: 9px 12px;
   border-radius: 10px;
-  font-weight: bold;
-  margin: 3px;
+  background: var(--panel-light);
 }
 
-button:hover {
-  filter: brightness(1.15);
-}
+/* ROOM INFO */
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* INPUTS */
-
-input,
-textarea,
-select {
-  width: 100%;
-  background: #281936;
-  color: white;
-  border: 1px solid #75418d;
-  border-radius: 10px;
-  padding: 12px;
-  margin: 6px 0;
-  outline: none;
-}
-
-input:focus,
-textarea:focus {
-  border-color: #ed54bc;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #bba6c7;
-}
-
-/* PANELS */
-
-section,
-.panel {
-  background: #241532;
-  border: 1px solid #49275d;
+.room-info {
+  margin: 12px;
   padding: 14px;
-  border-radius: 15px;
-  margin: 12px 0;
-  box-shadow: 0 4px 12px #00000033;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #54258c, #a52b83);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.room-info h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.room-info p {
+  margin: 0;
+  color: #f0dffb;
+  font-size: 12px;
+}
+
+.room-owner {
+  font-size: 12px;
+}
+
+/* ROOM STATUS */
+
+#roomStatus,
+#connectionStatus {
+  display: inline-block;
+  padding: 5px 9px;
+  margin: 5px 0;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  font-size: 11px;
+}
+
+/* SEAT SECTION */
+
+.seat-section {
+  margin: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.section-heading h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.seat-count {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.seat-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.seat-controls button {
+  flex: 1;
+  min-width: 55px;
+  padding: 9px 5px;
+  border-radius: 9px;
+  background: var(--panel-light);
+}
+
+.seat-controls button.active,
+.seat-controls button:hover {
+  background: linear-gradient(120deg, var(--purple), var(--pink));
+}
+
+#seats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.seat,
+.seat-item {
+  min-height: 100px;
+  padding: 10px 5px;
+  border-radius: 14px;
+  background: #291a3d;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.seat-number {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.seat-avatar {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #49305f;
+}
+
+.seat-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.empty-seat {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 /* MEMBERS */
 
-#members {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.members-section {
+  margin: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
 }
 
-.member {
-  background: #432454;
-  border: 1px solid #a64cc1;
-  border-radius: 20px;
-  padding: 9px 12px;
+#members {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border-radius: 12px;
+  background: var(--panel-light);
+}
+
+.member-item img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.member-name {
+  flex: 1;
   font-size: 13px;
+}
+
+.member-status {
+  color: var(--green);
+  font-size: 11px;
 }
 
 /* CHAT */
 
-#chatMessages {
-  background: #1a1025;
-  min-height: 150px;
-  max-height: 300px;
+.chat-section {
+  margin: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.chat-section h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+
+#chatMessages,
+#chatBox {
+  height: 220px;
   overflow-y: auto;
-  border-radius: 12px;
   padding: 10px;
-  margin: 10px 0;
+  border-radius: 12px;
+  background: #130c20;
+}
+
+.chat-message {
+  margin-bottom: 10px;
+  padding: 9px 11px;
+  max-width: 90%;
+  width: fit-content;
+  border-radius: 12px;
+  background: #302044;
+  font-size: 13px;
   overflow-wrap: anywhere;
+}
+
+.chat-message .username {
+  display: block;
+  margin-bottom: 4px;
+  color: #e68aff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 #chatInput {
-  width: 100%;
-}
-
-.chat-controls {
-  display: flex;
-  gap: 6px;
-}
-
-.chat-controls input {
   flex: 1;
   min-width: 0;
-}
-
-/* GIFT RANKING */
-
-#giftRanking {
-  background: #321c43;
-  border-radius: 12px;
-  padding: 10px;
-  color: #ffd0f0;
-}
-
-/* YOUTUBE */
-
-#youtubeLinks a {
-  background: #422052;
-  border-radius: 10px;
-  margin: 7px 0;
-  padding: 10px;
-  overflow-wrap: anywhere;
-}
-
-/* ADMIN PANEL */
-
-#adminPanel {
-  background: #352044;
-  border: 1px solid #b34bd1;
   padding: 12px;
+  border: 1px solid var(--border);
   border-radius: 12px;
+  background: #291a3d;
+  color: white;
 }
 
-.hidden {
-  display: none !important;
+#sendMessage {
+  padding: 0 16px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, var(--purple), var(--pink));
 }
 
-/* BOTTOM MENU */
+/* BOTTOM TOOLBAR */
 
-.bottom-menu {
-  position: sticky;
+.room-bottom-bar {
+  position: fixed;
+  z-index: 100;
   bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 900px;
-  margin: 15px auto 0;
-  padding: 10px 5px;
-  background: #21132e;
-  border-top: 1px solid #8545a5;
   display: flex;
   justify-content: space-around;
   align-items: center;
   gap: 4px;
-  z-index: 100;
+  padding: 12px 5px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(24,14,39,0.97);
+  border-top: 1px solid var(--border);
 }
 
-.bottom-menu button {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 3px;
-  font-size: 11px;
-  border-radius: 10px;
+.room-bottom-bar button {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 7px;
+  border-radius: 12px;
+  background: var(--panel-light);
+  font-size: 19px;
+}
+
+.room-bottom-bar button.active {
+  background: linear-gradient(120deg, var(--purple), var(--pink));
+}
+
+/* MIC AND SPEAKER */
+
+#micButton,
+#bottomMicButton,
+#micBtn {
+  background: linear-gradient(120deg, #b52b8d, #e63d9a);
+}
+
+#speakerButton,
+#speakerBtn {
+  background: #493064;
 }
 
 /* MODALS */
 
-.modal {
+.modal,
+.popup,
+#emojiModal,
+#giftModal,
+#inboxModal {
   display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: #000000bb;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
 }
 
-.modal-content {
-  background: #291738;
-  border: 1px solid #d14dbb;
-  border-radius: 18px;
+.modal.show,
+.popup.show {
+  display: flex;
+}
+
+#emojiModal,
+#giftModal,
+#inboxModal {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
   padding: 20px;
+  background: rgba(0,0,0,0.72);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content,
+.popup-content {
   width: 100%;
   max-width: 420px;
-  max-height: 85vh;
+  max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 10px 35px #00000088;
+  padding: 18px;
+  border-radius: 18px;
+  background: #241535;
+  border: 1px solid var(--border);
 }
 
-.modal-content h2 {
-  color: #ff9cdb;
+.modal-content h3,
+.popup-content h3 {
+  margin-top: 0;
 }
 
-/* EMOJI AND GIFTS */
+/* EMOJI */
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 9px;
+}
+
+.emoji-grid button {
+  padding: 9px;
+  border-radius: 10px;
+  background: var(--panel-light);
+  font-size: 22px;
+}
+
+/* GIFTS */
 
 #giftList {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-#giftList button {
-  min-height: 55px;
+.gift-item {
+  padding: 12px 5px;
+  border-radius: 12px;
+  text-align: center;
+  background: var(--panel-light);
 }
 
-.emoji-button {
-  font-size: 25px;
-  padding: 8px;
+.gift-item button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 5px;
+  border-radius: 9px;
+  background: linear-gradient(120deg, var(--purple), var(--pink));
+}
+
+.gift-icon {
+  font-size: 27px;
+}
+
+.gift-name {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.gift-price {
+  margin-top: 4px;
+  color: #ffd56a;
+  font-size: 11px;
+}
+
+/* INPUTS */
+
+.modal input,
+.modal textarea,
+.modal select,
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  width: 100%;
+  margin: 7px 0;
+  padding: 11px;
+  color: white;
+  background: #160e24;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.modal textarea,
+.modal-content textarea {
+  min-height: 75px;
+  resize: vertical;
+}
+
+.primary-button {
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, var(--purple), var(--pink));
+}
+
+.secondary-button {
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: #49345f;
 }
 
 /* INBOX */
@@ -340,6 +539,100 @@ section,
   overflow-y: auto;
 }
 
+.inbox-message {
+  margin: 8px 0;
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--panel-light);
+  font-size: 13px;
+}
+
+/* GIFT RANKING */
+
+#giftRanking {
+  margin-top: 12px;
+}
+
+.ranking-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px;
+  margin: 6px 0;
+  border-radius: 9px;
+  background: var(--panel-light);
+  font-size: 12px;
+}
+
+/* ADMIN PANEL */
+
+#adminPanel {
+  margin: 12px;
+  padding: 14px;
+  border-radius: 15px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+#adminPanel button {
+  margin: 4px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: var(--panel-light);
+}
+
+/* YOUTUBE */
+
+.youtube-section {
+  margin: 12px;
+  padding: 14px;
+  border-radius: 15px;
+  background: var(--panel);
+}
+
+.youtube-section input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #160e24;
+  color: white;
+}
+
+.youtube-section button {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, var(--purple), var(--pink));
+}
+
+/* ROOM SETTINGS */
+
+.settings-section {
+  margin: 12px;
+  padding: 14px;
+  border-radius: 15px;
+  background: var(--panel);
+}
+
+.settings-section label {
+  display: block;
+  margin: 10px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* LEAVE ROOM */
+
+.leave-room-button {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 15px 12px;
+  padding: 13px;
+  border-radius: 12px;
+  background: #b92d58;
+  font-weight: bold;
+}
+
 /* SCROLLBAR */
 
 ::-webkit-scrollbar {
@@ -347,49 +640,51 @@ section,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #a347c2;
+  background: #68418a;
   border-radius: 10px;
 }
 
-/* TABLET AND MOBILE */
+/* MOBILE */
 
-@media (max-width: 600px) {
-  .room-container,
-  main {
-    padding: 8px;
+@media (max-width: 480px) {
+  .room-header {
+    padding: 11px;
   }
 
-  #seats,
-  .seats,
-  .seat-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
+  .room-title {
+    font-size: 15px;
   }
 
-  .seat {
-    min-height: 75px;
-    font-size: 12px;
+  .room-info {
+    padding: 12px;
   }
 
-  .bottom-menu button {
-    font-size: 10px;
-    padding: 9px 2px;
+  #seats {
+    gap: 8px;
   }
 
-  section,
-  .panel {
-    padding: 10px;
+  .seat,
+  .seat-item {
+    min-height: 88px;
   }
 
-  .modal-content {
-    padding: 15px;
+  .seat-avatar {
+    width: 36px;
+    height: 36px;
   }
-}
 
-@media (min-width: 700px) {
-  #seats,
-  .seats,
-  .seat-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+  #chatMessages,
+  #chatBox {
+    height: 190px;
+  }
+
+  .room-bottom-bar button {
+    min-width: 37px;
+    min-height: 39px;
+    font-size: 17px;
+  }
+
+  #giftList {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
