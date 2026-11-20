@@ -1,761 +1,1095 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Huka Voice Chat - Profile</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#edf3ff">
+<title>Huka Voice Chat - My Profile</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      background: #160d24;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding-bottom: 85px;
-    }
+body {
+  margin: 0;
+  background: #f2f4fa;
+  color: #242b37;
+  font-family: Arial, sans-serif;
+  padding-bottom: 75px;
+}
 
-    button, input, textarea, select {
-      font-family: inherit;
-    }
+button, input, select, textarea {
+  font-family: inherit;
+}
 
-    .header {
-      padding: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #211333;
-    }
+button {
+  cursor: pointer;
+}
 
-    .header h2 {
-      margin: 0;
-      color: #ff80d5;
-    }
+.app {
+  max-width: 720px;
+  margin: auto;
+  background: #f4f5fa;
+  min-height: 100vh;
+}
 
-    .header button {
-      background: transparent;
-      border: 0;
-      color: white;
-      font-size: 23px;
-      cursor: pointer;
-    }
+/* PROFILE HEADER */
 
-    .profile-card {
-      margin: 18px;
-      padding: 22px 15px;
-      border-radius: 20px;
-      text-align: center;
-      background: linear-gradient(135deg, #542078, #a52c88);
-    }
+.profile-header {
+  padding: 28px 20px 20px;
+  min-height: 320px;
+  background:
+    radial-gradient(circle at 15% 10%, #ffffff, transparent 45%),
+    linear-gradient(125deg, #c9e6ff, #d9d5ff 60%, #f9d8e9);
+  position: relative;
+}
 
-    .avatar-area {
-      position: relative;
-      width: 105px;
-      height: 105px;
-      margin: auto;
-    }
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
 
-    #profileAvatar {
-      width: 105px;
-      height: 105px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #ffb4eb;
-      background: #32164a;
-    }
+.avatar-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, #fff, #f5b7d9, #7c68ff);
+  flex-shrink: 0;
+}
 
-    .camera-button {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: #ff4fc3;
-      border: 2px solid white;
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      color: white;
-      cursor: pointer;
-    }
+#profileAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #ddd;
+}
 
-    .profile-card h2 {
-      margin: 12px 0 5px;
-    }
+.profile-details {
+  min-width: 0;
+  flex: 1;
+}
 
-    .profile-id {
-      color: #f6c9ee;
-      font-size: 13px;
-    }
+#profileName {
+  font-size: 21px;
+  font-weight: bold;
+  margin: 0 0 9px;
+  overflow-wrap: anywhere;
+}
 
-    .frame-name {
-      color: #ffe58a;
-      font-size: 13px;
-      margin-top: 8px;
-    }
+.profile-id {
+  font-size: 12px;
+  color: #858c9a;
+}
 
-    .wallet {
-      margin: 15px 18px;
-      padding: 17px;
-      border-radius: 15px;
-      background: #29183b;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.level-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #9252d9, #d45ba8);
+  color: white;
+  font-size: 11px;
+}
 
-    .wallet strong {
-      color: #ffd56b;
-      font-size: 19px;
-    }
+.edit-button {
+  position: absolute;
+  top: 24px;
+  right: 18px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 20px;
+  background: #ffffffb9;
+  color: #536078;
+  font-size: 11px;
+}
 
-    .section {
-      margin: 18px;
-      padding: 17px;
-      background: #241633;
-      border-radius: 16px;
-    }
+.profile-bio {
+  margin: 13px 0 0 115px;
+  color: #69758b;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
 
-    .section h3 {
-      margin-top: 0;
-      color: #ff8bd9;
-    }
+/* FOLLOWERS */
 
-    .info-row {
-      padding: 12px 0;
-      border-bottom: 1px solid #49345c;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 14px;
-    }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  margin-top: 48px;
+}
 
-    .info-row:last-child {
-      border-bottom: 0;
-    }
+.stat strong {
+  display: block;
+  font-size: 22px;
+  color: #202633;
+}
 
-    .info-row span:last-child {
-      color: #e7b9ed;
-      text-align: right;
-    }
+.stat span {
+  display: block;
+  color: #8992a2;
+  font-size: 12px;
+  margin-top: 8px;
+}
 
-    .edit-button,
-    .save-button,
-    .shop-button {
-      border: 0;
-      padding: 11px 17px;
-      border-radius: 20px;
-      color: white;
-      background: linear-gradient(90deg, #a52cdb, #f044a8);
-      cursor: pointer;
-      font-weight: bold;
-    }
+/* SVIP BANNER */
 
-    .edit-button {
-      width: 100%;
-      margin-top: 12px;
-    }
+.svip-banner {
+  margin: -1px 10px 15px;
+  min-height: 145px;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #42080b, #8d151c, #350509);
+  border: 2px solid #d6a44c;
+  color: #f9d98c;
+  padding: 22px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  overflow: hidden;
+}
 
-    .form-group {
-      margin-bottom: 14px;
-    }
+.svip-banner h2 {
+  margin: 0;
+  font-size: 31px;
+  font-family: Georgia, serif;
+}
 
-    .form-group label {
-      display: block;
-      margin-bottom: 7px;
-      color: #e7b9ed;
-      font-size: 14px;
-    }
+.svip-banner p {
+  font-size: 12px;
+  color: #ffe8cf;
+  margin: 12px 0 0;
+}
 
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #614477;
-      border-radius: 10px;
-      background: #160d24;
-      color: white;
-      outline: none;
-    }
+.svip-icon {
+  font-size: 66px;
+}
 
-    .form-group textarea {
-      resize: vertical;
-      min-height: 75px;
-    }
+.svip-banner button {
+  margin-top: 10px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 20px;
+  background: #e5bd72;
+  color: #4b1710;
+  font-weight: bold;
+  font-size: 11px;
+}
 
-    .hidden {
-      display: none;
-    }
+/* MENU */
 
-    .frame-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+.menu-group {
+  background: #fff;
+  margin: 0 10px 12px;
+  padding: 9px 13px;
+  border-radius: 5px;
+}
 
-    .frame-item {
-      background: #342044;
-      padding: 13px 8px;
-      border-radius: 13px;
-      text-align: center;
-    }
+.menu-item {
+  width: 100%;
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 0;
+  background: #fff;
+  text-align: left;
+  padding: 8px 3px;
+  color: #303744;
+  border-bottom: 1px solid #f4f4f4;
+}
 
-    .frame-preview {
-      width: 65px;
-      height: 65px;
-      margin: auto auto 9px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      background: #160d24;
-    }
+.menu-item:last-child {
+  border-bottom: 0;
+}
 
-    .frame-item p {
-      font-size: 13px;
-      margin: 5px;
-    }
+.menu-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+  flex-shrink: 0;
+}
 
-    .frame-item button {
-      margin-top: 8px;
-      border: 0;
-      border-radius: 15px;
-      padding: 8px 12px;
-      background: #d83fae;
-      color: white;
-      cursor: pointer;
-    }
+.wallet { background: #fff0c5; }
+.level { background: #fff0ca; }
+.medal { background: #ffe0d4; }
+.cp { background: #ffe1f1; }
+.family { background: #dceeff; }
+.bag { background: #d5f5ff; }
+.dress { background: #ffe1e1; }
+.cdkey { background: #ffddec; }
+.language { background: #edf1f5; }
+.service { background: #e9f4ff; }
+.help { background: #f2edff; }
+.settings { background: #eff0f4; }
 
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 67px;
-      background: #211333;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 1px solid #49345c;
-    }
+.menu-label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: bold;
+}
 
-    .bottom-nav a {
-      color: #c9b4d8;
-      text-decoration: none;
-      text-align: center;
-      font-size: 12px;
-    }
+.menu-arrow {
+  color: #c3c7ce;
+  font-size: 23px;
+}
 
-    .bottom-nav a.active {
-      color: #ff75d0;
-    }
+.menu-extra {
+  font-size: 12px;
+  color: #a1a7b2;
+}
 
-    .bottom-nav span {
-      display: block;
-      font-size: 21px;
-      margin-bottom: 3px;
-    }
+/* BOTTOM NAVIGATION */
 
-    .note {
-      color: #cbb7d8;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-  </style>
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: white;
+  border-top: 1px solid #e8eaf0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 20;
+}
+
+.bottom-nav a {
+  text-decoration: none;
+  color: #9299a7;
+  text-align: center;
+  font-size: 10px;
+}
+
+.bottom-nav a span {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.bottom-nav a.active {
+  color: #39c6d5;
+}
+
+/* MODAL */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  z-index: 100;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 430px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.modal-box h2 {
+  margin: 0 0 15px;
+  font-size: 19px;
+}
+
+.modal-box label {
+  display: block;
+  font-size: 12px;
+  margin: 12px 0 5px;
+  color: #657087;
+}
+
+.modal-box input,
+.modal-box select,
+.modal-box textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  background: white;
+  color: #222;
+  outline: none;
+}
+
+.modal-box textarea {
+  min-height: 80px;
+}
+
+.primary {
+  border: 0;
+  border-radius: 11px;
+  padding: 12px;
+  background: linear-gradient(90deg, #40c7d4, #8057e7);
+  color: white;
+  font-weight: bold;
+}
+
+.secondary {
+  border: 0;
+  border-radius: 11px;
+  padding: 12px;
+  background: #edf0f5;
+  color: #47536a;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.frame-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.frame-card {
+  padding: 13px;
+  border-radius: 13px;
+  background: #f3f4fa;
+  text-align: center;
+}
+
+.frame-card button {
+  width: 100%;
+  margin-top: 9px;
+}
+
+.frame-preview {
+  font-size: 37px;
+  margin-bottom: 7px;
+}
+
+#toast {
+  display: none;
+  position: fixed;
+  z-index: 150;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  background: #293b64;
+  color: white;
+  padding: 11px 17px;
+  border-radius: 25px;
+  font-size: 12px;
+  max-width: 90%;
+  text-align: center;
+}
+
+@media(min-width:600px) {
+  .profile-header {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  .menu-group {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
+  .bottom-nav {
+    max-width: 720px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <header class="header">
-    <button onclick="history.back()">‹</button>
-    <h2>My Profile</h2>
-    <button onclick="showEdit()">⚙️</button>
-  </header>
+<main class="app">
 
-  <section class="profile-card">
-    <div class="avatar-area">
+<section class="profile-header">
+
+  <button class="edit-button" onclick="openEdit()">✏ Edit Profile</button>
+
+  <div class="profile-top">
+
+    <div class="avatar-box">
       <img id="profileAvatar"
-           src="https://placehold.co/200x200/542078/ffffff?text=H"
-           alt="Profile Photo">
-
-      <button class="camera-button"
-              onclick="document.getElementById('avatarInput').click()">
-        📷
-      </button>
-
-      <input type="file"
-             id="avatarInput"
-             accept="image/*"
-             hidden>
+           src="https://placehold.co/200x200/e6eaff/6655aa?text=H"
+           alt="Profile picture">
     </div>
 
-    <h2 id="displayName">Huka User</h2>
-    <div class="profile-id">
-      ID: <span id="displayId">100011</span>
+    <div class="profile-details">
+      <h1 id="profileName">Huka User</h1>
+      <div class="profile-id">
+        ID: <span id="profileId">Loading...</span>
+      </div>
+      <div class="level-badge">
+        💎 Lv.<span id="profileLevel">1</span>
+      </div>
     </div>
 
-    <div class="frame-name" id="activeFrameName">
-      No Frame Selected
-    </div>
-  </section>
+  </div>
 
-  <section class="wallet">
-    <div>
-      🪙 My Coins
-      <br>
-      <strong id="coinBalance">0</strong>
+  <p class="profile-bio" id="profileBio">
+    Welcome to Huka Voice Chat!
+  </p>
+
+  <div class="stats">
+
+    <div class="stat">
+      <strong id="followingCount">0</strong>
+      <span>Following</span>
     </div>
 
-    <button class="shop-button" onclick="showShop()">
-      Get Frames
+    <div class="stat">
+      <strong id="followersCount">0</strong>
+      <span>Followers</span>
+    </div>
+
+    <div class="stat">
+      <strong id="visitorsCount">0</strong>
+      <span>Visitors</span>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- SVIP -->
+
+<section class="svip-banner">
+  <div>
+    <h2>♛ SVIP</h2>
+    <p>Unlock SVIP and enjoy premium privileges.</p>
+    <button onclick="openPage('SVIP')">Explore SVIP</button>
+  </div>
+
+  <div class="svip-icon">💎</div>
+</section>
+
+<!-- MAIN MENU -->
+
+<section class="menu-group">
+
+  <button class="menu-item" onclick="openWallet()">
+    <span class="menu-icon wallet">💰</span>
+    <span class="menu-label">Wallet</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('Level')">
+    <span class="menu-icon level">🏆</span>
+    <span class="menu-label">Level</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('Medal')">
+    <span class="menu-icon medal">🎖️</span>
+    <span class="menu-label">Medal</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('CP Space')">
+    <span class="menu-icon cp">💞</span>
+    <span class="menu-label">CP Space</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('Family')">
+    <span class="menu-icon family">👑</span>
+    <span class="menu-label">Family</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openBag()">
+    <span class="menu-icon bag">🎒</span>
+    <span class="menu-label">Bag</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('Dress')">
+    <span class="menu-icon dress">👕</span>
+    <span class="menu-label">Dress</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('CD-KEY')">
+    <span class="menu-icon cdkey">🎟️</span>
+    <span class="menu-label">CD-KEY</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+</section>
+
+<!-- SETTINGS MENU -->
+
+<section class="menu-group">
+
+  <button class="menu-item" onclick="openLanguage()">
+    <span class="menu-icon language">🌐</span>
+    <span class="menu-label">Language</span>
+    <span class="menu-extra" id="languageLabel">English</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="contactManager()">
+    <span class="menu-icon service">🎧</span>
+    <span class="menu-label">Customer Service</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openPage('Help & Feedback')">
+    <span class="menu-icon help">❔</span>
+    <span class="menu-label">Help & Feedback</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+  <button class="menu-item" onclick="openSettings()">
+    <span class="menu-icon settings">⚙️</span>
+    <span class="menu-label">Settings</span>
+    <span class="menu-arrow">›</span>
+  </button>
+
+</section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+  <a href="index.html">
+    <span>⌂</span>Home
+  </a>
+
+  <a href="index.html#roomsHeading">
+    <span>🎙</span>Rooms
+  </a>
+
+  <a href="profile.html" class="active">
+    <span>👤</span>Me
+  </a>
+</nav>
+
+<!-- EDIT PROFILE MODAL -->
+
+<div class="modal" id="editModal">
+  <div class="modal-box">
+
+    <h2>Edit Profile</h2>
+
+    <label>Profile Picture URL</label>
+    <input id="editAvatar" placeholder="https://example.com/photo.jpg">
+
+    <label>Nickname</label>
+    <input id="editName" maxlength="20" placeholder="Your name">
+
+    <label>Bio</label>
+    <textarea id="editBio" maxlength="150"
+      placeholder="Write something about yourself"></textarea>
+
+    <label>Country</label>
+    <select id="editCountry">
+      <option value="">Select Country</option>
+      <option>India</option>
+      <option>Saudi Arabia</option>
+      <option>Bangladesh</option>
+      <option>Pakistan</option>
+      <option>Nepal</option>
+      <option>United Arab Emirates</option>
+      <option>Other</option>
+    </select>
+
+    <label>Gender</label>
+    <select id="editGender">
+      <option value="">Select Gender</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+      <option>Prefer not to say</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal('editModal')">Cancel</button>
+      <button class="primary" onclick="saveProfile()">Save Changes</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- WALLET MODAL -->
+
+<div class="modal" id="walletModal">
+  <div class="modal-box">
+
+    <h2>💰 My Wallet</h2>
+
+    <div class="info-row">
+      <span>Coins</span>
+      <strong id="walletCoins">0</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Diamonds</span>
+      <strong id="walletDiamonds">0</strong>
+    </div>
+
+    <p style="font-size:12px;color:#8992a1">
+      Coins and diamonds are virtual in-app balances.
+    </p>
+
+    <button class="primary" style="width:100%;margin-top:12px"
+      onclick="closeModal('walletModal')">
+      Close
     </button>
-  </section>
 
-  <section class="section">
-    <h3>👤 Personal Information</h3>
+  </div>
+</div>
 
-    <div class="info-row">
-      <span>Name</span>
-      <span id="infoName">Huka User</span>
+<!-- LANGUAGE MODAL -->
+
+<div class="modal" id="languageModal">
+  <div class="modal-box">
+
+    <h2>🌐 Select Language</h2>
+
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="ar">العربية</option>
+      <option value="bn">বাংলা</option>
+      <option value="ur">اردو</option>
+      <option value="ne">नेपाली</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal('languageModal')">Cancel</button>
+      <button class="primary" onclick="saveLanguage()">Save</button>
     </div>
 
-    <div class="info-row">
-      <span>Bio</span>
-      <span id="infoBio">Hello Huka Friends!</span>
+  </div>
+</div>
+
+<!-- BAG MODAL -->
+
+<div class="modal" id="bagModal">
+  <div class="modal-box">
+
+    <h2>🎒 My Bag</h2>
+
+    <div id="bagFrames" class="frame-grid">
+      <p>Loading frames...</p>
     </div>
 
-    <div class="info-row">
-      <span>Country</span>
-      <span id="infoCountry">Not Set</span>
-    </div>
-
-    <div class="info-row">
-      <span>Gender</span>
-      <span id="infoGender">Not Set</span>
-    </div>
-
-    <div class="info-row">
-      <span>Age Group</span>
-      <span id="infoAge">Not Set</span>
-    </div>
-
-    <div class="info-row">
-      <span>Language</span>
-      <span id="infoLanguage">English</span>
-    </div>
-
-    <button class="edit-button" onclick="showEdit()">
-      ✏️ Edit Profile
+    <button class="secondary" style="width:100%;margin-top:15px"
+      onclick="closeModal('bagModal')">
+      Close
     </button>
-  </section>
 
-  <section class="section hidden" id="editSection">
-    <h3>✏️ Edit Profile</h3>
+  </div>
+</div>
 
-    <div class="form-group">
-      <label>Profile Name</label>
-      <input id="editName" maxlength="25" placeholder="Enter your name">
-    </div>
+<!-- GENERAL INFO MODAL -->
 
-    <div class="form-group">
-      <label>Bio</label>
-      <textarea id="editBio" maxlength="150"
-                placeholder="Write something about yourself"></textarea>
-    </div>
+<div class="modal" id="infoModal">
+  <div class="modal-box">
 
-    <div class="form-group">
-      <label>Country</label>
-      <select id="editCountry">
-        <option value="">Select Country</option>
-        <option>India</option>
-        <option>Nepal</option>
-        <option>Bangladesh</option>
-        <option>Pakistan</option>
-        <option>United States</option>
-        <option>United Kingdom</option>
-        <option>United Arab Emirates</option>
-        <option>Saudi Arabia</option>
-        <option>Indonesia</option>
-        <option>Philippines</option>
-        <option>Other</option>
-      </select>
-    </div>
+    <h2 id="infoTitle">Huka</h2>
+    <p id="infoText" style="font-size:13px;line-height:1.6;color:#737f91"></p>
 
-    <div class="form-group">
-      <label>Gender</label>
-      <select id="editGender">
-        <option value="">Select Gender</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-        <option>Prefer not to say</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Age Group (Private)</label>
-      <select id="editAge">
-        <option value="">Select Age Group</option>
-        <option>Under 18</option>
-        <option>18-24</option>
-        <option>25-34</option>
-        <option>35-44</option>
-        <option>45+</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>App Language</label>
-      <select id="editLanguage">
-        <option value="English">English</option>
-        <option value="Hindi">हिन्दी</option>
-        <option value="Urdu">اردو</option>
-        <option value="Arabic">العربية</option>
-        <option value="Bengali">বাংলা</option>
-        <option value="Nepali">नेपाली</option>
-        <option value="Indonesian">Bahasa Indonesia</option>
-        <option value="Filipino">Filipino</option>
-      </select>
-    </div>
-
-    <button class="save-button" onclick="saveProfile()">
-      Save Changes
+    <button class="primary" style="width:100%;margin-top:12px"
+      onclick="closeModal('infoModal')">
+      OK
     </button>
-  </section>
 
-  <section class="section" id="bagSection">
-    <h3>🎒 My Frame Bag</h3>
-    <div class="frame-grid" id="myFrames"></div>
-  </section>
+  </div>
+</div>
 
-  <section class="section hidden" id="shopSection">
-    <h3>🛍️ Frame Shop</h3>
-    <p class="note">Coins se frames kharid sakte ho.</p>
-    <div class="frame-grid" id="shopFrames"></div>
-  </section>
+<!-- SETTINGS MODAL -->
 
-  <nav class="bottom-nav">
-    <a href="index.html">
-      <span>🏠</span>Home
-    </a>
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
 
-    <a href="index.html">
-      <span>🎬</span>Reel
-    </a>
+    <h2>⚙️ Settings</h2>
 
-    <a href="index.html">
-      <span>🎙️</span>Voice
-    </a>
+    <div class="info-row">
+      <span>Account ID</span>
+      <strong id="settingsId">-</strong>
+    </div>
 
-    <a href="index.html">
-      <span>✉️</span>Message
-    </a>
+    <button class="secondary" style="width:100%;margin-top:12px"
+      onclick="logout()">
+      Log Out
+    </button>
 
-    <a href="profile.html" class="active">
-      <span>👤</span>Profile
-    </a>
-  </nav>
+    <button class="secondary" style="width:100%;margin-top:10px"
+      onclick="closeModal('settingsModal')">
+      Close
+    </button>
 
-  <script>
-    const defaultFrames = [
-      {
-        id: "free",
-        name: "Free Frame",
-        price: 0,
-        emoji: "⭐",
-        free: true
-      },
-      {
-        id: "pink",
-        name: "Pink Frame",
-        price: 100,
-        emoji: "💗"
-      },
-      {
-        id: "gold",
-        name: "Gold Frame",
-        price: 250,
-        emoji: "👑"
-      },
-      {
-        id: "love",
-        name: "Love Frame",
-        price: 400,
-        emoji: "💖"
-      },
-      {
-        id: "diamond",
-        name: "Diamond Frame",
-        price: 700,
-        emoji: "💎"
-      },
-      {
-        id: "royal",
-        name: "Royal Frame",
-        price: 1000,
-        emoji: "🏆"
-      }
-    ];
+  </div>
+</div>
 
-    function getSaved(key, fallback) {
-      try {
-        const value = localStorage.getItem(key);
-        return value === null ? fallback : JSON.parse(value);
-      } catch {
-        return fallback;
-      }
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+const socket = io();
+
+const $ = id => document.getElementById(id);
+
+let profile = null;
+let managerUrl = '';
+
+function toast(message) {
+  const box = $('toast');
+  box.textContent = message;
+  box.style.display = 'block';
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(() => {
+    box.style.display = 'none';
+  }, 2800);
+}
+
+function showModal(id) {
+  $(id).classList.add('show');
+}
+
+function closeModal(id) {
+  $(id).classList.remove('show');
+}
+
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', event => {
+    if (event.target === modal) {
+      modal.classList.remove('show');
+    }
+  });
+});
+
+function getUserId() {
+  return localStorage.getItem('hukaUserId') || '';
+}
+
+function loadProfile() {
+  const userId = getUserId();
+
+  if (!userId) {
+    toast('Please open Huka Home and register first.');
+    return;
+  }
+
+  socket.emit('get-profile', { userId }, result => {
+    if (!result || result.ok === false) {
+      toast(result?.error || 'Could not load profile.');
+      return;
     }
 
-    let profile = getSaved("hukaProfile", {});
+    profile = result.profile || result.user || result;
+    renderProfile();
+  });
+}
 
-    let coins = Number(
-      localStorage.getItem("hukaCoins") || "0"
-    );
+function renderProfile() {
+  if (!profile) return;
 
-    let ownedFrames = getSaved("hukaOwnedFrames", ["free"]);
+  $('profileName').textContent = profile.name || 'Huka User';
+  $('profileId').textContent = profile.id || profile.userId || getUserId();
 
-    let selectedFrame =
-      localStorage.getItem("hukaSelectedFrame") || "free";
+  $('profileBio').textContent =
+    profile.bio || 'Welcome to Huka Voice Chat!';
 
-    let avatar =
-      localStorage.getItem("hukaAvatar") || "";
+  $('profileLevel').textContent = profile.level || 1;
 
-    function loadProfile() {
-      const name =
-        profile.name ||
-        localStorage.getItem("hukaName") ||
-        localStorage.getItem("hukaUsername") ||
-        "Huka User";
+  $('profileAvatar').src =
+    profile.avatar || 'https://placehold.co/200x200/e6eaff/6655aa?text=H';
 
-      const bio = profile.bio || "Hello Huka Friends!";
-      const country = profile.country || "Not Set";
-      const gender = profile.gender || "Not Set";
-      const age = profile.age || "Not Set";
-      const language = profile.language || "English";
+  $('followingCount').textContent =
+    (profile.following || []).length || 0;
 
-      const userId =
-        profile.userId ||
-        localStorage.getItem("hukaUserId") ||
-        "100011";
+  $('followersCount').textContent =
+    profile.followersCount || 0;
 
-      document.getElementById("displayName").textContent = name;
-      document.getElementById("displayId").textContent = userId;
+  $('visitorsCount').textContent =
+    profile.visitors || 0;
 
-      document.getElementById("infoName").textContent = name;
-      document.getElementById("infoBio").textContent = bio;
-      document.getElementById("infoCountry").textContent = country;
-      document.getElementById("infoGender").textContent = gender;
-      document.getElementById("infoAge").textContent = age;
-      document.getElementById("infoLanguage").textContent = language;
+  $('walletCoins').textContent =
+    Number(profile.coins || 0).toLocaleString();
 
-      document.getElementById("coinBalance").textContent = coins;
+  $('walletDiamonds').textContent =
+    Number(profile.diamonds || 0).toLocaleString();
 
-      document.getElementById("editName").value = name;
-      document.getElementById("editBio").value = bio;
+  $('settingsId').textContent =
+    profile.id || profile.userId || getUserId();
 
-      document.getElementById("editCountry").value =
-        country === "Not Set" ? "" : country;
+  $('languageLabel').textContent =
+    localStorage.getItem('hukaLanguageName') || 'English';
+}
 
-      document.getElementById("editGender").value =
-        gender === "Not Set" ? "" : gender;
+function openEdit() {
+  if (!profile) {
+    toast('Profile is still loading.');
+    return;
+  }
 
-      document.getElementById("editAge").value =
-        age === "Not Set" ? "" : age;
+  $('editAvatar').value = profile.avatar || '';
+  $('editName').value = profile.name || '';
+  $('editBio').value = profile.bio || '';
+  $('editCountry').value = profile.country || '';
+  $('editGender').value = profile.gender || '';
 
-      document.getElementById("editLanguage").value = language;
+  showModal('editModal');
+}
 
-      if (avatar) {
-        document.getElementById("profileAvatar").src = avatar;
-      }
+function saveProfile() {
+  const name = $('editName').value.trim();
 
-      const frame = defaultFrames.find(f => f.id === selectedFrame);
-      document.getElementById("activeFrameName").textContent =
-        frame ? frame.name : "No Frame Selected";
+  if (!name) {
+    toast('Please enter your name.');
+    return;
+  }
 
-      renderFrames();
+  const updates = {
+    name: name,
+    avatar: $('editAvatar').value.trim(),
+    bio: $('editBio').value.trim(),
+    country: $('editCountry').value,
+    gender: $('editGender').value
+  };
+
+  socket.emit('profile-update', updates, result => {
+    if (result && result.ok === false) {
+      toast(result.error || 'Profile update failed.');
+      return;
     }
 
-    function showEdit() {
-      const section = document.getElementById("editSection");
-      section.classList.toggle("hidden");
+    Object.assign(profile, updates);
 
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+    localStorage.setItem('hukaName', name);
+
+    renderProfile();
+    closeModal('editModal');
+    toast('Profile updated successfully!');
+  });
+}
+
+function openWallet() {
+  if (profile) renderProfile();
+  showModal('walletModal');
+}
+
+function openLanguage() {
+  $('languageSelect').value =
+    localStorage.getItem('hukaLanguage') || 'en';
+
+  showModal('languageModal');
+}
+
+function saveLanguage() {
+  const select = $('languageSelect');
+  const value = select.value;
+  const name = select.options[select.selectedIndex].text;
+
+  localStorage.setItem('hukaLanguage', value);
+  localStorage.setItem('hukaLanguageName', name);
+
+  $('languageLabel').textContent = name;
+
+  closeModal('languageModal');
+
+  toast('Language preference saved. Full app translation requires translation support on each page.');
+}
+
+function openBag() {
+  showModal('bagModal');
+  loadFrames();
+}
+
+function loadFrames() {
+  socket.emit('get-frames', result => {
+    if (!result) {
+      $('bagFrames').innerHTML = '<p>Could not load frames.</p>';
+      return;
     }
 
-    function saveProfile() {
-      const name =
-        document.getElementById("editName").value.trim();
+    const frames = Array.isArray(result)
+      ? result
+      : (result.frames || []);
 
-      if (!name) {
-        alert("Please enter your name.");
-        return;
-      }
+    const owned = profile?.ownedFrames || [];
 
-      profile.name = name;
-      profile.bio =
-        document.getElementById("editBio").value.trim();
+    $('bagFrames').innerHTML = '';
 
-      profile.country =
-        document.getElementById("editCountry").value;
-
-      profile.gender =
-        document.getElementById("editGender").value;
-
-      profile.age =
-        document.getElementById("editAge").value;
-
-      profile.language =
-        document.getElementById("editLanguage").value;
-
-      localStorage.setItem("hukaProfile", JSON.stringify(profile));
-      localStorage.setItem("hukaName", name);
-      localStorage.setItem("hukaUsername", name);
-      localStorage.setItem("hukaLanguage", profile.language);
-
-      document.getElementById("editSection").classList.add("hidden");
-
-      loadProfile();
-      alert("Profile saved!");
+    if (!frames.length) {
+      $('bagFrames').innerHTML =
+        '<p>No frames available right now.</p>';
+      return;
     }
 
-    document.getElementById("avatarInput")
-      .addEventListener("change", function(event) {
-        const file = event.target.files[0];
+    frames.forEach(frame => {
+      const card = document.createElement('div');
+      card.className = 'frame-card';
 
-        if (!file) return;
+      const preview = document.createElement('div');
+      preview.className = 'frame-preview';
+      preview.textContent = frame.icon || '💎';
 
-        if (!file.type.startsWith("image/")) {
-          alert("Please select an image.");
-          return;
-        }
+      const title = document.createElement('b');
+      title.textContent = frame.name || 'Profile Frame';
 
-        if (file.size > 2 * 1024 * 1024) {
-          alert("Image must be smaller than 2 MB.");
-          return;
-        }
+      const price = document.createElement('p');
+      price.style.fontSize = '12px';
+      price.textContent = frame.price
+        ? Number(frame.price).toLocaleString() + ' Coins'
+        : 'Free';
 
-        const reader = new FileReader();
+      const button = document.createElement('button');
+      button.className = 'primary';
 
-        reader.onload = function(e) {
-          avatar = e.target.result;
+      const isOwned = owned.includes(frame.id);
 
-          localStorage.setItem("hukaAvatar", avatar);
+      button.textContent = isOwned ? 'Equip' : 'Buy';
 
-          document.getElementById("profileAvatar").src = avatar;
-        };
-
-        reader.readAsDataURL(file);
-      });
-
-    function renderFrames() {
-      const bag = document.getElementById("myFrames");
-      const shop = document.getElementById("shopFrames");
-
-      bag.innerHTML = "";
-      shop.innerHTML = "";
-
-      defaultFrames.forEach(frame => {
-        const owned = ownedFrames.includes(frame.id);
-
-        if (owned) {
-          const item = document.createElement("div");
-          item.className = "frame-item";
-
-          item.innerHTML = `
-            <div class="frame-preview">${frame.emoji}</div>
-            <p>${frame.name}</p>
-            <button onclick="selectFrame('${frame.id}')">
-              ${selectedFrame === frame.id ? "Selected ✓" : "Use Frame"}
-            </button>
-          `;
-
-          bag.appendChild(item);
+      button.onclick = () => {
+        if (isOwned) {
+          equipFrame(frame.id);
         } else {
-          const item = document.createElement("div");
-          item.className = "frame-item";
-
-          item.innerHTML = `
-            <div class="frame-preview">${frame.emoji}</div>
-            <p>${frame.name}</p>
-            <p>🪙 ${frame.price} Coins</p>
-            <button onclick="buyFrame('${frame.id}')">
-              Buy Frame
-            </button>
-          `;
-
-          shop.appendChild(item);
+          buyFrame(frame.id);
         }
-      });
+      };
+
+      card.append(preview, title, price, button);
+      $('bagFrames').append(card);
+    });
+  });
+}
+
+function buyFrame(frameId) {
+  socket.emit('buy-frame', { frameId }, result => {
+    if (!result || !result.ok) {
+      toast(result?.error || 'Could not purchase frame.');
+      return;
     }
 
-    function selectFrame(id) {
-      if (!ownedFrames.includes(id)) {
-        alert("You don't own this frame.");
-        return;
-      }
-
-      selectedFrame = id;
-      localStorage.setItem("hukaSelectedFrame", id);
-
-      const frame = defaultFrames.find(f => f.id === id);
-
-      document.getElementById("activeFrameName").textContent =
-        frame ? frame.name : "";
-
-      renderFrames();
+    if (result.coins !== undefined) {
+      profile.coins = result.coins;
     }
 
-    function buyFrame(id) {
-      const frame = defaultFrames.find(f => f.id === id);
+    if (!profile.ownedFrames) profile.ownedFrames = [];
 
-      if (!frame) return;
-
-      if (ownedFrames.includes(id)) {
-        alert("You already own this frame.");
-        return;
-      }
-
-      if (coins < frame.price) {
-        alert("Not enough coins!");
-        return;
-      }
-
-      coins -= frame.price;
-
-      ownedFrames.push(id);
-
-      localStorage.setItem("hukaCoins", coins);
-      localStorage.setItem(
-        "hukaOwnedFrames",
-        JSON.stringify(ownedFrames)
-      );
-
-      document.getElementById("coinBalance").textContent = coins;
-
-      renderFrames();
-
-      alert(frame.name + " purchased successfully!");
+    if (!profile.ownedFrames.includes(frameId)) {
+      profile.ownedFrames.push(frameId);
     }
 
-    function showShop() {
-      const section = document.getElementById("shopSection");
+    renderProfile();
+    loadFrames();
 
-      section.classList.toggle("hidden");
+    toast('Frame purchased successfully!');
+  });
+}
 
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+function equipFrame(frameId) {
+  socket.emit('equip-frame', { frameId }, result => {
+    if (!result || !result.ok) {
+      toast(result?.error || 'Could not equip frame.');
+      return;
     }
 
+    if (profile) profile.frame = frameId;
+
+    toast('Frame equipped!');
     loadProfile();
-  </script>
+  });
+}
+
+function openPage(page) {
+  const messages = {
+    'SVIP': 'SVIP membership and premium privileges.',
+    'Level': 'Your Huka level and experience information.',
+    'Medal': 'Your achievements and medals.',
+    'CP Space': 'CP Space social features.',
+    'Family': 'Family membership and family rooms.',
+    'Dress': 'Profile appearance and dress collection.',
+    'CD-KEY': 'Enter a valid Huka reward code.',
+    'Help & Feedback': 'For help and feedback, contact the Huka Manager.'
+  };
+
+  $('infoTitle').textContent = page;
+  $('infoText').textContent =
+    messages[page] || 'This feature is not available yet.';
+
+  showModal('infoModal');
+}
+
+function contactManager() {
+  if (managerUrl) {
+    window.open(managerUrl, '_blank', 'noopener');
+    return;
+  }
+
+  openPage('Help & Feedback');
+}
+
+function openSettings() {
+  $('settingsId').textContent = getUserId();
+  showModal('settingsModal');
+}
+
+function logout() {
+  if (!confirm('Are you sure you want to log out?')) return;
+
+  localStorage.removeItem('hukaUserId');
+  localStorage.removeItem('hukaName');
+
+  location.href = 'index.html';
+}
+
+fetch('/api/config')
+  .then(response => response.json())
+  .then(data => {
+    managerUrl = data.managerUrl || '';
+  })
+  .catch(() => {});
+
+socket.on('connect', loadProfile);
+
+socket.on('profile-update', data => {
+  if (!profile || !data) return;
+
+  if (data.id === profile.id) {
+    Object.assign(profile, data);
+    renderProfile();
+  }
+});
+</script>
 
 </body>
-</html>
+      </html>
