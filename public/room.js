@@ -1,8 +1,8 @@
 "use strict";
 
-/* =====================================
-   HUKA VOICE CHAT - ROOM JS
-===================================== */
+/* =========================================
+   HUKA VOICE CHAT - ROOM JAVASCRIPT
+========================================= */
 
 const socket = io();
 
@@ -19,824 +19,791 @@ const USER_ID = localStorage.getItem("hukaUserId") || "";
 const USER_NAME =
   localStorage.getItem("hukaName") ||
   localStorage.getItem("hukaUsername") ||
-  "Huka User";
+  "Guest";
 
-const $ = id => document.getElementById(id);
-
-let currentUser = null;
 let currentRoom = null;
-let localStream = null;
-let micEnabled = false;
-let speakerEnabled = true;
+let roomMembers = [];
+let currentSeats = {};
+let currentSeatCount = 9;
+let selectedGift = null;
+let selectedGiftPrice = 0;
+let isMicOn = false;
+let isSpeakerOn = true;
+let isAdmin = false;
+let myCoins = 0;
 
-const peerConnections = {};
+const $ = (id) => document.getElementById(id);
 
-const ICE_SERVERS = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" }
-  ]
-};
-
-/* =====================================
-   STATUS
-===================================== */
-
-function status(message) {
-  const element = $("roomStatus");
-
-  if (element) element.textContent = message;
+function showMessage(message) {
+  alert(message);
 }
 
 function escapeHTML(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    char => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[char]
-  );
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
 }
 
-/* =====================================
-   REGISTER
-===================================== */
+function safeImage(value) {
+  if (typeof value !== "string") return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(value)) {
+    return value;
+  }
+  return "";
+}
+
+function setText(id, value) {
+  const element = $(id);
+  if (element) element.textContent = value ?? "";
+}
+
+function emitWithAck(eventName, data = {}) {
+  return new Promise((resolve) => {
+    socket.timeout(8000).emit(eventName, data, (error, response) => {
+      if (error) {
+        resolve({ ok: false, message: "Server response timeout" });
+      } else {
+        resolve(response || { ok: true });
+      }
+    });
+  });
+}
+
+/* =========================================
+   CONNECTION
+========================================= */
 
 socket.on("connect", () => {
-  status("Connected");
+  setText("connectionStatus", "Connected");
+
+  if (!USER_ID) {
+    showMessage("User ID nahi mila. Pehle profile se login karein.");
+    return;
+  }
+
+  if (!ROOM_ID) {
+    showMessage("Room ID nahi mili.");
+    return;
+  }
 
   socket.emit("register", {
     userId: USER_ID,
     name: USER_NAME
-  }, result => {
-    if (!result || !result.ok) {
-      status("Registration failed");
+  }, (response) => {
+    if (!response || !response.ok) {
+      showMessage(response?.message || "Registration failed");
       return;
     }
 
-    currentUser = result.user;
-
-    localStorage.setItem("hukaUserId", currentUser.id);
-    localStorage.setItem("hukaName", currentUser.name);
+    if (response.user) {
+      myCoins = Number(response.user.coins || 0);
+      setText("coinBalance", myCoins);
+    }
 
     joinRoom();
   });
 });
 
 socket.on("disconnect", () => {
-  status("Disconnected. Reconnecting...");
+  setText("connectionStatus", "Disconnected");
 });
 
-/* =====================================
+socket.on("connect_error", () => {
+  setText("connectionStatus", "Connection error");
+});
+
+/* =========================================
    JOIN ROOM
-===================================== */
+========================================= */
 
 function joinRoom() {
-  if (!ROOM_ID) {
-    status("Room ID missing");
-    return;
-  }
-
   socket.emit("join-room", {
     roomId: ROOM_ID
-  }, result => {
-    if (!result || !result.ok) {
-      status(result?.error || "Unable to join room");
+  }, (response) => {
+    if (response && response.ok === false) {
+      showMessage(response.message || "Room join nahi hua");
       return;
     }
 
-    currentRoom = result.room;
-
-    status("You joined the room");
-
-    renderMembers(result.members || []);
-
-    socket.emit("get-gifts");
-    socket.emit("get-inbox");
-    socket.emit("voice-existing-peers");
+    setText("roomId", ROOM_ID);
+    setText("roomStatus", "Online");
   });
 }
 
-socket.on("room-joined", result => {
-  if (!result || !result.ok) return;
+/* =========================================
+   ROOM MEMBERS
+========================================= */
 
-  currentRoom = result.room;
-  renderMembers(result.members || []);
+socket.on("members-update", (data) => {
+  if (Array.isArray(data)) {
+    roomMembers = data;
+  } else if (data && Array.isArray(data.members)) {
+    roomMembers = data.members;
+    currentRoom = data;
+    currentSeats = data.seats || {};
+  } else {
+    return;
+  }
+
+  renderMembers();
+  renderSeats();
+  updateGiftReceivers();
 });
 
-/* =====================================
-   ROOM UPDATE
-===================================== */
+socket.on("room-update", (room) => {
+  if (!room) return;
 
-socket.on("members-update", data => {
-  if (!data) return;
+  currentRoom = room;
+  currentSeats = room.seats || currentSeats;
 
-  if (data.room) {
-    currentRoom = data.room;
-  }
+  setText("roomName", room.name || "Huka Voice Room");
+  setText("roomTitle", room.name || "Huka Voice Room");
+  setText("roomOwner", room.ownerName || room.owner || "Room Owner");
+  setText("roomDescription", room.description || "");
 
-  renderMembers(data.members || []);
-
-  const count = $("memberCount");
-
-  if (count) {
-    count.textContent = data.memberCount || 0;
-  }
-
-  const roomName = $("roomName");
-
-  if (roomName && data.room) {
-    roomName.textContent = data.room.name;
-  }
+  renderSeats();
 });
 
-/* =====================================
-   MEMBERS AND SEATS
-===================================== */
-
-function renderMembers(members) {
+function renderMembers() {
   const container = $("members");
-
-  if (container) {
-    container.innerHTML = members.map(member => `
-      <div class="member">
-        ${escapeHTML(member.name)}
-        ${member.role === "owner" ? " 👑" : ""}
-        ${member.role === "admin" ? " 🛡️" : ""}
-      </div>
-    `).join("");
-  }
-
-  renderSeats(members);
-}
-
-function renderSeats(members) {
-  const container = $("seats");
-
   if (!container) return;
-
-  const seatCount =
-    currentRoom?.seats
-      ? Object.keys(currentRoom.seats).length
-      : 9;
-
-  const seats = currentRoom?.seats || {};
 
   container.innerHTML = "";
 
-  for (let i = 1; i <= seatCount; i++) {
-    const userId = seats[i];
-    const member = members.find(
-      item => item.id === userId
-    );
+  setText("memberCount", roomMembers.length);
+  setText("memberCountText", roomMembers.length + " Online");
 
-    const button = document.createElement("button");
+  roomMembers.forEach((member) => {
+    const name = typeof member === "string"
+      ? member
+      : member.name || member.username || "Guest";
 
-    button.className = "seat";
+    const item = document.createElement("div");
+    item.className = "member-item";
 
-    button.innerHTML = member
-      ? `<strong>${escapeHTML(member.name)}</strong>
-         <small>Seat ${i}</small>`
-      : `<strong>🎙️ Empty</strong>
-         <small>Seat ${i}</small>`;
+    const avatar = safeImage(member.avatar);
 
-    button.addEventListener("click", () => {
-      if (member) {
-        if (member.id === currentUser?.id) {
-          leaveSeat();
-        }
-      } else {
-        takeSeat(i);
-      }
-    });
+    item.innerHTML = `
+      <img src="${avatar || "https://placehold.co/80x80/49305f/ffffff?text=H"}"
+           alt="Avatar">
+      <div class="member-name">${escapeHTML(name)}</div>
+      <span class="member-status">Online</span>
+    `;
 
-    container.appendChild(button);
+    container.appendChild(item);
+  });
+
+  if (!roomMembers.length) {
+    container.innerHTML = '<p class="empty-seat">No members yet</p>';
   }
 }
 
-function takeSeat(seat) {
-  socket.emit("take-seat", { seat }, result => {
-    if (!result?.ok) {
-      alert(result?.error || "Unable to take seat");
+function renderSeats() {
+  const container = $("seats");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const seatEntries = Object.entries(currentSeats || {});
+
+  for (let i = 1; i <= currentSeatCount; i++) {
+    const occupant = currentSeats[i] || currentSeats[String(i)];
+
+    const seat = document.createElement("div");
+    seat.className = "seat";
+
+    if (occupant) {
+      const name = typeof occupant === "string"
+        ? occupant
+        : occupant.name || occupant.username || "Member";
+
+      seat.innerHTML = `
+        <div class="seat-number">Seat ${i}</div>
+        <div class="seat-avatar">🎙️</div>
+        <div class="seat-name">${escapeHTML(name)}</div>
+      `;
+    } else {
+      seat.innerHTML = `
+        <div class="seat-number">Seat ${i}</div>
+        <div class="seat-avatar">＋</div>
+        <div class="empty-seat">Empty</div>
+      `;
     }
+
+    seat.addEventListener("click", () => {
+      if (!occupant) takeSeat(i);
+      else showMessage("This seat is already occupied.");
+    });
+
+    container.appendChild(seat);
+  }
+}
+
+/* =========================================
+   SEAT MANAGEMENT
+========================================= */
+
+async function takeSeat(seatNumber) {
+  const response = await emitWithAck("take-seat", {
+    roomId: ROOM_ID,
+    seat: seatNumber
   });
+
+  if (response.ok === false) {
+    showMessage(response.message || "Seat nahi mil saki");
+  }
 }
 
-function leaveSeat() {
-  socket.emit("leave-seat");
+async function leaveSeat() {
+  const response = await emitWithAck("leave-seat", {
+    roomId: ROOM_ID
+  });
+
+  if (response.ok === false) {
+    showMessage(response.message || "Seat leave nahi hui");
+  }
 }
 
-/* =====================================
-   ROOM CHAT
-===================================== */
+document.querySelectorAll("[data-seats]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const count = Number(button.dataset.seats);
 
-function sendMessage() {
+    if (![9, 11, 15, 20].includes(count)) return;
+
+    const response = await emitWithAck("update-room-settings", {
+      roomId: ROOM_ID,
+      seats: count
+    });
+
+    if (response.ok === false) {
+      showMessage(response.message || "Seat settings update nahi hui");
+      return;
+    }
+
+    currentSeatCount = count;
+
+    document.querySelectorAll("[data-seats]").forEach((item) => {
+      item.classList.toggle(item === button ? "active" : "inactive", item === button);
+    });
+
+    renderSeats();
+  });
+});
+
+/* =========================================
+   CHAT
+========================================= */
+
+function addChatMessage(username, message) {
+  const container = $("chatMessages");
+  if (!container) return;
+
+  const item = document.createElement("div");
+  item.className = "chat-message";
+
+  const name = document.createElement("span");
+  name.className = "username";
+  name.textContent = username;
+
+  const text = document.createElement("span");
+  text.textContent = message;
+
+  item.appendChild(name);
+  item.appendChild(text);
+
+  container.appendChild(item);
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendChatMessage() {
   const input = $("chatInput");
-
   if (!input) return;
 
   const message = input.value.trim();
-
   if (!message) return;
 
   socket.emit("room-message", {
-    text: message
+    roomId: ROOM_ID,
+    message
+  }, (response) => {
+    if (response && response.ok === false) {
+      showMessage(response.message || "Message send nahi hua");
+    }
   });
 
   input.value = "";
 }
 
-const sendButton = $("sendMessage");
+$("sendMessage")?.addEventListener("click", sendChatMessage);
 
-if (sendButton) {
-  sendButton.addEventListener("click", sendMessage);
-}
+$("chatInput")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") sendChatMessage();
+});
 
-const chatInput = $("chatInput");
+socket.on("room-message", (data) => {
+  if (!data) return;
 
-if (chatInput) {
-  chatInput.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-      sendMessage();
-    }
+  addChatMessage(
+    data.username || data.name || "Guest",
+    data.message || ""
+  );
+});
+
+/* =========================================
+   CLEAR CHAT
+========================================= */
+
+$("clearChatButton")?.addEventListener("click", () => {
+  if (!confirm("Clear room chat?")) return;
+
+  socket.emit("clear-chat", {
+    roomId: ROOM_ID
   });
-}
-
-socket.on("room-message", message => {
-  const container = $("chatMessages");
-
-  if (!container || !message) return;
-
-  const item = document.createElement("div");
-
-  item.className = "chat-message";
-
-  item.innerHTML = `
-    <strong>${escapeHTML(message.name)}:</strong>
-    ${escapeHTML(message.text)}
-  `;
-
-  container.appendChild(item);
-  container.scrollTop = container.scrollHeight;
 });
 
 socket.on("chat-cleared", () => {
   const container = $("chatMessages");
-
   if (container) container.innerHTML = "";
 });
 
-/* =====================================
+/* =========================================
    EMOJI
-===================================== */
+========================================= */
 
-function sendEmoji(emoji) {
-  socket.emit("send-emoji", { emoji });
+function openEmoji() {
+  if ($("emojiModal")) $("emojiModal").style.display = "flex";
 }
 
-socket.on("emoji-event", data => {
-  const container = $("chatMessages");
+function closeEmoji() {
+  if ($("emojiModal")) $("emojiModal").style.display = "none";
+}
 
-  if (!container) return;
+$("emojiButton")?.addEventListener("click", openEmoji);
+$("closeEmoji")?.addEventListener("click", closeEmoji);
 
-  const item = document.createElement("div");
+$("emojiList")?.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
 
-  item.className = "emoji-event";
+  socket.emit("send-emoji", {
+    roomId: ROOM_ID,
+    emoji: button.textContent
+  });
 
-  item.textContent =
-    data.name + " " + data.emoji;
-
-  container.appendChild(item);
+  closeEmoji();
 });
 
-/* =====================================
-   MIC
-===================================== */
+socket.on("emoji-event", (data) => {
+  if (!data) return;
 
-async function toggleMic() {
-  try {
-    if (!localStream) {
-      localStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false
-      });
+  addChatMessage(
+    data.username || "Guest",
+    data.emoji || "😊"
+  );
+});
+
+/* =========================================
+   MIC BUTTON
+========================================= */
+
+function toggleMic() {
+  isMicOn = !isMicOn;
+
+  const buttons = [$("micButton"), $("bottomMicButton"), $("micBtn")];
+
+  buttons.forEach((button) => {
+    if (button) {
+      button.textContent = isMicOn ? "🎙️" : "🔇";
+      button.classList.toggle("active", isMicOn);
     }
+  });
 
-    micEnabled = !micEnabled;
+  socket.emit("mic-state", {
+    roomId: ROOM_ID,
+    muted: !isMicOn
+  });
 
-    localStream.getAudioTracks().forEach(track => {
-      track.enabled = micEnabled;
-    });
-
-    socket.emit("mic-state", {
-      mic: micEnabled
-    });
-
-    updateMicButton();
-
-  } catch (error) {
-    alert("Microphone permission is required.");
-    console.error(error);
+  if (isMicOn) {
+    showMessage("Mic state ON. Voice calling ke liye WebRTC setup zaroori hai.");
   }
 }
 
-function updateMicButton() {
-  const button =
-    $("micButton") ||
-    $("bottomMicButton") ||
-    $("micBtn");
+$("micButton")?.addEventListener("click", toggleMic);
+$("bottomMicButton")?.addEventListener("click", toggleMic);
+$("micBtn")?.addEventListener("click", toggleMic);
 
-  if (button) {
-    button.textContent = micEnabled
-      ? "🎙️ Mic ON"
-      : "🔇 Mic OFF";
-  }
-}
-
-const micButton =
-  $("micButton") ||
-  $("bottomMicButton") ||
-  $("micBtn");
-
-if (micButton) {
-  micButton.addEventListener("click", toggleMic);
-}
-
-/* =====================================
-   SPEAKER
-===================================== */
+/* =========================================
+   SPEAKER BUTTON
+========================================= */
 
 function toggleSpeaker() {
-  speakerEnabled = !speakerEnabled;
+  isSpeakerOn = !isSpeakerOn;
 
-  document.querySelectorAll("audio").forEach(audio => {
-    audio.muted = !speakerEnabled;
-  });
-
-  const button =
-    $("speakerButton") ||
-    $("speakerBtn");
+  const button = $("speakerButton") || $("speakerBtn");
 
   if (button) {
-    button.textContent = speakerEnabled
-      ? "🔊 Speaker ON"
-      : "🔇 Speaker OFF";
+    button.textContent = isSpeakerOn ? "🔊" : "🔇";
+    button.classList.toggle("active", isSpeakerOn);
   }
 }
 
-const speakerButton =
-  $("speakerButton") ||
-  $("speakerBtn");
+$("speakerButton")?.addEventListener("click", toggleSpeaker);
+$("speakerBtn")?.addEventListener("click", toggleSpeaker);
 
-if (speakerButton) {
-  speakerButton.addEventListener("click", toggleSpeaker);
+/* =========================================
+   GIFT SYSTEM
+========================================= */
+
+function openGift() {
+  if ($("giftModal")) $("giftModal").style.display = "flex";
+
+  socket.emit("get-gifts");
 }
 
-/* =====================================
-   GIFTS
-===================================== */
+function closeGift() {
+  if ($("giftModal")) $("giftModal").style.display = "none";
+}
 
-socket.on("gift-list", data => {
-  renderGifts(data.gifts || []);
-});
+$("giftButton")?.addEventListener("click", openGift);
+$("closeGift")?.addEventListener("click", closeGift);
 
-function renderGifts(gifts) {
+socket.on("gift-list", (gifts) => {
   const container = $("giftList");
-
-  if (!container) return;
+  if (!container || !Array.isArray(gifts)) return;
 
   container.innerHTML = "";
 
-  gifts.forEach(gift => {
-    const button = document.createElement("button");
+  gifts.forEach((gift) => {
+    const item = document.createElement("div");
+    item.className = "gift-item";
 
-    button.innerHTML = `
-      ${gift.emoji}
-      ${escapeHTML(gift.name)}
-      <br>
-      🪙 ${gift.price}
+    const icon = gift.icon || gift.emoji || "🎁";
+    const name = gift.name || "Gift";
+    const price = Number(gift.price || gift.coins || 0);
+
+    item.innerHTML = `
+      <div class="gift-icon">${escapeHTML(icon)}</div>
+      <div class="gift-name">${escapeHTML(name)}</div>
+      <div class="gift-price">🪙 ${price}</div>
+      <button type="button">Send</button>
     `;
 
-    button.addEventListener("click", () => {
-      sendGift(gift.id);
+    item.querySelector("button").addEventListener("click", () => {
+      selectedGift = gift;
+      selectedGiftPrice = price;
+      sendGift();
     });
 
-    container.appendChild(button);
-  });
-}
-
-function sendGift(giftId) {
-  const receiver = $("giftReceiver");
-
-  socket.emit("send-gift", {
-    giftId,
-    receiverId: receiver?.value || currentUser?.id,
-    quantity: 1
-  }, result => {
-    if (!result?.ok) {
-      alert(result?.error || "Gift failed");
-      return;
-    }
-
-    const coins = $("coins");
-
-    if (coins) {
-      coins.textContent = result.coins;
-    }
-  });
-}
-
-socket.on("gift-event", data => {
-  const container = $("chatMessages");
-
-  if (!container) return;
-
-  const item = document.createElement("div");
-
-  item.className = "gift-event";
-
-  item.textContent =
-    `${data.senderName} sent ${data.emoji} ${data.gift} to ${data.receiverName}`;
-
-  container.appendChild(item);
-});
-
-socket.on("coins-update", data => {
-  const coins = $("coins");
-
-  if (coins) coins.textContent = data.coins;
-});
-
-/* =====================================
-   GIFT RANKING
-===================================== */
-
-socket.on("gift-ranking", data => {
-  const container = $("giftRanking");
-
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  (data.ranking || []).forEach((user, index) => {
-    const item = document.createElement("div");
-
-    item.textContent =
-      `${index + 1}. ${user.name} - ${user.coins} coins`;
-
     container.appendChild(item);
   });
 });
 
-/* =====================================
+function updateGiftReceivers() {
+  const select = $("giftReceiver");
+  if (!select) return;
+
+  const oldValue = select.value;
+  select.innerHTML = '<option value="">Select member</option>';
+
+  roomMembers.forEach((member) => {
+    if (typeof member === "string") return;
+
+    const id = member.userId || member.id;
+    const name = member.name || member.username || "Member";
+
+    if (!id || id === USER_ID) return;
+
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+
+  if (oldValue) select.value = oldValue;
+}
+
+async function sendGift() {
+  if (!selectedGift) return;
+
+  const receiver = $("giftReceiver")?.value;
+
+  if (!receiver) {
+    showMessage("Pehle gift receiver select karein.");
+    return;
+  }
+
+  if (myCoins < selectedGiftPrice) {
+    showMessage("Aapke paas enough coins nahi hain.");
+    return;
+  }
+
+  const response = await emitWithAck("send-gift", {
+    roomId: ROOM_ID,
+    receiverId: receiver,
+    giftId: selectedGift.id,
+    quantity: 1
+  });
+
+  if (response.ok === false) {
+    showMessage(response.message || "Gift send nahi hua");
+    return;
+  }
+
+  if (response.coins !== undefined) {
+    myCoins = Number(response.coins);
+    setText("coinBalance", myCoins);
+  }
+
+  closeGift();
+}
+
+socket.on("gift-event", (data) => {
+  if (!data) return;
+
+  addChatMessage(
+    "🎁 " + (data.senderName || data.username || "Member"),
+    "sent a gift: " + (data.giftName || "Gift")
+  );
+});
+
+/* =========================================
+   GIFT RANKING
+========================================= */
+
+socket.on("gift-ranking", (ranking) => {
+  const container = $("giftRanking");
+  if (!container || !Array.isArray(ranking)) return;
+
+  container.innerHTML = "";
+
+  ranking.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "ranking-item";
+
+    row.textContent =
+      `${index + 1}. ${item.name || "Member"} — ${item.coins || 0} coins`;
+
+    container.appendChild(row);
+  });
+});
+
+/* =========================================
    INBOX
-===================================== */
+========================================= */
 
 function openInbox() {
+  if ($("inboxModal")) $("inboxModal").style.display = "flex";
+
   socket.emit("get-inbox");
-  showModal("inboxModal");
 }
 
-socket.on("inbox-messages", data => {
-  const container = $("inboxMessages");
+function closeInbox() {
+  if ($("inboxModal")) $("inboxModal").style.display = "none";
+}
 
+$("inboxButton")?.addEventListener("click", openInbox);
+$("inboxBottomButton")?.addEventListener("click", openInbox);
+$("closeInbox")?.addEventListener("click", closeInbox);
+
+socket.on("inbox-messages", (messages) => {
+  const container = $("inboxMessages");
   if (!container) return;
 
   container.innerHTML = "";
 
-  (data.messages || []).forEach(message => {
-    const item = document.createElement("div");
+  if (!Array.isArray(messages) || !messages.length) {
+    container.textContent = "No messages";
+    return;
+  }
 
+  messages.forEach((message) => {
+    const item = document.createElement("div");
+    item.className = "inbox-message";
     item.textContent =
-      `${message.senderName}: ${message.message}`;
+      `${message.fromName || "Member"}: ${message.message || ""}`;
 
     container.appendChild(item);
   });
 });
 
-/* =====================================
-   MODALS
-===================================== */
+/* =========================================
+   YOUTUBE LINK SHARING
+========================================= */
 
-function showModal(id) {
-  const modal = $(id);
+$("youtubeButton")?.addEventListener("click", () => {
+  $("youtubeInput")?.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
 
-  if (modal) {
-    modal.style.display = "flex";
-  }
-}
+  $("youtubeInput")?.focus();
+});
 
-function hideModal(id) {
-  const modal = $(id);
-
-  if (modal) {
-    modal.style.display = "none";
-  }
-}
-
-/* =====================================
-   YOUTUBE
-===================================== */
-
-function shareYoutube() {
+$("shareYoutubeButton")?.addEventListener("click", () => {
   const input = $("youtubeInput");
-
   if (!input) return;
 
-  const url = input.value.trim();
+  const link = input.value.trim();
 
-  if (!url) return;
+  let url;
 
-  socket.emit("share-youtube", { url });
+  try {
+    url = new URL(link);
+  } catch {
+    showMessage("Valid YouTube link enter karein.");
+    return;
+  }
+
+  const allowed =
+    url.hostname === "youtube.com" ||
+    url.hostname === "www.youtube.com" ||
+    url.hostname === "youtu.be" ||
+    url.hostname === "m.youtube.com";
+
+  if (!allowed) {
+    showMessage("Sirf YouTube link share karein.");
+    return;
+  }
+
+  socket.emit("share-youtube", {
+    roomId: ROOM_ID,
+    url: url.href
+  });
 
   input.value = "";
-}
+});
 
-socket.on("youtube-shared", data => {
+socket.on("youtube-shared", (data) => {
+  if (!data || !data.url) return;
+
   const container = $("youtubeLinks");
-
   if (!container) return;
 
   const link = document.createElement("a");
-
   link.href = data.url;
   link.target = "_blank";
   link.rel = "noopener noreferrer";
-  link.textContent = data.name + " shared YouTube";
+  link.textContent = "▶️ Open YouTube Link";
 
-  container.appendChild(link);
+  const row = document.createElement("p");
+  row.appendChild(link);
+  container.appendChild(row);
 });
 
-/* =====================================
-   ADMIN
-===================================== */
-
-function clearChat() {
-  socket.emit("clear-chat");
-}
-
-function kickMember(userId) {
-  socket.emit("kick-member", { userId });
-}
-
-function addAdmin(userId) {
-  socket.emit("add-room-admin", { userId });
-}
-
-function removeAdmin(userId) {
-  socket.emit("remove-room-admin", { userId });
-}
-
-function forceMute(userId) {
-  socket.emit("force-mute", { userId });
-}
-
-/* =====================================
+/* =========================================
    ROOM SETTINGS
-===================================== */
+========================================= */
 
-function saveRoomSettings() {
+$("saveRoomSettings")?.addEventListener("click", () => {
+  const name = $("settingRoomName")?.value.trim();
+  const description = $("settingDescription")?.value.trim();
+
+  const locked = Boolean($("roomLocked")?.checked);
+  const youtubeAllowed = Boolean($("youtubeAllowed")?.checked);
+
   socket.emit("update-room-settings", {
-    name: $("settingRoomName")?.value,
-    description: $("settingDescription")?.value,
-    locked: $("roomLocked")?.checked,
-    youtubeAllowed: $("youtubeAllowed")?.checked
-  }, result => {
-    if (!result?.ok) {
-      alert(result?.error || "Settings not saved");
-    } else {
-      alert("Room settings saved");
+    roomId: ROOM_ID,
+    name,
+    description,
+    locked,
+    youtubeAllowed
+  }, (response) => {
+    if (response && response.ok === false) {
+      showMessage(response.message || "Settings save nahi hui");
+      return;
     }
+
+    showMessage("Room settings update request sent.");
   });
-}
+});
 
-/* =====================================
-   WEBRTC
-===================================== */
+/* =========================================
+   ADMIN BUTTONS
+========================================= */
 
-function createPeerConnection(userId) {
-  if (peerConnections[userId]) {
-    return peerConnections[userId];
-  }
+$("addAdminButton")?.addEventListener("click", () => {
+  const userId = $("adminUserId")?.value.trim();
+  if (!userId) return showMessage("User ID enter karein.");
 
-  const pc = new RTCPeerConnection(ICE_SERVERS);
+  socket.emit("add-room-admin", {
+    roomId: ROOM_ID,
+    userId
+  });
+});
 
-  peerConnections[userId] = pc;
+$("removeAdminButton")?.addEventListener("click", () => {
+  const userId = $("adminUserId")?.value.trim();
+  if (!userId) return showMessage("User ID enter karein.");
 
-  if (localStream) {
-    localStream.getTracks().forEach(track => {
-      pc.addTrack(track, localStream);
-    });
-  }
+  socket.emit("remove-room-admin", {
+    roomId: ROOM_ID,
+    userId
+  });
+});
 
-  pc.onicecandidate = event => {
-    if (event.candidate) {
-      socket.emit("voice-ice", {
-        candidate: event.candidate
-      });
-    }
-  };
+$("kickMemberButton")?.addEventListener("click", () => {
+  const userId = $("adminUserId")?.value.trim();
+  if (!userId) return showMessage("User ID enter karein.");
 
-  pc.ontrack = event => {
-    let audio = $("audio-" + userId);
+  socket.emit("kick-member", {
+    roomId: ROOM_ID,
+    userId
+  });
+});
 
-    if (!audio) {
-      audio = document.createElement("audio");
-      audio.id = "audio-" + userId;
-      audio.autoplay = true;
-      document.body.appendChild(audio);
-    }
+$("forceMuteButton")?.addEventListener("click", () => {
+  const userId = $("adminUserId")?.value.trim();
+  if (!userId) return showMessage("User ID enter karein.");
 
-    audio.srcObject = event.streams[0];
-    audio.muted = !speakerEnabled;
-  };
+  socket.emit("force-mute", {
+    roomId: ROOM_ID,
+    userId
+  });
+});
 
-  return pc;
-}
+socket.on("admin-status", (data) => {
+  isAdmin = Boolean(data && data.isAdmin);
 
-socket.on("voice-existing-peers", async peers => {
-  for (const userId of peers) {
-    await createOffer(userId);
+  if ($("adminPanel")) {
+    $("adminPanel").style.display = isAdmin ? "block" : "none";
   }
 });
 
-socket.on("voice-peer-joined", async data => {
-  if (!data?.userId) return;
-
-  await createOffer(data.userId);
-});
-
-async function createOffer(userId) {
-  try {
-    const pc = createPeerConnection(userId);
-
-    const offer = await pc.createOffer();
-
-    await pc.setLocalDescription(offer);
-
-    socket.emit("voice-offer", {
-      offer
-    });
-
-  } catch (error) {
-    console.error("Offer error:", error);
-  }
-}
-
-socket.on("voice-offer", async data => {
-  try {
-    const userId = data.userId || data.from;
-
-    if (!userId || !data.offer) return;
-
-    const pc = createPeerConnection(userId);
-
-    await pc.setRemoteDescription(
-      new RTCSessionDescription(data.offer)
-    );
-
-    const answer = await pc.createAnswer();
-
-    await pc.setLocalDescription(answer);
-
-    socket.emit("voice-answer", {
-      answer
-    });
-
-  } catch (error) {
-    console.error("Answer error:", error);
-  }
-});
-
-socket.on("voice-answer", async data => {
-  try {
-    const userId = data.userId || data.from;
-
-    if (!userId || !data.answer) return;
-
-    const pc = peerConnections[userId];
-
-    if (pc) {
-      await pc.setRemoteDescription(
-        new RTCSessionDescription(data.answer)
-      );
-    }
-
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-socket.on("voice-ice", async data => {
-  try {
-    const userId = data.userId || data.from;
-
-    if (!userId || !data.candidate) return;
-
-    const pc = peerConnections[userId];
-
-    if (pc) {
-      await pc.addIceCandidate(
-        new RTCIceCandidate(data.candidate)
-      );
-    }
-
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-socket.on("voice-peer-left", data => {
-  const pc = peerConnections[data.userId];
-
-  if (pc) {
-    pc.close();
-    delete peerConnections[data.userId];
-  }
-
-  const audio = $("audio-" + data.userId);
-
-  if (audio) audio.remove();
-});
-
-/* =====================================
-   KICKED
-===================================== */
-
-socket.on("kicked-from-room", data => {
-  alert(data.message || "Removed from room");
-
-  location.href = "index.html";
-});
-
-/* =====================================
+/* =========================================
    LEAVE ROOM
-===================================== */
+========================================= */
 
-function leaveRoom() {
-  socket.emit("leave-room", () => {
+async function leaveRoom() {
+  if (!confirm("Kya aap room se bahar jana chahte hain?")) return;
+
+  socket.emit("leave-room", {
+    roomId: ROOM_ID
+  }, () => {
     location.href = "index.html";
   });
+
+  setTimeout(() => {
+    location.href = "index.html";
+  }, 1500);
 }
 
-window.addEventListener("beforeunload", () => {
-  socket.emit("leave-room");
-});
+$("leaveRoom")?.addEventListener("click", leaveRoom);
 
-/* =====================================
-   BUTTON CONNECTIONS
-===================================== */
+/* =========================================
+   INITIAL PAGE SETUP
+========================================= */
 
-const clearButton = $("clearChatButton");
+setText("roomId", ROOM_ID);
+setText("roomName", "Huka Voice Room");
+setText("roomTitle", "🎙️ Huka Voice Room");
 
-if (clearButton) {
-  clearButton.addEventListener("click", clearChat);
+if (!ROOM_ID) {
+  setText("roomStatus", "Room ID missing");
 }
 
-const inboxButton = $("inboxButton");
-
-if (inboxButton) {
-  inboxButton.addEventListener("click", openInbox);
-}
-
-const youtubeButton = $("youtubeButton");
-
-if (youtubeButton) {
-  youtubeButton.addEventListener("click", shareYoutube);
-}
-
-const settingsButton = $("saveRoomSettings");
-
-if (settingsButton) {
-  settingsButton.addEventListener("click", saveRoomSettings);
-}
-
-const leaveButton = $("leaveRoom");
-
-if (leaveButton) {
-  leaveButton.addEventListener("click", leaveRoom);
-}
-
-/* =====================================
-   GLOBAL FUNCTIONS
-===================================== */
-
-window.sendEmoji = sendEmoji;
-window.sendGift = sendGift;
-window.takeSeat = takeSeat;
-window.leaveSeat = leaveSeat;
-window.openInbox = openInbox;
-window.showModal = showModal;
-window.hideModal = hideModal;
-window.leaveRoom = leaveRoom;
-window.clearChat = clearChat;
-window.shareYoutube = shareYoutube;
-window.toggleMic = toggleMic;
-window.toggleSpeaker = toggleSpeaker;
-window.kickMember = kickMember;
-window.addAdmin = addAdmin;
-window.removeAdmin = removeAdmin;
-window.forceMute = forceMute;
-window.saveRoomSettings = saveRoomSettings;
+console.log("Huka Voice Chat Room JS Loaded");
