@@ -1556,6 +1556,11 @@ async function loadFrames() {
     const ownedFrames = result.ownedFrames || [];
     const activeFrame = result.activeFrame || "frame_free";
 
+    if (profile) {
+    profile.activeFrame = activeFrame;
+    renderProfile();
+    }
+  
     currentFrames = (result.frames || []).map(frame => ({
         ...frame,
         owned: ownedFrames.includes(frame.id),
