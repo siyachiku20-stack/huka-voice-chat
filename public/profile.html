@@ -1196,10 +1196,7 @@ async function saveProfile() {
         updates.avatar = selectedAvatar;
     }
 
-    const result = await emitRequest("profile-update", {
-        userId: getUserId(),
-        updates: updates
-    });
+    const result = await emitRequest("profile-update", updates);
 
     if (isSuccess(result)) {
         profile = result.profile || result.user || {
