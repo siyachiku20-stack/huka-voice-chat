@@ -56,7 +56,9 @@ let db = {
   nextUserId: 100001,
   nextRoomId: 100001,
   profiles: {},
-  inbox: {}
+  inbox: {},
+  families: {},
+  cdKeys: { HUKA100: { reward: 100000, usedBy: [] } }
 };
 
 try {
@@ -69,7 +71,9 @@ try {
       ...db,
       ...saved,
       profiles: saved.profiles || {},
-      inbox: saved.inbox || {}
+      inbox: saved.inbox || {},
+      families: saved.families || {},
+      cdKeys: saved.cdKeys || { HUKA100: { reward: 100000, usedBy: [] } }
     };
   }
 } catch (error) {
@@ -338,6 +342,24 @@ function getProfile(socket) {
   return user ? db.profiles[user.id] : null;
 }
 
+function addWalletHistory(profile, type, amount, note) {
+  profile.walletHistory ||= [];
+  profile.walletHistory.unshift({
+    id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    type: clean(type, 30),
+    amount: Number(amount) || 0,
+    note: clean(note, 100),
+    date: Date.now()
+  });
+  profile.walletHistory = profile.walletHistory.slice(0, 100);
+}
+
+function updateLevel(profile) {
+  const earned = Math.max(0, Number(profile.totalExperience) || 0);
+  profile.level = Math.max(1, Math.floor(Math.sqrt(earned / 100)) + 1);
+  return profile.level;
+     }
+
 function getRoom(socket) {
   return rooms.get(socket.data.roomId) || null;
 }
@@ -593,6 +615,13 @@ io.on("connection", socket => {
         diamonds: 0,
         level: 1,
         totalGifts: 0,
+        totalExperience: 0,
+        walletHistory: [],
+        svipUntil: 0,
+        medals: [],
+        familyId: "",
+        redeemedKeys: [],
+        feedback: [],
         frame: "frame_free",
         ownedFrames: ["frame_free"],
         following: [],
@@ -612,6 +641,13 @@ io.on("connection", socket => {
       profile.taskProgress ||= {};
       profile.claimedTasks ||= [];
       profile.dailyRewardDate ||= "";
+      profile.totalExperience = Number(profile.totalExperience) || 0;
+      profile.walletHistory ||= [];
+      profile.svipUntil = Number(profile.svipUntil) || 0;
+      profile.medals ||= [];
+      profile.familyId ||= "";
+      profile.redeemedKeys ||= [];
+      profile.feedback ||= [];
     }
 
     socket.data.userId = id;
@@ -667,6 +703,9 @@ io.on("connection", socket => {
 
     // Do not expose private information.
     delete result.taskProgress;
+    delete result.walletHistory;
+    delete result.feedback;
+    delete result.redeemedKeys;
 
     reply(callback, {
       ok: true,
@@ -798,7 +837,7 @@ io.on("connection", socket => {
     const frame = FRAMES.find(item => item.id === data?.frameId);
 
     if (!frame) {
-             return reply(callback, {
+      return reply(callback, {
         ok: false,
         message: "Frame not found"
       });
@@ -821,6 +860,7 @@ io.on("connection", socket => {
     }
 
     profile.coins -= frame.price;
+    addWalletHistory(profile, "purchase", -frame.price, `Bought ${frame.name}`);
     profile.ownedFrames.push(frame.id);
 
     user.coins = profile.coins;
@@ -866,9 +906,9 @@ io.on("connection", socket => {
 
   /* =======================================
      ROOM TASKS
-  ======================================= */
-
-  socket.on("get-room-tasks", callback => {
+  ======================================= */ 
+    
+   socket.on("get-room-tasks", callback => {
     const user = getUser(socket);
     const profile = getProfile(socket);
 
@@ -981,6 +1021,7 @@ io.on("connection", socket => {
     profile.coins = (Number(profile.coins) || 0) +
       DAILY_REWARD_COINS;
     profile.dailyRewardDate = today;
+    addWalletHistory(profile, "reward", DAILY_REWARD_COINS, "Daily login reward");
     user.coins = profile.coins;
 
     saveDB();
@@ -1076,7 +1117,7 @@ io.on("connection", socket => {
 
     reply(callback, {
       ok: true,
-      id,
+             id,
       seats: seatCount
     });
 
@@ -1123,6 +1164,9 @@ io.on("connection", socket => {
     room.members.add(socket.id);
     room.micStates.set(socket.id, true);
 
+    const joinedProfile = db.profiles[user.id];
+    joinedProfile.roomJoins = (Number(joinedProfile.roomJoins) || 0) + 1;
+    saveDB();
     completeTask(user.id, "join_room");
 
     reply(callback, {
@@ -1199,7 +1243,8 @@ io.on("connection", socket => {
         message: "Seat is occupied"
       });
     }
-        removeFromSeat(room, socket.id);
+
+    removeFromSeat(room, socket.id);
 
     room.seats[index] = {
       socketId: socket.id,
@@ -1253,7 +1298,7 @@ io.on("connection", socket => {
       });
     }
 
-    const message = {
+      const message = {
       username: user.name,
       name: user.name,
       userId: user.id,
@@ -1407,6 +1452,7 @@ io.on("connection", socket => {
     }
 
     profile.coins -= totalCost;
+    addWalletHistory(profile, "gift", -totalCost, `Sent ${quantity} x ${gift.name}`);
 
     if (receiver) {
       receiver.diamonds =
@@ -1414,6 +1460,17 @@ io.on("connection", socket => {
 
       receiver.totalGifts =
         (Number(receiver.totalGifts) || 0) + quantity;
+
+      receiver.walletHistory ||= [];
+      receiver.walletHistory.unshift({
+        id: `gift_${Date.now()}`,
+        type: "gift",
+        amount: totalCost,
+        note: `Received ${quantity} x ${gift.name} (Diamonds)`,
+        date: Date.now()
+      });
+
+      receiver.walletHistory = receiver.walletHistory.slice(0, 100);
     }
 
     user.coins = profile.coins;
@@ -1468,9 +1525,9 @@ io.on("connection", socket => {
 
   /* =======================================
      MIC STATE
-  ======================================= */
+  ======================================= */    
 
-  socket.on("mic-state", (data, callback) => {
+    socket.on("mic-state", (data, callback) => {
     const room = getRoom(socket);
     const user = getUser(socket);
 
@@ -1597,39 +1654,7 @@ io.on("connection", socket => {
     const targetId = clean(data?.userId, 20);
 
     if (!room || !isAdmin(room, user)) {
-
-  /* =======================================
-     MIC CONTROL
-  ======================================= */
-
-  socket.on("toggle-mic", (data, callback) => {
-    const room = getRoom(socket);
-
-    if (!room || !isMember(room, socket)) {
-      return reply(callback, { ok: false });
-    }
-
-    const current = room.micStates.get(socket.id) !== false;
-    const micOn = data?.micOn === undefined
-      ? !current
-      : Boolean(data.micOn);
-
-    room.micStates.set(socket.id, micOn);
-
-    io.to(room.id).emit("mic-update", {
-      socketId: socket.id,
-      micOn
-    });
-
-    updateRoom(room);
-
-    reply(callback, {
-      ok: true,
-      micOn
-    });
-  });
-
-          return reply(callback, {
+      return reply(callback, {
         ok: false,
         message: "Permission denied"
       });
@@ -1666,6 +1691,40 @@ io.on("connection", socket => {
     reply(callback, {
       ok: found,
       message: found ? "Member removed" : "Member not found"
+    });
+  });
+
+  /* =======================================
+     MIC CONTROL
+  ======================================= */
+
+  socket.on("toggle-mic", (data, callback) => {
+    const room = getRoom(socket);
+
+    if (!room || !isMember(room, socket)) {
+      return reply(callback, {
+        ok: false,
+        message: "Join a room first"
+      });
+    }
+
+    const current = room.micStates.get(socket.id) !== false;
+    const micOn = data?.micOn === undefined
+      ? !current
+      : Boolean(data.micOn);
+
+    room.micStates.set(socket.id, micOn);
+
+    io.to(room.id).emit("mic-update", {
+      socketId: socket.id,
+      micOn
+    });
+
+    updateRoom(room);
+
+    reply(callback, {
+      ok: true,
+      micOn
     });
   });
 
@@ -1709,9 +1768,9 @@ io.on("connection", socket => {
 
     if (data.allowYoutube !== undefined) {
       room.settings.allowYoutube = Boolean(data.allowYoutube);
-    }
+  } 
 
-    if (data.seats !== undefined) {
+        if (data.seats !== undefined) {
       if (!isOwner(room, user)) {
         return reply(callback, {
           ok: false,
@@ -1884,12 +1943,13 @@ io.on("connection", socket => {
       }
     }
 
-    socket.emit("dm-sent", message);
+    reply(callback, {
+      ok: true,
+      message
+    });
+  }); 
 
-    reply(callback, { ok: true });
-  });
-
-  /* =======================================
+     /* =======================================
      WEBRTC SIGNALING
   ======================================= */
 
@@ -1951,6 +2011,113 @@ io.on("connection", socket => {
   });
 
   /* =======================================
+     PROFILE EXTRAS: WALLET / SVIP / MEDALS / FAMILY / CD KEY
+  ======================================= */
+
+  socket.on("get-wallet-history", callback => {
+    const profile = getProfile(socket);
+    if (!profile) return reply(callback, { ok: false, message: "Register first" });
+    reply(callback, { ok: true, coins: Number(profile.coins) || 0, diamonds: Number(profile.diamonds) || 0, history: profile.walletHistory || [] });
+  });
+
+  socket.on("get-svip", callback => {
+    const profile = getProfile(socket);
+    if (!profile) return reply(callback, { ok: false, message: "Register first" });
+    reply(callback, { ok: true, active: Number(profile.svipUntil) > Date.now(), until: Number(profile.svipUntil) || 0, coins: Number(profile.coins) || 0, plans: [{ id: "svip7", name: "SVIP 7 Days", days: 7, price: 500000 }, { id: "svip30", name: "SVIP 30 Days", days: 30, price: 1500000 }] });
+  });
+
+  socket.on("buy-svip", (data, callback) => {
+    const profile = getProfile(socket);
+    const user = getUser(socket);
+    if (!profile || !user) return reply(callback, { ok: false, message: "Register first" });
+    const plans = { svip7: { days: 7, price: 500000, name: "SVIP 7 Days" }, svip30: { days: 30, price: 1500000, name: "SVIP 30 Days" } };
+    const plan = plans[clean(data?.planId, 20)];
+    if (!plan) return reply(callback, { ok: false, message: "Invalid SVIP plan" });
+    if ((Number(profile.coins) || 0) < plan.price) return reply(callback, { ok: false, message: "Not enough virtual Coins" });
+    profile.coins -= plan.price;
+    const start = Math.max(Date.now(), Number(profile.svipUntil) || 0);
+    profile.svipUntil = start + plan.days * 86400000;
+    addWalletHistory(profile, "purchase", -plan.price, `Bought ${plan.name}`);
+    user.coins = profile.coins;
+    saveDB();
+    socket.emit("profile-update", { id: user.id, coins: profile.coins, svipUntil: profile.svipUntil });
+    reply(callback, { ok: true, coins: profile.coins, until: profile.svipUntil });
+  });
+
+  socket.on("get-medals", callback => {
+    const p = getProfile(socket);
+    if (!p) return reply(callback, { ok: false });
+    const medals = [
+      { id: "first_room", name: "Room Explorer", icon: "🎙️", description: "Join a voice room", earned: (p.roomJoins || 0) > 0 },
+      { id: "gifter", name: "Gift Sender", icon: "🎁", description: "Send a gift", earned: (p.totalGifts || 0) > 0 },
+      { id: "svip", name: "SVIP Member", icon: "👑", description: "Have an active SVIP membership", earned: (p.svipUntil || 0) > Date.now() }
+    ];
+    reply(callback, { ok: true, medals });
+  });
+
+  socket.on("get-family", callback => {
+    const p = getProfile(socket);
+    if (!p) return reply(callback, { ok: false });
+    const family = p.familyId ? db.families[p.familyId] : null;
+    reply(callback, { ok: true, family: family ? { id: family.id, name: family.name, code: family.code, members: family.members.length } : null });
+  });
+
+  socket.on("create-family", (data, callback) => {
+    const p = getProfile(socket); const u = getUser(socket);
+    if (!p || !u) return reply(callback, { ok: false, message: "Register first" });
+    if (p.familyId && db.families[p.familyId]) return reply(callback, { ok: false, message: "Leave your current family first" });
+    const name = clean(data?.name, 30);
+    if (name.length < 3) return reply(callback, { ok: false, message: "Family name must be at least 3 characters" });
+    const id = `F${Date.now().toString().slice(-8)}`;
+    const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+    db.families[id] = { id, name, code, ownerId: u.id, members: [u.id], createdAt: Date.now() };
+    p.familyId = id; saveDB();
+    reply(callback, { ok: true, family: { id, name, code, members: 1 } });
+  });
+
+  socket.on("join-family", (data, callback) => {
+    const p = getProfile(socket); const code = clean(data?.code, 12).toUpperCase();
+    if (!p) return reply(callback, { ok: false, message: "Register first" });
+    if (p.familyId && db.families[p.familyId]) return reply(callback, { ok: false, message: "You are already in a family" });
+    const family = Object.values(db.families).find(f => f.code === code);
+    if (!family) return reply(callback, { ok: false, message: "Family code not found" });
+    if (family.members.length >= 50) return reply(callback, { ok: false, message: "Family is full" });
+    family.members.push(getUser(socket).id); p.familyId = family.id; saveDB();
+    reply(callback, { ok: true, family: { id: family.id, name: family.name, code: family.code, members: family.members.length } });
+  });
+
+  socket.on("leave-family", callback => {
+    const p = getProfile(socket); const u = getUser(socket);
+    if (!p || !u || !p.familyId) return reply(callback, { ok: false, message: "You are not in a family" });
+    const f = db.families[p.familyId];
+    if (f) { f.members = f.members.filter(id => id !== u.id); if (!f.members.length) delete db.families[f.id]; else if (f.ownerId === u.id) f.ownerId = f.members[0]; }
+    p.familyId = ""; saveDB(); reply(callback, { ok: true });
+  });
+
+  socket.on("redeem-cdkey", (data, callback) => {
+    const p = getProfile(socket); const u = getUser(socket);
+    if (!p || !u) return reply(callback, { ok: false, message: "Register first" });
+    const code = clean(data?.code, 30).toUpperCase(); const key = db.cdKeys[code];
+    if (!key) return reply(callback, { ok: false, message: "Invalid CD-KEY" });
+    key.usedBy ||= []; p.redeemedKeys ||= [];
+    if (key.usedBy.includes(u.id) || p.redeemedKeys.includes(code)) return reply(callback, { ok: false, message: "This key has already been used" });
+    const reward = Math.max(0, Number(key.reward) || 0);
+    key.usedBy.push(u.id); p.redeemedKeys.push(code); p.coins = (Number(p.coins) || 0) + reward; u.coins = p.coins;
+    addWalletHistory(p, "reward", reward, `CD-KEY ${code}`); saveDB();
+    socket.emit("profile-update", { id: u.id, coins: p.coins });
+    reply(callback, { ok: true, reward, coins: p.coins, message: `You received ${reward.toLocaleString()} Coins` });
+  });
+
+  socket.on("send-profile-feedback", (data, callback) => {
+    const p = getProfile(socket); const u = getUser(socket);
+    if (!p || !u) return reply(callback, { ok: false, message: "Register first" });
+    const message = clean(data?.message, 500);
+    if (message.length < 5) return reply(callback, { ok: false, message: "Please enter at least 5 characters" });
+    p.feedback ||= []; p.feedback.unshift({ message, date: Date.now() }); p.feedback = p.feedback.slice(0, 20); saveDB();
+    reply(callback, { ok: true, message: "Feedback submitted" });
+  });
+
+  /* =======================================
      DISCONNECT
   ======================================= */
 
@@ -1975,4 +2142,4 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log("Gifts:", GIFTS.length);
   console.log("Frames:", FRAMES.length);
   console.log("=================================");
-}); 
+});   
