@@ -1079,8 +1079,32 @@ fetch('/api/config')
   })
   .catch(() => {});
 
-socket.on('connect', loadProfile);
+function registerAndLoadProfile() {
+  const savedId = localStorage.getItem('hukaUserId') || '';
+  const savedName = localStorage.getItem('hukaName') || 'Huka User';
 
+  if (!savedId) {
+    toast('Please open Home first.');
+    return;
+  }
+
+  socket.emit('register', {
+    name: savedName,
+    userId: savedId
+  }, result => {
+    if (!result || !result.ok || !result.user) {
+      toast(result?.message || 'Registration failed. Please try again.');
+      return;
+    }
+
+    localStorage.setItem('hukaUserId', result.user.id);
+    localStorage.setItem('hukaName', result.user.name || savedName);
+
+    loadProfile();
+  });
+}
+
+socket.on('connect', registerAndLoadProfile);
 socket.on('profile-update', data => {
   if (!profile || !data) return;
 
