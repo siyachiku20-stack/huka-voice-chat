@@ -41,6 +41,13 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/api/config", (req, res) => {
+  res.json({
+    ok: true,
+    managerUrl: process.env.MANAGER_URL || ""
+  });
+});
+
 /* =========================================
    DATABASE
 ========================================= */
@@ -296,6 +303,26 @@ function clean(value, max = 100) {
     .slice(0, max);
 }
 
+function getIndiaDate() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts
+      .filter(part => part.type !== "literal")
+      .map(part => [part.type, part.value])
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+const WELCOME_REWARD_COINS = 10000000;
+const DAILY_REWARD_COINS = 1000000;
+
 function reply(callback, data) {
   if (typeof callback === "function") {
     callback(data);
@@ -376,8 +403,8 @@ function getRoomList() {
     owner: room.ownerName,
     ownerId: room.ownerId,
     members: room.members.size,
-    seats: room.seats.length,
-    locked: room.settings.locked
+    seats: room.seatCount,
+    locked: room.locked
   }));
 }
 
@@ -549,9 +576,11 @@ io.on("connection", socket => {
 
     let id = requestedId;
     let profile = db.profiles[id];
+    let isNewUser = false;
 
     if (!profile) {
       id = String(db.nextUserId++);
+      isNewUser = true;
 
       profile = {
         id,
@@ -560,7 +589,7 @@ io.on("connection", socket => {
         bio: "",
         country: "",
         gender: "",
-        coins: 1000,
+        coins: WELCOME_REWARD_COINS,
         diamonds: 0,
         level: 1,
         totalGifts: 0,
@@ -569,16 +598,20 @@ io.on("connection", socket => {
         following: [],
         taskProgress: {},
         claimedTasks: [],
+        dailyRewardDate: "",
         createdAt: Date.now()
       };
 
       db.profiles[id] = profile;
     } else {
       profile.name = name;
+      profile.coins = Number(profile.coins) || 0;
+      profile.diamonds = Number(profile.diamonds) || 0;
       profile.ownedFrames ||= ["frame_free"];
       profile.following ||= [];
       profile.taskProgress ||= {};
       profile.claimedTasks ||= [];
+      profile.dailyRewardDate ||= "";
     }
 
     socket.data.userId = id;
@@ -594,11 +627,12 @@ io.on("connection", socket => {
     };
 
     online.set(socket.id, user);
-
     saveDB();
 
     reply(callback, {
       ok: true,
+      isNewUser,
+      welcomeReward: isNewUser ? WELCOME_REWARD_COINS : 0,
       user
     });
 
@@ -764,7 +798,7 @@ io.on("connection", socket => {
     const frame = FRAMES.find(item => item.id === data?.frameId);
 
     if (!frame) {
-      return reply(callback, {
+             return reply(callback, {
         ok: false,
         message: "Frame not found"
       });
@@ -884,15 +918,109 @@ io.on("connection", socket => {
   });
 
   /* =======================================
+     DAILY LOGIN REWARD
+     10 lakh virtual coins, once per India day
+  ======================================= */
+
+  socket.on("get-daily-tasks", callback => {
+    const user = getUser(socket);
+    const profile = getProfile(socket);
+
+    if (!user || !profile) {
+      return reply(callback, {
+        ok: false,
+        message: "Register first"
+      });
+    }
+
+    const today = getIndiaDate();
+    const claimed = profile.dailyRewardDate === today;
+
+    reply(callback, {
+      ok: true,
+      tasks: [
+        {
+          id: "daily_login",
+          name: "Daily Login Reward",
+          description: "Claim your daily login reward",
+          reward: DAILY_REWARD_COINS,
+          completed: claimed,
+          claimed
+        }
+      ],
+      coins: Number(profile.coins) || 0,
+      canClaim: !claimed,
+      reward: DAILY_REWARD_COINS,
+      date: today,
+      nextReset: "12:00 AM India Time"
+    });
+  });
+
+  socket.on("claim-daily-task", (data, callback) => {
+    const user = getUser(socket);
+    const profile = getProfile(socket);
+
+    if (!user || !profile) {
+      return reply(callback, {
+        ok: false,
+        message: "Register first"
+      });
+    }
+
+    const today = getIndiaDate();
+
+    if (profile.dailyRewardDate === today) {
+      return reply(callback, {
+        ok: false,
+        message: "Today's reward has already been claimed",
+        coins: Number(profile.coins) || 0,
+        claimed: true
+      });
+    }
+
+    profile.coins = (Number(profile.coins) || 0) +
+      DAILY_REWARD_COINS;
+    profile.dailyRewardDate = today;
+    user.coins = profile.coins;
+
+    saveDB();
+
+    const result = {
+      ok: true,
+      reward: DAILY_REWARD_COINS,
+      coins: profile.coins,
+      claimed: true,
+      date: today
+    };
+
+    socket.emit("profile-update", {
+      id: user.id,
+      coins: profile.coins
+    });
+
+    reply(callback, result);
+  });
+
+  /* =======================================
      ROOM LIST
   ======================================= */
 
-  socket.on("get-rooms", () => {
-    socket.emit("room-list", getRoomList());
+  socket.on("get-rooms", (data, callback) => {
+    const roomList = getRoomList();
+    socket.emit("room-list", roomList);
+    reply(callback, {
+      ok: true,
+      rooms: roomList
+    });
   });
 
-  socket.on("room-list", () => {
-    socket.emit("room-list", getRoomList());
+  socket.on("room-list", (data, callback) => {
+    const roomList = getRoomList();
+    socket.emit("room-list", roomList);
+    reply(callback, {
+      ok: true,
+      rooms: roomList
+    });
   });
 
   /* =======================================
@@ -1077,743 +1205,60 @@ io.on("connection", socket => {
     room.seats[index] = {
       socketId: socket.id,
       userId: user.id,
-      id: user.id,
-      name: user.name
+      name: user.name,
+      avatar: user.avatar || ""
     };
 
     completeTask(user.id, "take_seat");
 
-    reply(callback, { ok: true });
-
     updateRoom(room);
-    saveDB();
+
+    reply(callback, {
+      ok: true,
+      seat: seatNumber
+    });
   });
 
   socket.on("leave-seat", (data, callback) => {
     const room = getRoom(socket);
 
     if (!room) {
-      return reply(callback, {
-        ok: false,
-        message: "Join a room first"
-      });
+      return reply(callback, { ok: false });
     }
 
     removeFromSeat(room, socket.id);
-
-    reply(callback, { ok: true });
-
     updateRoom(room);
-  });
-
-  /* =======================================
-     CHAT
-  ======================================= */
-
-  socket.on("room-message", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-
-    const messageText = clean(
-      data?.message || data?.text,
-      500
-    );
-
-    if (!room || !user || !isMember(room, socket) || !messageText) {
-      return reply(callback, {
-        ok: false,
-        message: "Invalid message"
-      });
-    }
-
-    const message = {
-      username: user.name,
-      name: user.name,
-      userId: user.id,
-      message: messageText,
-      text: messageText,
-      time: Date.now()
-    };
-
-    room.messages.push(message);
-
-    if (room.messages.length > 100) {
-      room.messages.shift();
-    }
-
-    completeTask(user.id, "send_message");
-
-    io.to(room.id).emit("room-message", message);
-
-    saveDB();
-    reply(callback, { ok: true });
-  });
-
-  /* =======================================
-     CLEAR CHAT
-  ======================================= */
-
-  socket.on("clear-chat", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-
-    if (!room || !isAdmin(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Only Owner/Admin can clear chat"
-      });
-    }
-
-    room.messages = [];
-
-    io.to(room.id).emit("chat-cleared", {
-      by: user.name,
-      time: Date.now()
-    });
 
     reply(callback, { ok: true });
   });
 
   /* =======================================
-     EMOJI
+     MIC CONTROL
   ======================================= */
 
-  socket.on("send-emoji", (data, callback) => {
+  socket.on("toggle-mic", (data, callback) => {
     const room = getRoom(socket);
-    const user = getUser(socket);
-    const emoji = clean(data?.emoji, 12);
 
-    if (!room || !user || !isMember(room, socket)) {
+    if (!room || !isMember(room, socket)) {
       return reply(callback, { ok: false });
     }
 
-    if (!ALLOWED_EMOJIS.includes(emoji)) {
-      return reply(callback, {
-        ok: false,
-        message: "Invalid emoji"
-      });
-    }
-
-    completeTask(user.id, "use_emoji");
-
-    io.to(room.id).emit("emoji-event", {
-      username: user.name,
-      name: user.name,
-      userId: user.id,
-      emoji,
-      time: Date.now()
-    });
-
-    saveDB();
-    reply(callback, { ok: true });
-  });
-
-  /* =======================================
-     GIFTS
-  ======================================= */
-
-  socket.on("get-gifts", callback => {
-    reply(callback, {
-      ok: true,
-      gifts: GIFTS,
-      categories: GIFT_CATEGORIES
-    });
-  });
-
-  socket.on("send-gift", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-    const profile = getProfile(socket);
-
-    if (!room || !user || !profile || !isMember(room, socket)) {
-      return reply(callback, {
-        ok: false,
-        message: "Join a room first"
-      });
-    }
-
-    const gift = findGift(data?.giftId || data?.gift);
-    const receiverId = clean(
-      data?.receiverId || data?.to,
-      20
-    );
-
-    const quantity = Math.max(
-      1,
-      Math.min(10, Number(data?.quantity) || 1)
-    );
-
-    if (!gift) {
-      return reply(callback, {
-        ok: false,
-        message: "Gift not found"
-      });
-    }
-
-    const totalCost = gift.price * quantity;
-
-    if (profile.coins < totalCost) {
-      return reply(callback, {
-        ok: false,
-        message: "Not enough coins"
-      });
-    }
-
-    let receiver = null;
-
-    if (receiverId && receiverId !== "Everyone") {
-      for (const socketId of room.members) {
-        const member = online.get(socketId);
-
-        if (member?.id === receiverId) {
-          receiver = db.profiles[receiverId];
-          break;
-        }
-      }
-
-      if (!receiver) {
-        return reply(callback, {
-          ok: false,
-          message: "Receiver is not in this room"
-        });
-      }
-    }
-
-    profile.coins -= totalCost;
-
-    if (receiver) {
-      receiver.diamonds =
-        (Number(receiver.diamonds) || 0) + totalCost;
-
-      receiver.totalGifts =
-        (Number(receiver.totalGifts) || 0) + quantity;
-    }
-
-    user.coins = profile.coins;
-
-    const rankingId = receiverId || "Everyone";
-
-    const ranking = room.giftRanking.get(rankingId) || {
-      userId: rankingId,
-      name: receiver?.name || "Everyone",
-      gifts: 0,
-      coins: 0
-    };
-
-    ranking.gifts += quantity;
-    ranking.coins += totalCost;
-
-    room.giftRanking.set(rankingId, ranking);
-
-    completeTask(user.id, "send_gift");
-
-    const event = {
-      senderName: user.name,
-      username: user.name,
-      senderId: user.id,
-      receiverId: receiverId || null,
-      receiverName: receiver?.name || "Everyone",
-      giftName: gift.name,
-      giftIcon: gift.icon,
-      price: gift.price,
-      quantity,
-      time: Date.now()
-    };
-
-    saveDB();
-
-    socket.emit("profile-update", {
-      id: user.id,
-      name: user.name,
-      coins: profile.coins,
-      diamonds: profile.diamonds
-    });
-
-    io.to(room.id).emit("gift-event", event);
-    io.to(room.id).emit("gift-ranking", getRanking(room));
-
-    reply(callback, {
-      ok: true,
-      coins: profile.coins,
-      diamonds: profile.diamonds
-    });
-  });
-
-  /* =======================================
-     MIC STATE
-  ======================================= */
-
-  socket.on("mic-state", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-
-    if (!room || !user || !isMember(room, socket)) {
-      return reply(callback, { ok: false });
-    }
-
-    const micOn = data?.micOn !== undefined
-      ? Boolean(data.micOn)
-      : !Boolean(data?.muted);
+    const current = room.micStates.get(socket.id) !== false;
+    const micOn = data?.micOn === undefined
+      ? !current
+      : Boolean(data.micOn);
 
     room.micStates.set(socket.id, micOn);
 
     io.to(room.id).emit("mic-update", {
       socketId: socket.id,
-      userId: user.id,
       micOn
     });
 
-    reply(callback, { ok: true });
-  });
-
-  /* =======================================
-     FORCE MUTE
-  ======================================= */
-
-  socket.on("force-mute", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-    const targetId = clean(data?.userId, 20);
-
-    if (!room || !isAdmin(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Permission denied"
-      });
-    }
-
-    let found = false;
-
-    for (const socketId of room.members) {
-      const member = online.get(socketId);
-
-      if (member?.id === targetId) {
-        room.micStates.set(socketId, false);
-
-        io.to(socketId).emit("force-mute", {
-          muted: true
-        });
-
-        io.to(room.id).emit("mic-update", {
-          socketId,
-          userId: targetId,
-          micOn: false
-        });
-
-        found = true;
-        break;
-      }
-    }
-
-    reply(callback, {
-      ok: found,
-      message: found ? "Muted" : "User not found"
-    });
-  });
-
-  /* =======================================
-     ADMIN MANAGEMENT
-  ======================================= */
-
-  socket.on("add-room-admin", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-    const targetId = clean(data?.userId, 20);
-
-    if (!room || !isOwner(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Only owner can add admins"
-      });
-    }
-
-    if (!db.profiles[targetId] || targetId === room.ownerId) {
-      return reply(callback, {
-        ok: false,
-        message: "User not found"
-      });
-    }
-
-    room.admins.add(targetId);
-
-    reply(callback, { ok: true });
-
     updateRoom(room);
-  });
-
-  socket.on("remove-room-admin", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-    const targetId = clean(data?.userId, 20);
-
-    if (!room || !isOwner(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Only owner can remove admins"
-      });
-    }
-
-    room.admins.delete(targetId);
-
-    reply(callback, { ok: true });
-
-    updateRoom(room);
-  });
-
-  /* =======================================
-     KICK MEMBER
-  ======================================= */
-
-  socket.on("kick-member", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-    const targetId = clean(data?.userId, 20);
-
-    if (!room || !isAdmin(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Permission denied"
-      });
-    }
-
-    if (targetId === room.ownerId) {
-      return reply(callback, {
-        ok: false,
-        message: "Owner cannot be kicked"
-      });
-    }
-
-    let found = false;
-
-    for (const socketId of room.members) {
-      const member = online.get(socketId);
-
-      if (member?.id === targetId) {
-        const targetSocket = io.sockets.sockets.get(socketId);
-
-        if (targetSocket) {
-          targetSocket.emit("kicked-from-room", {
-            message: "You were removed from this room"
-          });
-
-          leaveRoom(targetSocket);
-        }
-
-        found = true;
-        break;
-      }
-    }
-
-    reply(callback, {
-      ok: found,
-      message: found ? "Member removed" : "Member not found"
-    });
-  });
-
-  /* =======================================
-     ROOM SETTINGS
-  ======================================= */
-
-  socket.on("update-room-settings", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-
-    if (!room || !isAdmin(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Only Owner/Admin can update settings"
-      });
-    }
-
-    if (data.name !== undefined) {
-      room.name = clean(data.name, 35) || room.name;
-    }
-
-    if (data.description !== undefined) {
-      room.settings.description = clean(data.description, 150);
-    }
-
-    if (data.locked !== undefined) {
-      if (!isOwner(room, user)) {
-        return reply(callback, {
-          ok: false,
-          message: "Only owner can lock the room"
-        });
-      }
-
-      room.settings.locked = Boolean(data.locked);
-    }
-
-    if (data.youtubeAllowed !== undefined) {
-      room.settings.allowYoutube = Boolean(data.youtubeAllowed);
-    }
-
-    if (data.allowYoutube !== undefined) {
-      room.settings.allowYoutube = Boolean(data.allowYoutube);
-    }
-
-    if (data.seats !== undefined) {
-      if (!isOwner(room, user)) {
-        return reply(callback, {
-          ok: false,
-          message: "Only owner can change seat count"
-        });
-      }
-
-      const count = Number(data.seats);
-
-      if (!ALLOWED_SEATS.includes(count)) {
-        return reply(callback, {
-          ok: false,
-          message: "Choose 9, 11, 15 or 20 seats"
-        });
-      }
-
-      if (count < room.seats.length) {
-        const removedSeats = room.seats.slice(count);
-
-        if (removedSeats.some(Boolean)) {
-          return reply(callback, {
-            ok: false,
-            message: "Some seats are occupied"
-          });
-        }
-      }
-
-      room.seats = Array(count)
-        .fill(null)
-        .map((_, index) => room.seats[index] || null);
-    }
 
     reply(callback, {
       ok: true,
-      message: "Settings updated"
-    });
-
-    updateRoom(room);
-  });
-
-  /* =======================================
-     YOUTUBE SHARING
-  ======================================= */
-
-  socket.on("share-youtube", (data, callback) => {
-    const room = getRoom(socket);
-    const user = getUser(socket);
-
-    if (!room || !user || !isMember(room, socket)) {
-      return reply(callback, {
-        ok: false,
-        message: "Join a room first"
-      });
-    }
-
-    if (!room.settings.allowYoutube) {
-      return reply(callback, {
-        ok: false,
-        message: "YouTube sharing is disabled"
-      });
-    }
-
-    if (!isAdmin(room, user)) {
-      return reply(callback, {
-        ok: false,
-        message: "Only Owner/Admin can share links"
-      });
-    }
-
-    let url;
-
-    try {
-      url = new URL(clean(data?.url, 500));
-    } catch {
-      return reply(callback, {
-        ok: false,
-        message: "Invalid link"
-      });
-    }
-
-    const validHosts = [
-      "youtube.com",
-      "www.youtube.com",
-      "m.youtube.com",
-      "youtu.be",
-      "www.youtu.be"
-    ];
-
-    if (url.protocol !== "https:" || !validHosts.includes(url.hostname)) {
-      return reply(callback, {
-        ok: false,
-        message: "Only YouTube links are allowed"
-      });
-    }
-
-    const event = {
-      url: url.toString(),
-      by: user.name,
-      username: user.name,
-      time: Date.now()
-    };
-
-    io.to(room.id).emit("youtube-shared", event);
-    io.to(room.id).emit("youtube-link", event);
-
-    reply(callback, { ok: true });
-  });
-
-  /* =======================================
-     INBOX
-  ======================================= */
-
-  socket.on("get-inbox", callback => {
-    const user = getUser(socket);
-
-    if (!user) {
-      return reply(callback, {
-        ok: false,
-        message: "Register first"
-      });
-    }
-
-    const messages = db.inbox[user.id] || [];
-
-    socket.emit("inbox-messages", messages);
-    socket.emit("inbox-data", messages);
-
-    reply(callback, {
-      ok: true,
-      messages
+      micOn
     });
   });
-
-  socket.on("send-dm", (data, callback) => {
-    const user = getUser(socket);
-    const targetId = clean(data?.to, 20);
-    const messageText = clean(data?.text, 500);
-
-    if (!user || !db.profiles[targetId] || !messageText) {
-      return reply(callback, {
-        ok: false,
-        message: "Invalid message"
-      });
-    }
-
-    const message = {
-      from: user.name,
-      fromId: user.id,
-      to: db.profiles[targetId].name,
-      toId: targetId,
-      message: messageText,
-      text: messageText,
-      time: Date.now()
-    };
-
-    db.inbox[targetId] ||= [];
-    db.inbox[user.id] ||= [];
-
-    db.inbox[targetId].push(message);
-    db.inbox[user.id].push(message);
-
-    db.inbox[targetId] = db.inbox[targetId].slice(-500);
-    db.inbox[user.id] = db.inbox[user.id].slice(-500);
-
-    saveDB();
-
-    for (const [socketId, onlineUser] of online.entries()) {
-      if (onlineUser.id === targetId) {
-        io.to(socketId).emit("new-dm", message);
-      }
-    }
-
-    socket.emit("dm-sent", message);
-
-    reply(callback, { ok: true });
-  });
-
-  /* =======================================
-     WEBRTC SIGNALING
-  ======================================= */
-
-  socket.on("voice-offer", data => {
-    const room = getRoom(socket);
-    if (!room || !isMember(room, socket)) return;
-
-    const targetId = clean(data?.to || data?.targetId, 100);
-    const target = io.sockets.sockets.get(targetId);
-
-    if (
-      !target ||
-      target.data.roomId !== room.id ||
-      !data?.offer
-    ) return;
-
-    target.emit("voice-offer", {
-      from: socket.id,
-      offer: data.offer
-    });
-  });
-
-  socket.on("voice-answer", data => {
-    const room = getRoom(socket);
-    if (!room || !isMember(room, socket)) return;
-
-    const targetId = clean(data?.to || data?.targetId, 100);
-    const target = io.sockets.sockets.get(targetId);
-
-    if (
-      !target ||
-      target.data.roomId !== room.id ||
-      !data?.answer
-    ) return;
-
-    target.emit("voice-answer", {
-      from: socket.id,
-      answer: data.answer
-    });
-  });
-
-  socket.on("voice-ice", data => {
-    const room = getRoom(socket);
-    if (!room || !isMember(room, socket)) return;
-
-    const targetId = clean(data?.to || data?.targetId, 100);
-    const target = io.sockets.sockets.get(targetId);
-
-    if (
-      !target ||
-      target.data.roomId !== room.id ||
-      !data?.candidate
-    ) return;
-
-    target.emit("voice-ice", {
-      from: socket.id,
-      candidate: data.candidate
-    });
-  });
-
-  /* =======================================
-     DISCONNECT
-  ======================================= */
-
-  socket.on("disconnect", () => {
-    leaveRoom(socket);
-    online.delete(socket.id);
-
-    io.emit("online-count", online.size);
-  });
-
-});
-
-/* =========================================
-   START SERVER
-========================================= */
-
-server.listen(PORT, "0.0.0.0", () => {
-  console.log("=================================");
-  console.log("HUKA VOICE CHAT SERVER STARTED");
-  console.log("Port:", PORT);
-  console.log("Public folder:", PUBLIC_DIR);
-  console.log("Gifts:", GIFTS.length);
-  console.log("Frames:", FRAMES.length);
-  console.log("=================================");
-});
