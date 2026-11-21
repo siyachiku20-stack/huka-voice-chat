@@ -930,13 +930,20 @@ $('avatarFile').addEventListener('change', function(event) {
   reader.readAsDataURL(file);
 });
   
-function openEdit() {
-  if (!profile) {
+   if (!profile) {
     toast('Profile is still loading.');
     return;
   }
 
-  $('editAvatar').value = profile.avatar || '';
+  selectedAvatar = profile.avatar || '';
+
+  $('editAvatar').value = '';
+  $('avatarFile').value = '';
+
+  $('avatarPreview').src =
+    selectedAvatar ||
+    'https://placehold.co/200x200/e6eaff/6655aa?text=H';
+
   $('editName').value = profile.name || '';
   $('editBio').value = profile.bio || '';
   $('editCountry').value = profile.country || '';
@@ -955,7 +962,7 @@ function saveProfile() {
 
   const updates = {
     name: name,
-    avatar: $('editAvatar').value.trim(),
+    avatar: selectedAvatar || profile.avatar || '',
     bio: $('editBio').value.trim(),
     country: $('editCountry').value,
     gender: $('editGender').value
