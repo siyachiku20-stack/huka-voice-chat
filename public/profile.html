@@ -1081,24 +1081,24 @@ function renderProfile() {
         $("profileLevel").textContent = profile.level || 1;
     }
 
-    if ($("profileFollowers")) {
-        $("profileFollowers").textContent =
+    if ($("followersCount")) {
+        $("followersCount").textContent =
             profile.followersCount ??
             (Array.isArray(profile.followers) ? profile.followers.length : 0);
     }
 
-    if ($("profileFollowing")) {
-        $("profileFollowing").textContent =
+    if ($("followingCount")) {
+        $("followingCount").textContent =
             profile.followingCount ??
             (Array.isArray(profile.following) ? profile.following.length : 0);
     }
 
-    if ($("profileVisitors")) {
-        $("profileVisitors").textContent = profile.visitorsCount || 0;
+    if ($("visitorsCount")) {
+        $("visitorsCount").textContent = profile.visitorsCount || 0;
     }
 
     localStorage.setItem("hukaName", name);
-}
+    }
 
 /* ---------- EDIT PROFILE ---------- */
 
