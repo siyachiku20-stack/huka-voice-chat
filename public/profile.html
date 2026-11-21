@@ -876,7 +876,60 @@ function renderProfile() {
   $('languageLabel').textContent =
     localStorage.getItem('hukaLanguageName') || 'English';
 }
+let selectedAvatar = "";
 
+$('avatarFile').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    toast('Please select an image.');
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    toast('Image must be smaller than 10 MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const image = new Image();
+
+    image.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxSize = 400;
+
+      let width = image.width;
+      let height = image.height;
+
+      if (width > height && width > maxSize) {
+        height = Math.round(height * maxSize / width);
+        width = maxSize;
+      } else if (height > maxSize) {
+        width = Math.round(width * maxSize / height);
+        height = maxSize;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(image, 0, 0, width, height);
+
+      selectedAvatar = canvas.toDataURL('image/jpeg', 0.75);
+
+      $('avatarPreview').src = selectedAvatar;
+    };
+
+    image.src = e.target.result;
+  };
+
+  reader.readAsDataURL(file);
+});
+  
 function openEdit() {
   if (!profile) {
     toast('Profile is still loading.');
