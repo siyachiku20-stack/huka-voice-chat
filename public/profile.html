@@ -603,9 +603,32 @@ button {
 
     <h2>Edit Profile</h2>
 
-    <label>Profile Picture URL</label>
-    <input id="editAvatar" placeholder="https://example.com/photo.jpg">
+<label>Profile Picture</label>
 
+<div style="text-align:center;margin:12px 0;">
+  <img
+    id="avatarPreview"
+    src="https://placehold.co/200x200/e6eaff/6655aa?text=H"
+    style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid #d9c5ff;"
+    alt="DP Preview"
+  >
+</div>
+
+<input
+  type="file"
+  id="avatarFile"
+  accept="image/*"
+  style="margin-bottom:10px;"
+>
+
+<button
+  type="button"
+  class="secondary"
+  style="width:100%;"
+  onclick="document.getElementById('avatarFile').click()"
+>
+  📷 Choose Profile Picture
+</button>
     <label>Nickname</label>
     <input id="editName" maxlength="20" placeholder="Your name">
 
