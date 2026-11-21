@@ -1053,8 +1053,9 @@ async function loadProfile() {
     profile = result.profile || result.user || result;
 
     if (profile) {
-        renderProfile();
-    }
+    renderProfile();
+    await loadFrames();
+  }
 }
 
 /* ---------- DISPLAY PROFILE ---------- */
