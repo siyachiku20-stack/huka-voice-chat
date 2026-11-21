@@ -1072,33 +1072,68 @@ function renderProfile() {
     if ($("profileName")) $("profileName").textContent = name;
     if ($("profileId")) $("profileId").textContent = userId;
     if ($("profileBio")) $("profileBio").textContent = bio || "Add your bio";
+
     if ($("profileCountry")) $("profileCountry").textContent = country;
     if ($("profileGender")) $("profileGender").textContent = gender;
 
-    if ($("profileAvatar") && avatar) {
-        $("profileAvatar").src = avatar;
+    // Profile DP
+    if ($("profileAvatar")) {
+        $("profileAvatar").src =
+            avatar || "https://placehold.co/200x200/e6eaff/6655aa?text=H";
     }
 
-    if ($("avatarPreview") && avatar) {
-        $("avatarPreview").src = avatar;
+    // Edit DP Preview
+    if ($("avatarPreview")) {
+        $("avatarPreview").src =
+            selectedAvatar || avatar ||
+            "https://placehold.co/200x200/e6eaff/6655aa?text=H";
+    }
+
+    // Active Frame
+    const frameBox = $("avatarFrame");
+
+    if (frameBox) {
+        const frameId = profile.activeFrame || "frame_free";
+
+        frameBox.classList.remove(
+            "frame_free",
+            "frame_pink",
+            "frame_blue",
+            "frame_gold",
+            "frame_diamond",
+            "frame_rainbow",
+            "frame_vip"
+        );
+
+        const allowedFrames = [
+            "frame_free",
+            "frame_pink",
+            "frame_blue",
+            "frame_gold",
+            "frame_diamond",
+            "frame_rainbow",
+            "frame_vip"
+        ];
+
+        frameBox.classList.add(
+            allowedFrames.includes(frameId) ? frameId : "frame_free"
+        );
     }
 
     if ($("walletCoins")) {
-        $("walletCoins").textContent = Number(profile.coins || 0);
+        $("walletCoins").textContent =
+            Number(profile.coins || 0).toLocaleString("en-IN");
     }
 
     if ($("walletDiamonds")) {
-        $("walletDiamonds").textContent = Number(profile.diamonds || 0);
+        $("walletDiamonds").textContent =
+            Number(profile.diamonds || 0).toLocaleString("en-IN");
     }
 
     if ($("editName")) $("editName").value = name;
     if ($("editBio")) $("editBio").value = bio;
     if ($("editCountry")) $("editCountry").value = country;
     if ($("editGender")) $("editGender").value = gender;
-
-    if ($("avatarPreview") && avatar) {
-        $("avatarPreview").src = avatar;
-    }
 
     if ($("settingsId")) {
         $("settingsId").textContent = userId;
@@ -1125,7 +1160,7 @@ function renderProfile() {
     }
 
     localStorage.setItem("hukaName", name);
-    }
+          }
 
 /* ---------- EDIT PROFILE ---------- */
 
