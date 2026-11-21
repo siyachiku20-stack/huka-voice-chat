@@ -930,7 +930,8 @@ $('avatarFile').addEventListener('change', function(event) {
   reader.readAsDataURL(file);
 });
   
-   if (!profile) {
+   function openEdit() {
+  if (!profile) {
     toast('Profile is still loading.');
     return;
   }
@@ -949,8 +950,7 @@ $('avatarFile').addEventListener('change', function(event) {
   $('editGender').value = profile.gender || '';
 
   showModal('editModal');
-}
-
+   }
 function saveProfile() {
   const name = $('editName').value.trim();
 
