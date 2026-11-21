@@ -915,12 +915,21 @@ function getUserName() {
     return localStorage.getItem("hukaName") || "Huka User";
 }
 
+const CALLBACK_ONLY_EVENTS = new Set([
+    "get-wallet-history",
+    "get-svip",
+    "get-medals",
+    "get-family",
+    "get-frames",
+    "leave-family"
+]);
+
 function emitRequest(eventName, data = {}) {
     return new Promise((resolve) => {
         if (!socket.connected) {
             resolve({
                 ok: false,
-                message: "Server se connection nahi hai."
+                message: "Server connection nahi hai."
             });
             return;
         }
@@ -932,18 +941,24 @@ function emitRequest(eventName, data = {}) {
                 completed = true;
                 resolve({
                     ok: false,
-                    message: "Server response nahi mila. Dobara try karein."
+                    message: "Server response nahi mila."
                 });
             }
         }, 10000);
 
-        socket.emit(eventName, data, (result) => {
+        const callback = (result) => {
             if (completed) return;
 
             completed = true;
             clearTimeout(timer);
             resolve(result || {});
-        });
+        };
+
+        if (CALLBACK_ONLY_EVENTS.has(eventName)) {
+            socket.emit(eventName, callback);
+        } else {
+            socket.emit(eventName, data, callback);
+        }
     });
 }
 
