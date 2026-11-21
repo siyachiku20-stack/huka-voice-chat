@@ -487,9 +487,8 @@ button {
   <div>
     <h2>♛ SVIP</h2>
     <p>Unlock SVIP and enjoy premium privileges.</p>
-    <button onclick="openPage('SVIP')">Explore SVIP</button>
+    <button onclick="openSVIP()">Explore SVIP</button>
   </div>
-
   <div class="svip-icon">💎</div>
 </section>
 
@@ -509,7 +508,7 @@ button {
     <span class="menu-arrow">›</span>
   </button>
 
-  <button class="menu-item" onclick="openPage('Medal')">
+  <button class="menu-item" onclick="openMedals()">
     <span class="menu-icon medal">🎖️</span>
     <span class="menu-label">Medal</span>
     <span class="menu-arrow">›</span>
@@ -521,7 +520,7 @@ button {
     <span class="menu-arrow">›</span>
   </button>
 
-  <button class="menu-item" onclick="openPage('Family')">
+  <button class="menu-item" onclick="openFamily()">
     <span class="menu-icon family">👑</span>
     <span class="menu-label">Family</span>
     <span class="menu-arrow">›</span>
@@ -539,7 +538,7 @@ button {
     <span class="menu-arrow">›</span>
   </button>
 
-  <button class="menu-item" onclick="openPage('CD-KEY')">
+  <button class="menu-item" onclick="openCDKey()">
     <span class="menu-icon cdkey">🎟️</span>
     <span class="menu-label">CD-KEY</span>
     <span class="menu-arrow">›</span>
@@ -564,7 +563,7 @@ button {
     <span class="menu-arrow">›</span>
   </button>
 
-  <button class="menu-item" onclick="openPage('Help & Feedback')">
+  <button class="menu-item" onclick="openFeedback()">
     <span class="menu-icon help">❔</span>
     <span class="menu-label">Help & Feedback</span>
     <span class="menu-arrow">›</span>
@@ -603,32 +602,24 @@ button {
 
     <h2>Edit Profile</h2>
 
-<label>Profile Picture</label>
+    <label>Profile Picture</label>
 
-<div style="text-align:center;margin:12px 0;">
-  <img
-    id="avatarPreview"
-    src="https://placehold.co/200x200/e6eaff/6655aa?text=H"
-    style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid #d9c5ff;"
-    alt="DP Preview"
-  >
-</div>
+    <div style="text-align:center;margin:12px 0;">
+      <img
+        id="avatarPreview"
+        src="https://placehold.co/200x200/e6eaff/6655aa?text=H"
+        style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid #d9c5ff;"
+        alt="DP Preview"
+      >
+    </div>
 
-<input
-  type="file"
-  id="avatarFile"
-  accept="image/*"
-  style="margin-bottom:10px;"
->
+    <input
+      type="file"
+      id="avatarFile"
+      accept="image/*"
+      style="margin-bottom:10px;"
+    >
 
-<button
-  type="button"
-  class="secondary"
-  style="width:100%;"
-  onclick="document.getElementById('avatarFile').click()"
->
-  📷 Choose Profile Picture
-</button>
     <label>Nickname</label>
     <input id="editName" maxlength="20" placeholder="Your name">
 
@@ -682,9 +673,13 @@ button {
       <strong id="walletDiamonds">0</strong>
     </div>
 
-    <p style="font-size:12px;color:#8992a1">
-      Coins and diamonds are virtual in-app balances.
-    </p>
+    <button class="secondary" style="width:100%;margin-top:12px"
+      onclick="loadWalletHistory()">
+      📜 Wallet History
+    </button>
+
+    <div id="walletHistory"
+      style="font-size:12px;margin-top:12px"></div>
 
     <button class="primary" style="width:100%;margin-top:12px"
       onclick="closeModal('walletModal')">
@@ -737,19 +732,110 @@ button {
   </div>
 </div>
 
+<!-- SVIP MODAL -->
+
+<div class="modal" id="svipModal">
+  <div class="modal-box">
+    <h2>♛ SVIP Membership</h2>
+    <div id="svipStatus" class="info-row">Loading...</div>
+
+    <div class="frame-card">
+      <h3>SVIP 7 Days</h3>
+      <p>500,000 Coins</p>
+      <button class="primary" onclick="buySVIP('svip7')">Buy 7 Days</button>
+    </div>
+
+    <div class="frame-card" style="margin-top:10px">
+      <h3>SVIP 30 Days</h3>
+      <p>1,500,000 Coins</p>
+      <button class="primary" onclick="buySVIP('svip30')">Buy 30 Days</button>
+    </div>
+
+    <button class="secondary" style="width:100%;margin-top:15px"
+      onclick="closeModal('svipModal')">Close</button>
+  </div>
+</div>
+
+<!-- MEDALS MODAL -->
+
+<div class="modal" id="medalModal">
+  <div class="modal-box">
+    <h2>🎖️ My Medals</h2>
+    <div id="medalList">Loading medals...</div>
+    <button class="secondary" style="width:100%;margin-top:15px"
+      onclick="closeModal('medalModal')">Close</button>
+  </div>
+</div>
+
+<!-- FAMILY MODAL -->
+
+<div class="modal" id="familyModal">
+  <div class="modal-box">
+    <h2>👑 Family</h2>
+    <div id="familyInfo">Loading family...</div>
+
+    <label>Family Name</label>
+    <input id="familyName" maxlength="30" placeholder="Enter family name">
+
+    <button class="primary" style="width:100%;margin-top:10px"
+      onclick="createFamily()">Create Family</button>
+
+    <label>Join with Family Code</label>
+    <input id="familyCode" maxlength="12" placeholder="Enter family code">
+
+    <button class="primary" style="width:100%;margin-top:10px"
+      onclick="joinFamily()">Join Family</button>
+
+    <button class="secondary" style="width:100%;margin-top:10px"
+      onclick="leaveFamily()">Leave Family</button>
+
+    <button class="secondary" style="width:100%;margin-top:10px"
+      onclick="closeModal('familyModal')">Close</button>
+  </div>
+</div>
+
+<!-- CD KEY MODAL -->
+
+<div class="modal" id="cdkeyModal">
+  <div class="modal-box">
+    <h2>🎟️ Redeem CD-KEY</h2>
+    <label>Enter your reward code</label>
+    <input id="cdkeyInput" maxlength="30" placeholder="Enter CD-KEY">
+
+    <button class="primary" style="width:100%;margin-top:12px"
+      onclick="redeemCDKey()">Redeem</button>
+
+    <button class="secondary" style="width:100%;margin-top:10px"
+      onclick="closeModal('cdkeyModal')">Close</button>
+  </div>
+</div>
+
+<!-- FEEDBACK MODAL -->
+
+<div class="modal" id="feedbackModal">
+  <div class="modal-box">
+    <h2>❔ Help & Feedback</h2>
+    <label>Your message</label>
+    <textarea id="feedbackMessage" maxlength="500"
+      placeholder="Write your feedback here"></textarea>
+
+    <button class="primary" style="width:100%;margin-top:12px"
+      onclick="sendFeedback()">Submit Feedback</button>
+
+    <button class="secondary" style="width:100%;margin-top:10px"
+      onclick="closeModal('feedbackModal')">Close</button>
+  </div>
+</div>
+
 <!-- GENERAL INFO MODAL -->
 
 <div class="modal" id="infoModal">
   <div class="modal-box">
-
     <h2 id="infoTitle">Huka</h2>
     <p id="infoText" style="font-size:13px;line-height:1.6;color:#737f91"></p>
 
     <button class="primary" style="width:100%;margin-top:12px"
-      onclick="closeModal('infoModal')">
-      OK
-    </button>
-
+      onclick="closeModal('infoModal')">OK</button>
   </div>
 </div>
 
@@ -757,7 +843,6 @@ button {
 
 <div class="modal" id="settingsModal">
   <div class="modal-box">
-
     <h2>⚙️ Settings</h2>
 
     <div class="info-row">
@@ -766,15 +851,10 @@ button {
     </div>
 
     <button class="secondary" style="width:100%;margin-top:12px"
-      onclick="logout()">
-      Log Out
-    </button>
+      onclick="logout()">Log Out</button>
 
     <button class="secondary" style="width:100%;margin-top:10px"
-      onclick="closeModal('settingsModal')">
-      Close
-    </button>
-
+      onclick="closeModal('settingsModal')">Close</button>
   </div>
 </div>
 
@@ -783,419 +863,947 @@ button {
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
+/* =========================================
+   HUKA VOICE CHAT - PROFILE JAVASCRIPT
+   Profile, Wallet, Frames, SVIP, Family
+========================================= */
+
 const socket = io();
 
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 let profile = null;
-let managerUrl = '';
+let selectedAvatar = "";
+let currentFrames = [];
+let currentFamily = null;
 
-function toast(message) {
-  const box = $('toast');
-  box.textContent = message;
-  box.style.display = 'block';
+/* ---------- COMMON FUNCTIONS ---------- */
 
-  clearTimeout(window.toastTimer);
+function showToast(message) {
+    const toast = $("toast");
 
-  window.toastTimer = setTimeout(() => {
-    box.style.display = 'none';
-  }, 2800);
+    if (!toast) {
+        alert(message);
+        return;
+    }
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(window.hukaToastTimer);
+
+    window.hukaToastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
 }
 
 function showModal(id) {
-  $(id).classList.add('show');
+    const modal = $(id);
+    if (modal) modal.style.display = "flex";
 }
 
 function closeModal(id) {
-  $(id).classList.remove('show');
+    const modal = $(id);
+    if (modal) modal.style.display = "none";
 }
-
-document.querySelectorAll('.modal').forEach(modal => {
-  modal.addEventListener('click', event => {
-    if (event.target === modal) {
-      modal.classList.remove('show');
-    }
-  });
-});
 
 function getUserId() {
-  return localStorage.getItem('hukaUserId') || '';
+    return localStorage.getItem("hukaUserId") || "";
 }
 
-function loadProfile() {
-  const userId = getUserId();
+function getUserName() {
+    return localStorage.getItem("hukaName") || "Huka User";
+}
 
-  if (!userId) {
-    toast('Please open Huka Home and register first.');
-    return;
-  }
+function emitRequest(eventName, data = {}) {
+    return new Promise((resolve) => {
+        if (!socket.connected) {
+            resolve({
+                ok: false,
+                message: "Server se connection nahi hai."
+            });
+            return;
+        }
 
-  socket.emit('get-profile', { userId }, result => {
-    if (!result || result.ok === false) {
-      toast(result?.error || 'Could not load profile.');
-      return;
+        let completed = false;
+
+        const timer = setTimeout(() => {
+            if (!completed) {
+                completed = true;
+                resolve({
+                    ok: false,
+                    message: "Server response nahi mila. Dobara try karein."
+                });
+            }
+        }, 10000);
+
+        socket.emit(eventName, data, (result) => {
+            if (completed) return;
+
+            completed = true;
+            clearTimeout(timer);
+            resolve(result || {});
+        });
+    });
+}
+
+function isSuccess(result) {
+    return result && (
+        result.ok === true ||
+        result.success === true
+    );
+}
+
+/* ---------- PROFILE REGISTER ---------- */
+
+async function registerAndLoadProfile() {
+    let userId = getUserId();
+    let userName = getUserName();
+
+    if (!userId) {
+        userId = "HUKA" + Date.now().toString().slice(-8);
+        localStorage.setItem("hukaUserId", userId);
+    }
+
+    const result = await emitRequest("register", {
+        name: userName,
+        userId: userId
+    });
+
+    if (result && (result.ok || result.success || result.user)) {
+        const user = result.user || result.profile || {};
+
+        if (user.userId || user.id) {
+            userId = user.userId || user.id;
+            localStorage.setItem("hukaUserId", userId);
+        }
+
+        if (user.name) {
+            localStorage.setItem("hukaName", user.name);
+        }
+
+        await loadProfile();
+    } else {
+        showToast(result.message || "Profile register nahi ho paya.");
+    }
+}
+
+/* ---------- LOAD PROFILE ---------- */
+
+async function loadProfile() {
+    const userId = getUserId();
+
+    if (!userId) {
+        showToast("User ID nahi mili.");
+        return;
+    }
+
+    const result = await emitRequest("get-profile", {
+        userId: userId
+    });
+
+    if (!result || result.error || result.ok === false) {
+        showToast(result.message || "Profile load nahi hua.");
+        return;
     }
 
     profile = result.profile || result.user || result;
-    renderProfile();
-  });
+
+    if (profile) {
+        renderProfile();
+    }
 }
+
+/* ---------- DISPLAY PROFILE ---------- */
 
 function renderProfile() {
-  if (!profile) return;
+    if (!profile) return;
 
-  $('profileName').textContent = profile.name || 'Huka User';
-  $('profileId').textContent = profile.id || profile.userId || getUserId();
+    const name = profile.name || getUserName();
+    const avatar = profile.avatar || profile.dp || "";
+    const userId = profile.userId || profile.id || getUserId();
+    const bio = profile.bio || "";
+    const country = profile.country || "India";
+    const gender = profile.gender || "Not selected";
 
-  $('profileBio').textContent =
-    profile.bio || 'Welcome to Huka Voice Chat!';
+    if ($("profileName")) $("profileName").textContent = name;
+    if ($("profileId")) $("profileId").textContent = userId;
+    if ($("profileBio")) $("profileBio").textContent = bio || "Add your bio";
+    if ($("profileCountry")) $("profileCountry").textContent = country;
+    if ($("profileGender")) $("profileGender").textContent = gender;
 
-  $('profileLevel').textContent = profile.level || 1;
+    document.querySelectorAll(".profile-avatar").forEach((img) => {
+        if (avatar) img.src = avatar;
+    });
 
-  $('profileAvatar').src =
-    profile.avatar || 'https://placehold.co/200x200/e6eaff/6655aa?text=H';
-
-  $('followingCount').textContent =
-    (profile.following || []).length || 0;
-
-  $('followersCount').textContent =
-    profile.followersCount || 0;
-
-  $('visitorsCount').textContent =
-    profile.visitors || 0;
-
-  $('walletCoins').textContent =
-    Number(profile.coins || 0).toLocaleString();
-
-  $('walletDiamonds').textContent =
-    Number(profile.diamonds || 0).toLocaleString();
-
-  $('settingsId').textContent =
-    profile.id || profile.userId || getUserId();
-
-  $('languageLabel').textContent =
-    localStorage.getItem('hukaLanguageName') || 'English';
-}
-let selectedAvatar = "";
-
-$('avatarFile').addEventListener('change', function(event) {
-  const file = event.target.files[0];
-
-  if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    toast('Please select an image.');
-    return;
-  }
-
-  if (file.size > 10 * 1024 * 1024) {
-    toast('Image must be smaller than 10 MB.');
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = function(e) {
-    const image = new Image();
-
-    image.onload = function() {
-      const canvas = document.createElement('canvas');
-      const maxSize = 400;
-
-      let width = image.width;
-      let height = image.height;
-
-      if (width > height && width > maxSize) {
-        height = Math.round(height * maxSize / width);
-        width = maxSize;
-      } else if (height > maxSize) {
-        width = Math.round(width * maxSize / height);
-        height = maxSize;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(image, 0, 0, width, height);
-
-      selectedAvatar = canvas.toDataURL('image/jpeg', 0.75);
-
-      $('avatarPreview').src = selectedAvatar;
-    };
-
-    image.src = e.target.result;
-  };
-
-  reader.readAsDataURL(file);
-});
-  
-   function openEdit() {
-  if (!profile) {
-    toast('Profile is still loading.');
-    return;
-  }
-
-  selectedAvatar = profile.avatar || '';
-
-  $('avatarFile').value = '';
-
-  $('avatarPreview').src =
-    selectedAvatar ||
-    'https://placehold.co/200x200/e6eaff/6655aa?text=H';
-
-  $('editName').value = profile.name || '';
-  $('editBio').value = profile.bio || '';
-  $('editCountry').value = profile.country || '';
-  $('editGender').value = profile.gender || '';
-
-  showModal('editModal');
-   }
-function saveProfile() {
-  const name = $('editName').value.trim();
-
-  if (!name) {
-    toast('Please enter your name.');
-    return;
-  }
-
-  const updates = {
-    name: name,
-    avatar: selectedAvatar || profile.avatar || '',
-    bio: $('editBio').value.trim(),
-    country: $('editCountry').value,
-    gender: $('editGender').value
-  };
-
-  socket.emit('profile-update', updates, result => {
-    if (result && result.ok === false) {
-      toast(result.error || 'Profile update failed.');
-      return;
+    if ($("walletCoins")) {
+        $("walletCoins").textContent = Number(profile.coins || 0);
     }
 
-    Object.assign(profile, updates);
+    if ($("walletDiamonds")) {
+        $("walletDiamonds").textContent = Number(profile.diamonds || 0);
+    }
 
-    localStorage.setItem('hukaName', name);
+    if ($("editName")) $("editName").value = name;
+    if ($("editBio")) $("editBio").value = bio;
+    if ($("editCountry")) $("editCountry").value = country;
+    if ($("editGender")) $("editGender").value = gender;
 
-    renderProfile();
-    closeModal('editModal');
-    toast('Profile updated successfully!');
-  });
+    if ($("avatarPreview") && avatar) {
+        $("avatarPreview").src = avatar;
+    }
+
+    if ($("settingsId")) {
+        $("settingsId").textContent = userId;
+    }
+
+    if ($("profileLevel")) {
+        $("profileLevel").textContent = profile.level || 1;
+    }
+
+    if ($("profileFollowers")) {
+        $("profileFollowers").textContent =
+            profile.followersCount ??
+            (Array.isArray(profile.followers) ? profile.followers.length : 0);
+    }
+
+    if ($("profileFollowing")) {
+        $("profileFollowing").textContent =
+            profile.followingCount ??
+            (Array.isArray(profile.following) ? profile.following.length : 0);
+    }
+
+    if ($("profileVisitors")) {
+        $("profileVisitors").textContent = profile.visitorsCount || 0;
+    }
+
+    localStorage.setItem("hukaName", name);
 }
 
-function openWallet() {
-  if (profile) renderProfile();
-  showModal('walletModal');
+/* ---------- EDIT PROFILE ---------- */
+
+function editProfile() {
+    if (profile) {
+        renderProfile();
+    }
+
+    selectedAvatar = "";
+    showModal("editModal");
 }
+
+function openEditProfile() {
+    editProfile();
+}
+
+function previewAvatar(event) {
+    const file = event.target.files && event.target.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        showToast("Sirf image file select karein.");
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        showToast("Image 5 MB se chhoti honi chahiye.");
+        event.target.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const image = new Image();
+
+        image.onload = function() {
+            const canvas = document.createElement("canvas");
+            const maxSize = 400;
+
+            let width = image.width;
+            let height = image.height;
+
+            if (width > height && width > maxSize) {
+                height = Math.round(height * maxSize / width);
+                width = maxSize;
+            } else if (height > maxSize) {
+                width = Math.round(width * maxSize / height);
+                height = maxSize;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const context = canvas.getContext("2d");
+            context.drawImage(image, 0, 0, width, height);
+
+            selectedAvatar = canvas.toDataURL("image/jpeg", 0.75);
+
+            if ($("avatarPreview")) {
+                $("avatarPreview").src = selectedAvatar;
+            }
+        };
+
+        image.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+}
+
+async function saveProfile() {
+    const name = $("editName")?.value.trim() || "";
+    const bio = $("editBio")?.value.trim() || "";
+    const country = $("editCountry")?.value || "India";
+    const gender = $("editGender")?.value || "";
+
+    if (!name) {
+        showToast("Apna naam likhein.");
+        return;
+    }
+
+    if (name.length > 25) {
+        showToast("Naam 25 characters se chhota rakhein.");
+        return;
+    }
+
+    const updates = {
+        name,
+        bio,
+        country,
+        gender
+    };
+
+    if (selectedAvatar) {
+        updates.avatar = selectedAvatar;
+    }
+
+    const result = await emitRequest("profile-update", {
+        userId: getUserId(),
+        updates: updates
+    });
+
+    if (isSuccess(result)) {
+        profile = result.profile || result.user || {
+            ...profile,
+            ...updates
+        };
+
+        localStorage.setItem("hukaName", name);
+
+        renderProfile();
+        closeModal("editModal");
+        showToast("Profile update ho gaya!");
+    } else {
+        showToast(result.message || "Profile update nahi hua.");
+    }
+}
+
+/* ---------- WALLET ---------- */
+
+async function openWallet() {
+    showModal("walletModal");
+
+    if (profile) {
+        if ($("walletCoins")) {
+            $("walletCoins").textContent = Number(profile.coins || 0);
+        }
+
+        if ($("walletDiamonds")) {
+            $("walletDiamonds").textContent = Number(profile.diamonds || 0);
+        }
+    }
+
+    await loadWalletHistory();
+}
+
+async function loadWalletHistory() {
+    const result = await emitRequest("get-wallet-history", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        if ($("walletHistory")) {
+            $("walletHistory").textContent =
+                result.message || "Wallet history load nahi hui.";
+        }
+        return;
+    }
+
+    if (result.coins !== undefined && $("walletCoins")) {
+        $("walletCoins").textContent = Number(result.coins);
+    }
+
+    if (result.diamonds !== undefined && $("walletDiamonds")) {
+        $("walletDiamonds").textContent = Number(result.diamonds);
+    }
+
+    const history = result.history || result.transactions || [];
+    const container = $("walletHistory");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!history.length) {
+        container.textContent = "Abhi koi transaction nahi hai.";
+        return;
+    }
+
+    history.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "history-item";
+
+        const title = document.createElement("span");
+        title.textContent = item.description || item.type || "Transaction";
+
+        const amount = document.createElement("span");
+        amount.textContent =
+            (item.amount > 0 ? "+" : "") + (item.amount ?? 0);
+
+        row.append(title, amount);
+        container.appendChild(row);
+    });
+}
+
+/* ---------- SVIP ---------- */
+
+async function openSVIP() {
+    showModal("svipModal");
+
+    const result = await emitRequest("get-svip", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        showToast(result.message || "SVIP details load nahi hue.");
+        return;
+    }
+
+    const svip = result.svip || result;
+
+    if ($("svipStatus")) {
+        $("svipStatus").textContent =
+            svip.active
+                ? "SVIP Active"
+                : "SVIP Not Active";
+    }
+}
+
+async function buySVIP(planId) {
+    const result = await emitRequest("buy-svip", {
+        userId: getUserId(),
+        planId: planId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "SVIP purchase successful!");
+
+        if (result.profile) {
+            profile = result.profile;
+            renderProfile();
+        }
+
+        await openSVIP();
+    } else {
+        showToast(result.message || "SVIP purchase nahi hua.");
+    }
+}
+
+/* ---------- MEDALS ---------- */
+
+async function openMedals() {
+    showModal("medalModal");
+
+    const container = $("medalList");
+    if (container) container.textContent = "Loading medals...";
+
+    const result = await emitRequest("get-medals", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        if (container) {
+            container.textContent = result.message || "Medals load nahi hue.";
+        }
+        return;
+    }
+
+    const medals = result.medals || [];
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!medals.length) {
+        container.textContent = "Abhi koi medal nahi mila.";
+        return;
+    }
+
+    medals.forEach((medal) => {
+        const item = document.createElement("div");
+        item.className = "medal-item";
+
+        const icon = document.createElement("span");
+        icon.textContent = medal.icon || "🏅";
+
+        const title = document.createElement("span");
+        title.textContent = medal.name || medal.title || "Medal";
+
+        item.append(icon, title);
+        container.appendChild(item);
+    });
+}
+
+/* ---------- FAMILY ---------- */
+
+async function openFamily() {
+    showModal("familyModal");
+
+    const result = await emitRequest("get-family", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        if ($("familyInfo")) {
+            $("familyInfo").textContent =
+                result.message || "Family information load nahi hui.";
+        }
+        return;
+    }
+
+    currentFamily = result.family || null;
+
+    if ($("familyInfo")) {
+        $("familyInfo").textContent = currentFamily
+            ? (currentFamily.name || "Family joined")
+            : "Aap abhi kisi family mein nahi hain.";
+    }
+
+    if ($("familyName")) {
+        $("familyName").value = currentFamily?.name || "";
+    }
+
+    if ($("familyCode")) {
+        $("familyCode").textContent = currentFamily?.code || "";
+    }
+}
+
+async function createFamily() {
+    const name = $("familyName")?.value.trim() || "";
+
+    if (!name) {
+        showToast("Family ka naam likhein.");
+        return;
+    }
+
+    const result = await emitRequest("create-family", {
+        userId: getUserId(),
+        name: name
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Family create ho gayi.");
+        await openFamily();
+    } else {
+        showToast(result.message || "Family create nahi hui.");
+    }
+}
+
+async function joinFamily() {
+    const code = prompt("Family code enter karein:");
+
+    if (!code || !code.trim()) return;
+
+    const result = await emitRequest("join-family", {
+        userId: getUserId(),
+        code: code.trim()
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Family join ho gayi.");
+        await openFamily();
+    } else {
+        showToast(result.message || "Family join nahi hui.");
+    }
+}
+
+async function leaveFamily() {
+    const confirmed = confirm("Kya aap family leave karna chahte hain?");
+
+    if (!confirmed) return;
+
+    const result = await emitRequest("leave-family", {
+        userId: getUserId()
+    });
+
+    if (isSuccess(result)) {
+        currentFamily = null;
+        showToast(result.message || "Family leave ho gayi.");
+        await openFamily();
+    } else {
+        showToast(result.message || "Family leave nahi hui.");
+    }
+}
+
+/* ---------- BAG AND FRAMES ---------- */
+
+async function openBag() {
+    showModal("bagModal");
+    await loadFrames();
+}
+
+async function loadFrames() {
+    const container = $("bagFrames");
+
+    if (container) {
+        container.textContent = "Loading frames...";
+    }
+
+    const result = await emitRequest("get-frames", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        if (container) {
+            container.textContent = result.message || "Frames load nahi hue.";
+        }
+        return;
+    }
+
+    currentFrames = result.frames || [];
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!currentFrames.length) {
+        container.textContent = "Abhi koi frame available nahi hai.";
+        return;
+    }
+
+    currentFrames.forEach((frame) => {
+        const card = document.createElement("div");
+        card.className = "frame-card";
+
+        const title = document.createElement("h4");
+        title.textContent = frame.name || "Profile Frame";
+
+        const price = document.createElement("p");
+        price.textContent = "Coins: " + Number(frame.price || 0);
+
+        const button = document.createElement("button");
+
+        const owned = frame.owned === true;
+        const equipped = frame.equipped === true;
+
+        if (equipped) {
+            button.textContent = "Equipped";
+            button.disabled = true;
+        } else if (owned) {
+            button.textContent = "Use Frame";
+            button.onclick = () => equipFrame(frame.id || frame.frameId);
+        } else {
+            button.textContent = "Buy Frame";
+            button.onclick = () => buyFrame(frame.id || frame.frameId);
+        }
+
+        card.append(title, price, button);
+        container.appendChild(card);
+    });
+}
+
+async function buyFrame(frameId) {
+    if (!frameId) {
+        showToast("Frame ID nahi mili.");
+        return;
+    }
+
+    const result = await emitRequest("buy-frame", {
+        userId: getUserId(),
+        frameId: frameId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Frame kharid liya!");
+        await loadFrames();
+        await loadProfile();
+    } else {
+        showToast(result.message || "Frame purchase nahi hua.");
+    }
+}
+
+async function equipFrame(frameId) {
+    if (!frameId) {
+        showToast("Frame ID nahi mili.");
+        return;
+    }
+
+    const result = await emitRequest("equip-frame", {
+        userId: getUserId(),
+        frameId: frameId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Frame equip ho gaya!");
+        await loadFrames();
+        await loadProfile();
+    } else {
+        showToast(result.message || "Frame equip nahi hua.");
+    }
+}
+
+/* ---------- LANGUAGE ---------- */
 
 function openLanguage() {
-  $('languageSelect').value =
-    localStorage.getItem('hukaLanguage') || 'en';
+    const modal = $("languageModal");
 
-  showModal('languageModal');
+    if (!modal) return;
+
+    let select = modal.querySelector("#hukaLanguageSelect");
+
+    if (!select) {
+        select = document.createElement("select");
+        select.id = "hukaLanguageSelect";
+
+        const languages = [
+            ["en", "English"],
+            ["hi", "हिन्दी"],
+            ["ur", "اردو"],
+            ["bn", "বাংলা"],
+            ["ne", "नेपाली"],
+            ["ar", "العربية"]
+        ];
+
+        languages.forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            select.appendChild(option);
+        });
+
+        const button = document.createElement("button");
+        button.textContent = "Save Language";
+        button.onclick = saveLanguage;
+
+        modal.append(select, button);
+    }
+
+    select.value = localStorage.getItem("hukaLanguage") || "en";
+    showModal("languageModal");
 }
 
 function saveLanguage() {
-  const select = $('languageSelect');
-  const value = select.value;
-  const name = select.options[select.selectedIndex].text;
+    const select = $("hukaLanguageSelect");
 
-  localStorage.setItem('hukaLanguage', value);
-  localStorage.setItem('hukaLanguageName', name);
+    if (!select) return;
 
-  $('languageLabel').textContent = name;
+    localStorage.setItem("hukaLanguage", select.value);
 
-  closeModal('languageModal');
+    closeModal("languageModal");
 
-  toast('Language preference saved. Full app translation requires translation support on each page.');
+    showToast(
+        "Language preference save ho gayi. Puri app translation ke liye baaki pages mein bhi translation support add karna hoga."
+    );
 }
 
-function openBag() {
-  showModal('bagModal');
-  loadFrames();
+/* ---------- OTHER PROFILE PAGES ---------- */
+
+function openPage(pageName) {
+    let message = "";
+
+    if (pageName === "Level") {
+        message = "Your Level: " + (profile?.level || 1);
+    } else if (pageName === "CP Space") {
+        message = "CP Space feature abhi complete nahi hai.";
+    } else if (pageName === "Dress") {
+        message = "Dress feature abhi complete nahi hai.";
+    } else {
+        message = pageName + " page abhi available nahi hai.";
+    }
+
+    if ($("infoTitle")) $("infoTitle").textContent = pageName;
+    if ($("infoText")) $("infoText").textContent = message;
+
+    showModal("infoModal");
 }
 
-function loadFrames() {
-  socket.emit('get-frames', result => {
-    if (!result) {
-      $('bagFrames').innerHTML = '<p>Could not load frames.</p>';
-      return;
+function openMedalsPage() {
+    openMedals();
+}
+
+function openDress() {
+    openPage("Dress");
+}
+
+/* ---------- CD KEY ---------- */
+
+function openCDKey() {
+    if ($("cdkeyInput")) {
+        $("cdkeyInput").value = "";
     }
 
-    const frames = Array.isArray(result)
-      ? result
-      : (result.frames || []);
+    showModal("cdkeyModal");
+}
 
-    const owned = profile?.ownedFrames || [];
+async function redeemCDKey() {
+    const code = $("cdkeyInput")?.value.trim() || "";
 
-    $('bagFrames').innerHTML = '';
-
-    if (!frames.length) {
-      $('bagFrames').innerHTML =
-        '<p>No frames available right now.</p>';
-      return;
+    if (!code) {
+        showToast("CD Key enter karein.");
+        return;
     }
 
-    frames.forEach(frame => {
-      const card = document.createElement('div');
-      card.className = 'frame-card';
-
-      const preview = document.createElement('div');
-      preview.className = 'frame-preview';
-      preview.textContent = frame.icon || '💎';
-
-      const title = document.createElement('b');
-      title.textContent = frame.name || 'Profile Frame';
-
-      const price = document.createElement('p');
-      price.style.fontSize = '12px';
-      price.textContent = frame.price
-        ? Number(frame.price).toLocaleString() + ' Coins'
-        : 'Free';
-
-      const button = document.createElement('button');
-      button.className = 'primary';
-
-      const isOwned = owned.includes(frame.id);
-
-      button.textContent = isOwned ? 'Equip' : 'Buy';
-
-      button.onclick = () => {
-        if (isOwned) {
-          equipFrame(frame.id);
-        } else {
-          buyFrame(frame.id);
-        }
-      };
-
-      card.append(preview, title, price, button);
-      $('bagFrames').append(card);
+    const result = await emitRequest("redeem-cdkey", {
+        userId: getUserId(),
+        code: code
     });
-  });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "CD Key redeem ho gayi.");
+        closeModal("cdkeyModal");
+        await loadProfile();
+        await loadWalletHistory();
+    } else {
+        showToast(result.message || "CD Key redeem nahi hui.");
+    }
 }
 
-function buyFrame(frameId) {
-  socket.emit('buy-frame', { frameId }, result => {
-    if (!result || !result.ok) {
-      toast(result?.error || 'Could not purchase frame.');
-      return;
+/* ---------- FEEDBACK ---------- */
+
+function openFeedback() {
+    if ($("feedbackMessage")) {
+        $("feedbackMessage").value = "";
     }
 
-    if (result.coins !== undefined) {
-      profile.coins = result.coins;
+    showModal("feedbackModal");
+}
+
+async function sendFeedback() {
+    const message = $("feedbackMessage")?.value.trim() || "";
+
+    if (!message) {
+        showToast("Feedback likhein.");
+        return;
     }
 
-    if (!profile.ownedFrames) profile.ownedFrames = [];
+    const result = await emitRequest("send-profile-feedback", {
+        userId: getUserId(),
+        message: message
+    });
 
-    if (!profile.ownedFrames.includes(frameId)) {
-      profile.ownedFrames.push(frameId);
+    if (isSuccess(result)) {
+        showToast(result.message || "Feedback send ho gaya.");
+        closeModal("feedbackModal");
+    } else {
+        showToast(result.message || "Feedback send nahi hua.");
     }
-
-    renderProfile();
-    loadFrames();
-
-    toast('Frame purchased successfully!');
-  });
 }
 
-function equipFrame(frameId) {
-  socket.emit('equip-frame', { frameId }, result => {
-    if (!result || !result.ok) {
-      toast(result?.error || 'Could not equip frame.');
-      return;
+/* ---------- MANAGER CONTACT ---------- */
+
+async function contactManager() {
+    try {
+        const response = await fetch("/api/config");
+        const config = await response.json();
+
+        const managerUrl =
+            config.managerUrl ||
+            config.customerSupportUrl ||
+            "";
+
+        if (managerUrl) {
+            window.open(managerUrl, "_blank");
+        } else {
+            showToast("Manager contact link abhi set nahi hai.");
+        }
+    } catch (error) {
+        showToast("Manager details load nahi hui.");
     }
-
-    if (profile) profile.frame = frameId;
-
-    toast('Frame equipped!');
-    loadProfile();
-  });
 }
 
-function openPage(page) {
-  const messages = {
-    'SVIP': 'SVIP membership and premium privileges.',
-    'Level': 'Your Huka level and experience information.',
-    'Medal': 'Your achievements and medals.',
-    'CP Space': 'CP Space social features.',
-    'Family': 'Family membership and family rooms.',
-    'Dress': 'Profile appearance and dress collection.',
-    'CD-KEY': 'Enter a valid Huka reward code.',
-    'Help & Feedback': 'For help and feedback, contact the Huka Manager.'
-  };
-
-  $('infoTitle').textContent = page;
-  $('infoText').textContent =
-    messages[page] || 'This feature is not available yet.';
-
-  showModal('infoModal');
-}
-
-function contactManager() {
-  if (managerUrl) {
-    window.open(managerUrl, '_blank', 'noopener');
-    return;
-  }
-
-  openPage('Help & Feedback');
-}
+/* ---------- SETTINGS ---------- */
 
 function openSettings() {
-  $('settingsId').textContent = getUserId();
-  showModal('settingsModal');
+    if ($("settingsId")) {
+        $("settingsId").textContent = getUserId();
+    }
+
+    showModal("settingsModal");
 }
 
 function logout() {
-  if (!confirm('Are you sure you want to log out?')) return;
+    const confirmed = confirm("Kya aap logout karna chahte hain?");
 
-  localStorage.removeItem('hukaUserId');
-  localStorage.removeItem('hukaName');
+    if (!confirmed) return;
 
-  location.href = 'index.html';
+    localStorage.removeItem("hukaUserId");
+    localStorage.removeItem("hukaName");
+
+    socket.disconnect();
+
+    window.location.href = "/";
 }
 
-fetch('/api/config')
-  .then(response => response.json())
-  .then(data => {
-    managerUrl = data.managerUrl || '';
-  })
-  .catch(() => {});
+/* ---------- LIVE PROFILE UPDATE ---------- */
 
-function registerAndLoadProfile() {
-  const savedId = localStorage.getItem('hukaUserId') || '';
-  const savedName = localStorage.getItem('hukaName') || 'Huka User';
+socket.on("profile-update", (data) => {
+    if (!data) return;
 
-  if (!savedId) {
-    toast('Please open Home first.');
-    return;
-  }
+    const updatedUserId =
+        data.userId ||
+        data.profile?.userId ||
+        data.user?.userId;
 
-  socket.emit('register', {
-    name: savedName,
-    userId: savedId
-  }, result => {
-    if (!result || !result.ok || !result.user) {
-      toast(result?.message || 'Registration failed. Please try again.');
-      return;
+    if (updatedUserId && updatedUserId !== getUserId()) {
+        return;
     }
 
-    localStorage.setItem('hukaUserId', result.user.id);
-    localStorage.setItem('hukaName', result.user.name || savedName);
+    if (data.profile) {
+        profile = data.profile;
+    } else if (data.user) {
+        profile = data.user;
+    } else if (data.updates) {
+        profile = {
+            ...profile,
+            ...data.updates
+        };
+    } else {
+        profile = {
+            ...profile,
+            ...data
+        };
+    }
 
-    loadProfile();
-  });
+    renderProfile();
+});
+
+/* ---------- SOCKET CONNECTION ---------- */
+
+socket.on("connect", () => {
+    console.log("Huka Profile Connected:", socket.id);
+    registerAndLoadProfile();
+});
+
+socket.on("disconnect", () => {
+    console.log("Huka Profile Disconnected");
+});
+
+/* ---------- CLOSE MODAL ON OUTSIDE CLICK ---------- */
+
+document.querySelectorAll(".modal").forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+});
+
+/* ---------- START ---------- */
+
+if (socket.connected) {
+    registerAndLoadProfile();
 }
 
-socket.on('connect', registerAndLoadProfile);
-socket.on('profile-update', data => {
-  if (!profile || !data) return;
-
-  if (data.id === profile.id) {
-    Object.assign(profile, data);
-    renderProfile();
-  }
-});
 </script>
-
 </body>
-      </html>
+</html>
