@@ -1431,7 +1431,7 @@ async function createFamily() {
 }
 
 async function joinFamily() {
-    const code = prompt("Family code enter karein:");
+    const code = $("familyCode")?.value.trim() || "";
 
     if (!code || !code.trim()) return;
 
