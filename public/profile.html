@@ -1486,7 +1486,14 @@ async function loadFrames() {
         return;
     }
 
-    currentFrames = result.frames || [];
+    const ownedFrames = result.ownedFrames || [];
+    const activeFrame = result.activeFrame || "frame_free";
+
+    currentFrames = (result.frames || []).map(frame => ({
+        ...frame,
+        owned: ownedFrames.includes(frame.id),
+        equipped: activeFrame === frame.id
+    }));
 
     if (!container) return;
 
