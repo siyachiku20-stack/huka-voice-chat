@@ -1047,9 +1047,13 @@ function renderProfile() {
     if ($("profileCountry")) $("profileCountry").textContent = country;
     if ($("profileGender")) $("profileGender").textContent = gender;
 
-    document.querySelectorAll(".profile-avatar").forEach((img) => {
-        if (avatar) img.src = avatar;
-    });
+    if ($("profileAvatar") && avatar) {
+        $("profileAvatar").src = avatar;
+    }
+
+    if ($("avatarPreview") && avatar) {
+        $("avatarPreview").src = avatar;
+    }
 
     if ($("walletCoins")) {
         $("walletCoins").textContent = Number(profile.coins || 0);
