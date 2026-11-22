@@ -1208,6 +1208,17 @@ io.on("connection", socket => {
         feedback: [],
         frame: "frame_free",
         ownedFrames: ["frame_free"],
+        bagItems: [],
+        equippedCosmetics: {
+        vehicle: "",
+        chatBubble: "",
+        profileCard: "",
+        rgbName: "",
+        entryEffect: "",
+        micEffect: "",
+        nameDecoration: "",
+        specialEffect: ""
+      },
         following: [],
         taskProgress: {},
         claimedTasks: [],
@@ -1221,6 +1232,18 @@ io.on("connection", socket => {
       profile.coins = Number(profile.coins) || 0;
       profile.diamonds = Number(profile.diamonds) || 0;
       profile.ownedFrames ||= ["frame_free"];
+      profile.bagItems ||= [];
+
+      profile.equippedCosmetics ||= {
+        vehicle: "",
+        chatBubble: "",
+        profileCard: "",
+        rgbName: "",
+        entryEffect: "",
+        micEffect: "",
+        nameDecoration: "",
+        specialEffect: ""
+      };
       profile.following ||= [];
       profile.taskProgress ||= {};
       profile.claimedTasks ||= [];
