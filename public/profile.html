@@ -805,6 +805,38 @@ button {
   </div>
 </div>
 
+<!-- LEVEL MODAL -->
+
+<div class="modal" id="levelModal">
+  <div class="modal-box">
+
+    <h2>🏆 My Level</h2>
+
+    <div class="info-row">
+      <span>Current Level</span>
+      <strong id="levelPageCurrent">1</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Total XP</span>
+      <strong id="levelPageXP">0</strong>
+    </div>
+
+    <h3 style="margin-top:20px;">🎁 Level Rewards</h3>
+
+    <div id="levelPageRewardsList" class="frame-grid">
+      <p>Loading rewards...</p>
+    </div>
+
+    <button class="secondary"
+      style="width:100%;margin-top:15px"
+      onclick="closeModal('levelModal')">
+      Close
+    </button>
+
+  </div>
+</div>
+  
 <!-- BAG MODAL -->
 
 <div class="modal" id="bagModal">
