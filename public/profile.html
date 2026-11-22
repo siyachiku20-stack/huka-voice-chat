@@ -1121,29 +1121,18 @@ function renderProfile() {
     if (frameBox) {
         const frameId = profile.activeFrame || "frame_free";
 
-        frameBox.classList.remove(
-            "frame_free",
-            "frame_pink",
-            "frame_blue",
-            "frame_gold",
-            "frame_diamond",
-            "frame_rainbow",
-            "frame_vip"
+        frameBox.className = "avatar-box";
+
+        const selectedFrame = currentFrames.find(
+            frame => frame.id === frameId
         );
 
-        const allowedFrames = [
-            "frame_free",
-            "frame_pink",
-            "frame_blue",
-            "frame_gold",
-            "frame_diamond",
-            "frame_rainbow",
-            "frame_vip"
-        ];
-
-        frameBox.classList.add(
-            allowedFrames.includes(frameId) ? frameId : "frame_free"
-        );
+        if (selectedFrame && selectedFrame.gradient) {
+            frameBox.style.background = selectedFrame.gradient;
+        } else {
+            frameBox.style.background =
+                "linear-gradient(135deg,#ffffff,#d9d9d9)";
+        }
     }
 
     if ($("walletCoins")) {
