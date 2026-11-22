@@ -978,6 +978,23 @@ io.on("connection", socket => {
 
     const result = { ...profile };
     result.levelProgress = getLevelProgress(profile);
+   
+    result.levelRewards = Array.from({ length: 100 }, (_, index) => {
+      const level = index + 1;
+
+      const claimed =
+        Array.isArray(profile.claimedLevelRewards) &&
+        profile.claimedLevelRewards.includes(level);
+
+      return {
+        level,
+        coins: level < 2 ? 0 : level * 50000,
+        name: level === 1
+          ? "Starter Badge"
+          : LEVEL_SPECIAL_REWARDS[level - 2],
+        owned: level === 1 || claimed
+       };
+     }); 
      
     // Do not expose private information.
     delete result.taskProgress;
