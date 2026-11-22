@@ -2545,7 +2545,334 @@ io.on("connection", socket => {
     p.feedback ||= []; p.feedback.unshift({ message, date: Date.now() }); p.feedback = p.feedback.slice(0, 20); saveDB();
     reply(callback, { ok: true, message: "Feedback submitted" });
   });
+   
+/* =========================================
+   CP SPACE REQUESTS AND PARTNERS
+========================================= */
 
+// GET CP SPACE
+socket.on("get-cp-space", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  ensureCPProfile(profile);
+
+  const partner = profile.cpPartnerId
+    ? db.profiles[profile.cpPartnerId]
+    : null;
+
+  const incomingRequests = Object.values(db.cpRequests)
+    .filter(request => request.toId === user.id)
+    .map(request => ({
+      id: request.id,
+      fromId: request.fromId,
+      fromName: db.profiles[request.fromId]?.name || "Huka User",
+      fromAvatar: db.profiles[request.fromId]?.avatar || ""
+    }));
+
+  const outgoingRequests = Object.values(db.cpRequests)
+    .filter(request => request.fromId === user.id)
+    .map(request => ({
+      id: request.id,
+      toId: request.toId,
+      toName: db.profiles[request.toId]?.name || "Huka User"
+    }));
+
+  let partnerData = null;
+
+  if (partner && partner.cpPartnerId === user.id) {
+    ensureCPProfile(partner);
+
+    partnerData = {
+      id: partner.id,
+      name: partner.name,
+      avatar: partner.avatar || "",
+      level: getCPLevel(profile.cpXP),
+      xp: profile.cpXP,
+      pairedAt: profile.cpPairedAt || 0
+    };
+  }
+
+  reply(callback, {
+    ok: true,
+    partner: partnerData,
+    progress: getCPProgress(profile),
+    incomingRequests,
+    outgoingRequests
+  });
+});
+
+
+// SEND CP REQUEST
+socket.on("send-cp-request", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const targetId = clean(data?.userId, 20);
+  const target = db.profiles[targetId];
+
+  if (!target || targetId === user.id) {
+    return reply(callback, {
+      ok: false,
+      message: "Invalid user"
+    });
+  }
+
+  ensureCPProfile(profile);
+  ensureCPProfile(target);
+
+  if (profile.cpPartnerId || target.cpPartnerId) {
+    return reply(callback, {
+      ok: false,
+      message: "One of the users already has a CP Partner"
+    });
+  }
+
+  const existing = Object.values(db.cpRequests).find(request =>
+    (request.fromId === user.id && request.toId === targetId) ||
+    (request.fromId === targetId && request.toId === user.id)
+  );
+
+  if (existing) {
+    return reply(callback, {
+      ok: false,
+      message: "A CP request is already pending"
+    });
+  }
+
+  const requestId =
+    "CP_" + Date.now() + "_" +
+    Math.random().toString(36).slice(2, 8);
+
+  db.cpRequests[requestId] = {
+    id: requestId,
+    fromId: user.id,
+    toId: targetId,
+    createdAt: Date.now()
+  };
+
+  saveDB();
+
+  emitCPUpdate(targetId);
+
+  reply(callback, {
+    ok: true,
+    message: "CP Request sent",
+    requestId
+  });
+});
+
+
+// ACCEPT OR REJECT CP REQUEST
+socket.on("respond-cp-request", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const requestId = clean(data?.requestId, 100);
+  const request = db.cpRequests[requestId];
+
+  if (!request || request.toId !== user.id) {
+    return reply(callback, {
+      ok: false,
+      message: "CP request not found"
+    });
+  }
+
+  const sender = db.profiles[request.fromId];
+
+  if (!sender) {
+    delete db.cpRequests[requestId];
+    saveDB();
+
+    return reply(callback, {
+      ok: false,
+      message: "User not found"
+    });
+  }
+
+  if (data?.accept !== true) {
+    delete db.cpRequests[requestId];
+    saveDB();
+
+    emitCPUpdate(request.fromId);
+
+    return reply(callback, {
+      ok: true,
+      message: "CP request rejected"
+    });
+  }
+
+  ensureCPProfile(profile);
+  ensureCPProfile(sender);
+
+  if (profile.cpPartnerId || sender.cpPartnerId) {
+    return reply(callback, {
+      ok: false,
+      message: "One of the users already has a CP Partner"
+    });
+  }
+
+  profile.cpPartnerId = sender.id;
+  sender.cpPartnerId = user.id;
+
+  profile.cpXP = 0;
+  sender.cpXP = 0;
+
+  profile.cpWeeklyXP = 0;
+  sender.cpWeeklyXP = 0;
+
+  profile.cpMonthlyXP = 0;
+  sender.cpMonthlyXP = 0;
+
+  profile.cpDailyXP = 0;
+  sender.cpDailyXP = 0;
+
+  profile.cpPairedAt = Date.now();
+  sender.cpPairedAt = Date.now();
+
+  // Remove requests involving either partner.
+  for (const [id, item] of Object.entries(db.cpRequests)) {
+    if (
+      item.fromId === user.id ||
+      item.toId === user.id ||
+      item.fromId === sender.id ||
+      item.toId === sender.id
+    ) {
+      delete db.cpRequests[id];
+    }
+  }
+
+  saveDB();
+
+  emitCPUpdate(user.id);
+  emitCPUpdate(sender.id);
+
+  reply(callback, {
+    ok: true,
+    message: "CP Partner connected"
+  });
+});
+
+
+// UNPAIR CP PARTNER
+socket.on("unpair-cp", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const partnerId = profile.cpPartnerId;
+
+  if (!partnerId) {
+    return reply(callback, {
+      ok: false,
+      message: "You do not have a CP Partner"
+    });
+  }
+
+  const partner = db.profiles[partnerId];
+
+  profile.cpPartnerId = "";
+  profile.cpXP = 0;
+  profile.cpWeeklyXP = 0;
+  profile.cpMonthlyXP = 0;
+  profile.cpDailyXP = 0;
+
+  if (partner && partner.cpPartnerId === user.id) {
+    partner.cpPartnerId = "";
+    partner.cpXP = 0;
+    partner.cpWeeklyXP = 0;
+    partner.cpMonthlyXP = 0;
+    partner.cpDailyXP = 0;
+  }
+
+  saveDB();
+
+  emitCPUpdate(user.id);
+  emitCPUpdate(partnerId);
+
+  reply(callback, {
+    ok: true,
+    message: "CP Partner removed"
+  });
+});
+
+
+// CP WEEKLY AND MONTHLY RANKING
+socket.on("get-cp-ranking", (data, callback) => {
+  const period = data?.period === "monthly"
+    ? "monthly"
+    : "weekly";
+
+  const pairs = [];
+  const added = new Set();
+
+  for (const profile of Object.values(db.profiles)) {
+    ensureCPProfile(profile);
+
+    const partnerId = profile.cpPartnerId;
+    if (!partnerId || added.has(profile.id)) continue;
+
+    const partner = db.profiles[partnerId];
+
+    if (!partner || partner.cpPartnerId !== profile.id) {
+      continue;
+    }
+
+    added.add(profile.id);
+    added.add(partner.id);
+
+    const xp = period === "monthly"
+      ? profile.cpMonthlyXP
+      : profile.cpWeeklyXP;
+
+    pairs.push({
+      userId: profile.id,
+      partnerId: partner.id,
+      name: profile.name,
+      partnerName: partner.name,
+      avatar: profile.avatar || "",
+      partnerAvatar: partner.avatar || "",
+      level: getCPLevel(profile.cpXP),
+      xp
+    });
+  }
+
+  pairs.sort((a, b) => b.xp - a.xp);
+
+  reply(callback, {
+    ok: true,
+    period,
+    ranking: pairs.slice(0, 50)
+  });
+});
+   
   /* =======================================
      DISCONNECT
   ======================================= */
