@@ -322,6 +322,206 @@ function getFrameDesign(frameId) {
      }
 
 /* =========================================
+   HUKA COMPLETE BAG ITEM STORE
+========================================= */
+
+const VEHICLE_LIST = [
+  ["Royal Car", "🚗"],
+  ["Sports Car", "🏎️"],
+  ["Luxury Car", "🚘"],
+  ["Super Car", "🏎️"],
+  ["Golden Car", "🚕"],
+  ["Pink Car", "🚗"],
+  ["Blue Racing Car", "🏎️"],
+  ["Neon Car", "🚙"],
+  ["Royal Jeep", "🚙"],
+  ["Monster Truck", "🛻"],
+  ["Royal Bike", "🏍️"],
+  ["Sports Bike", "🏍️"],
+  ["Golden Bike", "🏍️"],
+  ["Red Bike", "🏍️"],
+  ["Blue Bike", "🏍️"],
+  ["Super Bike", "🏍️"],
+  ["Royal Scooter", "🛵"],
+  ["Luxury Scooter", "🛵"],
+  ["Golden Horse", "🐎"],
+  ["White Horse", "🐎"],
+  ["Black Horse", "🐎"],
+  ["Royal Horse", "🐎"],
+  ["Pegasus", "🪽"],
+  ["Unicorn Ride", "🦄"],
+  ["Royal Bicycle", "🚲"],
+  ["Mountain Bike", "🚵"],
+  ["Golden Yacht", "🛥️"],
+  ["Luxury Yacht", "🛥️"],
+  ["Royal Ship", "🚢"],
+  ["Speed Boat", "🚤"],
+  ["Private Jet", "🛩️"],
+  ["Royal Airplane", "✈️"],
+  ["Golden Plane", "✈️"],
+  ["Helicopter", "🚁"],
+  ["Royal Helicopter", "🚁"],
+  ["Space Rocket", "🚀"],
+  ["Galaxy Rocket", "🚀"],
+  ["Royal Train", "🚆"],
+  ["Bullet Train", "🚄"],
+  ["Luxury Bus", "🚌"],
+  ["Royal Bus", "🚌"],
+  ["Golden Truck", "🚚"],
+  ["Luxury Van", "🚐"],
+  ["Royal Carriage", "🐴"],
+  ["Magic Carpet", "🪄"],
+  ["Dragon Ride", "🐉"],
+  ["Phoenix Ride", "🔥"],
+  ["Galaxy Vehicle", "🌌"],
+  ["Diamond Vehicle", "💎"],
+  ["Huka Royal Vehicle", "👑"]
+];
+
+const BAG_DESIGNS = {
+  chatBubble: [
+    ["Pink Love Bubble", "💗"],
+    ["Blue Galaxy Bubble", "🌌"],
+    ["Golden Royal Bubble", "👑"],
+    ["Diamond Bubble", "💎"],
+    ["Rainbow Bubble", "🌈"],
+    ["Neon Bubble", "💫"],
+    ["Heart Bubble", "❤️"],
+    ["Fire Bubble", "🔥"],
+    ["Star Bubble", "⭐"],
+    ["Royal Purple Bubble", "💜"],
+    ["Ocean Bubble", "🌊"],
+    ["Crystal Bubble", "🧊"]
+  ],
+
+  profileCard: [
+    ["Pink Princess Card", "👸"],
+    ["Royal King Card", "🤴"],
+    ["Golden VIP Card", "👑"],
+    ["Diamond Card", "💎"],
+    ["Galaxy Card", "🌌"],
+    ["Love Card", "💗"],
+    ["Rainbow Card", "🌈"],
+    ["Neon Card", "✨"],
+    ["Butterfly Card", "🦋"],
+    ["Royal Empire Card", "🏰"]
+  ],
+
+  rgbName: [
+    ["Rainbow RGB", "🌈"],
+    ["Neon Pink", "💗"],
+    ["Neon Blue", "💙"],
+    ["Neon Purple", "💜"],
+    ["Golden Glow", "✨"],
+    ["Fire RGB", "🔥"],
+    ["Diamond RGB", "💎"],
+    ["Galaxy RGB", "🌌"]
+  ],
+
+  entryEffect: [
+    ["Rose Entry", "🌹"],
+    ["Heart Entry", "💗"],
+    ["Golden Entry", "👑"],
+    ["Diamond Entry", "💎"],
+    ["Fire Entry", "🔥"],
+    ["Rainbow Entry", "🌈"],
+    ["Butterfly Entry", "🦋"],
+    ["Star Entry", "⭐"],
+    ["Galaxy Entry", "🌌"],
+    ["Royal Entry", "🏰"]
+  ],
+
+  micEffect: [
+    ["Pink Mic", "🎤"],
+    ["Golden Mic", "🎙️"],
+    ["Diamond Mic", "💎"],
+    ["Rainbow Mic", "🌈"],
+    ["Fire Mic", "🔥"],
+    ["Galaxy Mic", "🌌"],
+    ["Neon Mic", "✨"],
+    ["Royal Mic", "👑"]
+  ],
+
+  nameDecoration: [
+    ["Royal Crown", "👑"],
+    ["Golden Star", "⭐"],
+    ["Pink Heart", "💗"],
+    ["Diamond Decoration", "💎"],
+    ["Butterfly Decoration", "🦋"],
+    ["Angel Wings", "🪽"],
+    ["Fire Decoration", "🔥"],
+    ["Rainbow Decoration", "🌈"],
+    ["Royal Rose", "🌹"],
+    ["Galaxy Decoration", "🌌"]
+  ],
+
+  specialEffect: [
+    ["Royal Aura", "👑"],
+    ["Diamond Aura", "💎"],
+    ["Rainbow Aura", "🌈"],
+    ["Galaxy Aura", "🌌"],
+    ["Fire Aura", "🔥"],
+    ["Angel Aura", "😇"],
+    ["Butterfly Aura", "🦋"],
+    ["Legendary Aura", "✨"]
+  ]
+};
+
+const BAG_ITEMS = [];
+
+// Existing frames also appear in Bag.
+for (const frame of FRAMES) {
+  BAG_ITEMS.push({
+    id: frame.id,
+    name: frame.name,
+    category: "frame",
+    icon: frame.icon,
+    price: frame.price,
+    free: Boolean(frame.free),
+    design: frame.gradient
+  });
+}
+
+// Generate exactly 50 vehicles.
+VEHICLE_LIST.forEach((vehicle, index) => {
+  BAG_ITEMS.push({
+    id: `vehicle_${index + 1}`,
+    name: vehicle[0],
+    category: "vehicle",
+    icon: vehicle[1],
+    price: (index + 1) * 1000,
+    free: false
+  });
+});
+
+// Generate all other Bag categories.
+for (const [category, designs] of Object.entries(BAG_DESIGNS)) {
+  designs.forEach((item, index) => {
+    BAG_ITEMS.push({
+      id: `${category}_${index + 1}`,
+      name: item[0],
+      category,
+      icon: item[1],
+      price: (index + 1) * 500,
+      free: false
+    });
+  });
+}
+
+const BAG_CATEGORIES = [
+  "all",
+  "frame",
+  "vehicle",
+  "chatBubble",
+  "profileCard",
+  "rgbName",
+  "entryEffect",
+  "micEffect",
+  "nameDecoration",
+  "specialEffect"
+];
+
+/* =========================================
    ROOM TASKS
 ========================================= */
 
