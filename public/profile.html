@@ -840,16 +840,55 @@ button {
 </div>
   
 <!-- BAG MODAL -->
-
+  
 <div class="modal" id="bagModal">
-  <div class="modal-box">
+  <div class="modal-box bag-modal-box">
 
-    <h2>🎒 My Bag</h2>
+    <h2>🎒 Huka Store & My Bag</h2>
 
-    <div id="bagFrames" class="frame-grid">
-      <p>Loading frames...</p>
+    <div class="bag-wallet">
+      💰 Your Coins: <strong id="bagCoins">0</strong>
     </div>
-    
+
+    <div class="bag-main-tabs">
+      <button class="primary" id="bagStoreTab" onclick="switchBagView('store')">🛍️ Store</button>
+      <button class="secondary" id="bagOwnedTab" onclick="switchBagView('owned')">🎒 My Bag</button>
+    </div>
+
+    <div class="bag-category-list" id="bagCategoryList">
+      <button class="bag-category active" onclick="selectBagCategory('all',this)">All</button>
+      <button class="bag-category" onclick="selectBagCategory('frame',this)">🖼️ Frames</button>
+      <button class="bag-category" onclick="selectBagCategory('vehicle',this)">🚗 Vehicles</button>
+      <button class="bag-category" onclick="selectBagCategory('chatBubble',this)">💬 Chat Bubbles</button>
+      <button class="bag-category" onclick="selectBagCategory('profileCard',this)">🪪 Profile Cards</button>
+      <button class="bag-category" onclick="selectBagCategory('rgbName',this)">🌈 RGB Names</button>
+      <button class="bag-category" onclick="selectBagCategory('entryEffect',this)">✨ Entry Effects</button>
+      <button class="bag-category" onclick="selectBagCategory('micEffect',this)">🎤 Mic Effects</button>
+      <button class="bag-category" onclick="selectBagCategory('nameDecoration',this)">👑 Name Decorations</button>
+      <button class="bag-category" onclick="selectBagCategory('specialEffect',this)">💎 Special Effects</button>
+    </div>
+
+    <div id="bagItemsGrid" class="bag-items-grid">
+      <p>Loading items...</p>
+    </div>
+
+    <h3 style="margin-top:25px;">🏆 My Level Rewards</h3>
+
+    <div id="levelRewardsList" class="frame-grid">
+      <p>Loading level rewards...</p>
+    </div>
+
+    <!-- Legacy frame container: kept for existing frame/profile code -->
+    <div id="bagFrames" style="display:none"></div>
+
+    <button class="secondary" style="width:100%;margin-top:15px"
+      onclick="closeModal('bagModal')">
+      Close
+    </button>
+
+  </div>
+</div>    
+  
 <!-- LEVEL REWARDS -->
     
 <h3 style="margin-top:25px;">🏆 My Level Rewards</h3>
