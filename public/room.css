@@ -788,3 +788,55 @@ button {
     row-gap: 18px;
   }
 }
+
+/* ==========================================
+   PROFILE FRAMES - ROOM SEATS & MEMBERS
+========================================== */
+
+/* Seat avatar frame */
+.seat-card .seat-avatar {
+  box-sizing: border-box;
+  padding: 4px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.seat-card .seat-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Member list layout */
+.member-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Member DP */
+.member-avatar-frame {
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(180, 80, 255, 0.6);
+}
+
+.member-avatar-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.member-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
