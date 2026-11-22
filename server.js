@@ -446,6 +446,116 @@ function getLevelProgress(profile) {
   };
 }
 
+/* =========================================
+   HUKA LEVEL 1-100 REWARD SYSTEM
+========================================= */
+
+const LEVEL_SPECIAL_REWARDS = [
+  "Bronze Crown",
+  "Silver Crown",
+  "Golden Crown",
+  "Pink Heart Frame",
+  "Purple Galaxy Frame",
+  "Royal Butterfly Frame",
+  "Diamond Avatar",
+  "Golden Wings",
+  "Level 10 Royal Medal",
+  "Rainbow Name Effect",
+  "Fire Avatar Effect",
+  "Ice Avatar Effect",
+  "Star Profile Frame",
+  "Royal Rose Gift",
+  "Golden Butterfly Effect",
+  "Diamond Name Decoration",
+  "Moonlight Frame",
+  "Phoenix Medal",
+  "Level 20 Royal Wings",
+  "Neon Avatar Effect",
+  "Crystal Frame",
+  "Golden Star Gift",
+  "Rainbow Wings",
+  "Level 25 Diamond Crown",
+  "Galaxy Name Effect",
+  "Royal Tiger Frame",
+  "Shooting Star Effect",
+  "Emerald Medal",
+  "Level 30 Dragon Frame",
+  "Golden Phoenix Effect",
+  "Crystal Butterfly Gift",
+  "Ocean Avatar Frame",
+  "Diamond Heart Medal",
+  "Royal Unicorn Frame",
+  "Lightning Name Effect",
+  "Golden Eagle Wings",
+  "Aurora Avatar Effect",
+  "Ruby Medal",
+  "Level 40 Imperial Crown",
+  "Cosmic Profile Frame",
+  "Golden Lion Effect",
+  "Diamond Rose Gift",
+  "Royal Moon Frame",
+  "Sapphire Medal",
+  "Rainbow Dragon Effect",
+  "Golden Phoenix Frame",
+  "Starlight Avatar Effect",
+  "Royal Heart Medal",
+  "Level 50 Legendary Crown",
+  "Galaxy Dragon Wings",
+  "Diamond Butterfly Frame",
+  "Royal Fire Gift",
+  "Golden Universe Effect",
+  "Level 55 Emperor Medal",
+  "Crystal Dragon Frame",
+  "Rainbow Phoenix Wings",
+  "Royal Diamond Gift",
+  "Eternal Star Medal",
+  "Level 60 Emperor Crown",
+  "Golden Galaxy Frame",
+  "Cosmic Butterfly Effect",
+  "Royal Universe Gift",
+  "Diamond Tiger Wings",
+  "Level 65 Mythical Medal",
+  "Eternal Phoenix Frame",
+  "Golden Angel Effect",
+  "Royal Crystal Gift",
+  "Galaxy Lion Medal",
+  "Level 70 Legendary Wings",
+  "Diamond Universe Frame",
+  "Royal Aurora Effect",
+  "Golden Dragon Gift",
+  "Eternal Butterfly Medal",
+  "Level 75 Royal Emperor Frame",
+  "Cosmic Angel Wings",
+  "Diamond Phoenix Effect",
+  "Royal Galaxy Gift",
+  "Golden Universe Medal",
+  "Level 80 Mythical Crown",
+  "Eternal Dragon Frame",
+  "Diamond Angel Effect",
+  "Royal Cosmic Gift",
+  "Golden Phoenix Medal",
+  "Level 85 Supreme Wings",
+  "Eternal Galaxy Frame",
+  "Diamond Universe Effect",
+  "Royal Star Gift",
+  "Mythical Dragon Medal",
+  "Level 90 Supreme Crown",
+  "Eternal Angel Frame",
+  "Royal Phoenix Effect",
+  "Diamond Galaxy Gift",
+  "Supreme Universe Medal",
+  "Level 95 Immortal Wings",
+  "Eternal Royal Frame",
+  "Supreme Dragon Effect",
+  "Legendary Galaxy Gift",
+  "Immortal Diamond Medal",
+  "Ultimate Royal Crown + Immortal Frame + Legendary Aura"
+];
+
+/* =========================================
+   ADD XP AND LEVEL REWARDS
+========================================= */
+
 function addExperience(profile, amount) {
   const today = getIndiaDate();
 
@@ -464,12 +574,61 @@ function addExperience(profile, amount) {
 
   if (reward <= 0) return 0;
 
+  const oldLevel = updateLevel(profile);
+
   profile.totalExperience =
     (Number(profile.totalExperience) || 0) + reward;
 
   profile.xpEarnedToday = earnedToday + reward;
 
-  updateLevel(profile);
+  const newLevel = updateLevel(profile);
+
+  profile.claimedLevelRewards =
+    Array.isArray(profile.claimedLevelRewards)
+      ? profile.claimedLevelRewards
+      : [];
+
+  profile.levelRewardItems =
+    Array.isArray(profile.levelRewardItems)
+      ? profile.levelRewardItems
+      : [];
+
+  // Give separate rewards for every new level
+  for (
+    let level = oldLevel + 1;
+    level <= Math.min(newLevel, 100);
+    level++
+  ) {
+    if (profile.claimedLevelRewards.includes(level)) {
+      continue;
+    }
+
+    // Level 2 = 100000 coins
+    // Every next level adds 50000 coins
+    const coinsReward = level * 50000;
+
+    profile.coins =
+      (Number(profile.coins) || 0) + coinsReward;
+
+    const specialReward =
+      LEVEL_SPECIAL_REWARDS[level - 2];
+
+    profile.claimedLevelRewards.push(level);
+
+    profile.levelRewardItems.push({
+      level: level,
+      name: specialReward,
+      claimed: true,
+      date: new Date().toISOString()
+    });
+
+    addWalletHistory(
+      profile,
+      "reward",
+      coinsReward,
+      `Level ${level} Up Reward`
+    );
+  }
 
   return reward;
 }
