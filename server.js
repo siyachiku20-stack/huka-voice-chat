@@ -423,6 +423,57 @@ function updateLevel(profile) {
   return profile.level;
      }
 
+/* =========================================
+   LEVEL XP PROGRESS SYSTEM
+========================================= */
+
+function getLevelProgress(profile) {
+  const totalXP = Math.max(
+    0,
+    Number(profile.totalExperience) || 0
+  );
+
+  const level = updateLevel(profile);
+
+  const currentLevelXP = (level - 1) ** 2 * 100;
+  const nextLevelXP = level ** 2 * 100;
+
+  return {
+    level,
+    currentXP: totalXP - currentLevelXP,
+    requiredXP: nextLevelXP - currentLevelXP,
+    totalXP
+  };
+}
+
+function addExperience(profile, amount) {
+  const today = getIndiaDate();
+
+  if (profile.xpDailyDate !== today) {
+    profile.xpDailyDate = today;
+    profile.xpEarnedToday = 0;
+  }
+
+  const earnedToday = Number(profile.xpEarnedToday) || 0;
+  const remaining = Math.max(0, 100 - earnedToday);
+
+  const reward = Math.min(
+    Math.max(0, Number(amount) || 0),
+    remaining
+  );
+
+  if (reward <= 0) return 0;
+
+  profile.totalExperience =
+    (Number(profile.totalExperience) || 0) + reward;
+
+  profile.xpEarnedToday = earnedToday + reward;
+
+  updateLevel(profile);
+
+  return reward;
+}
+
 function getRoom(socket) {
   return rooms.get(socket.data.roomId) || null;
 }
