@@ -1539,6 +1539,231 @@ io.on("connection", socket => {
       frameData: getFrameDesign(frameId)
     });
   });
+   
+/* =========================================
+   COMPLETE BAG SYSTEM
+========================================= */
+
+// GET BAG
+socket.on("get-bag", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  profile.bagItems ||= [];
+  profile.ownedFrames ||= ["frame_free"];
+
+  profile.equippedCosmetics ||= {};
+
+  const ownedItems = [
+    ...profile.ownedFrames,
+    ...profile.bagItems
+  ];
+
+  reply(callback, {
+    ok: true,
+    items: BAG_ITEMS,
+    categories: BAG_CATEGORIES,
+    ownedItems: [...new Set(ownedItems)],
+    equipped: {
+      frame: profile.frame || "frame_free",
+      ...profile.equippedCosmetics
+    },
+    coins: Number(profile.coins) || 0
+  });
+});
+
+
+// BUY BAG ITEM
+socket.on("buy-bag-item", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const itemId = clean(data?.itemId, 80);
+  const item = BAG_ITEMS.find(x => x.id === itemId);
+
+  if (!item) {
+    return reply(callback, {
+      ok: false,
+      message: "Item not found"
+    });
+  }
+
+  profile.bagItems ||= [];
+  profile.ownedFrames ||= ["frame_free"];
+
+  const owned = item.category === "frame"
+    ? profile.ownedFrames.includes(item.id)
+    : profile.bagItems.includes(item.id);
+
+  if (owned) {
+    return reply(callback, {
+      ok: false,
+      message: "Item already owned"
+    });
+  }
+
+  const price = Math.max(0, Number(item.price) || 0);
+
+  if (profile.coins < price) {
+    return reply(callback, {
+      ok: false,
+      message: "Not enough Coins"
+    });
+  }
+
+  profile.coins -= price;
+
+  if (item.category === "frame") {
+    profile.ownedFrames.push(item.id);
+  } else {
+    profile.bagItems.push(item.id);
+  }
+
+  addWalletHistory(
+    profile,
+    "purchase",
+    -price,
+    `Bought ${item.name}`
+  );
+
+  user.coins = profile.coins;
+
+  saveDB();
+
+  socket.emit("profile-update", {
+    id: user.id,
+    coins: profile.coins
+  });
+
+  reply(callback, {
+    ok: true,
+    message: "Item added to Bag",
+    item,
+    coins: profile.coins
+  });
+});
+
+
+// EQUIP BAG ITEM
+socket.on("equip-bag-item", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const itemId = clean(data?.itemId, 80);
+  const item = BAG_ITEMS.find(x => x.id === itemId);
+
+  if (!item) {
+    return reply(callback, {
+      ok: false,
+      message: "Item not found"
+    });
+  }
+
+  profile.bagItems ||= [];
+  profile.ownedFrames ||= ["frame_free"];
+  profile.equippedCosmetics ||= {};
+
+  const owned = item.category === "frame"
+    ? profile.ownedFrames.includes(item.id)
+    : profile.bagItems.includes(item.id);
+
+  if (!owned) {
+    return reply(callback, {
+      ok: false,
+      message: "Buy this item first"
+    });
+  }
+
+  if (item.category === "frame") {
+    profile.frame = item.id;
+    user.frame = item.id;
+  } else {
+    profile.equippedCosmetics[item.category] = item.id;
+  }
+
+  saveDB();
+
+  const room = getRoom(socket);
+
+  if (room) {
+    updateRoom(room);
+  }
+
+  reply(callback, {
+    ok: true,
+    message: "Item equipped",
+    equipped: {
+      frame: profile.frame || "frame_free",
+      ...profile.equippedCosmetics
+    }
+  });
+});
+
+
+// UNEQUIP BAG ITEM
+socket.on("unequip-bag-item", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const category = clean(data?.category, 40);
+
+  if (category === "frame") {
+    profile.frame = "frame_free";
+    user.frame = "frame_free";
+  } else if (
+    BAG_CATEGORIES.includes(category) &&
+    category !== "all"
+  ) {
+    profile.equippedCosmetics ||= {};
+    profile.equippedCosmetics[category] = "";
+  } else {
+    return reply(callback, {
+      ok: false,
+      message: "Invalid category"
+    });
+  }
+
+  saveDB();
+
+  const room = getRoom(socket);
+
+  if (room) {
+    updateRoom(room);
+  }
+
+  reply(callback, {
+    ok: true,
+    message: "Item unequipped"
+  });
+});
 
   /* =======================================
      ROOM TASKS
