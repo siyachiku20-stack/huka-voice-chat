@@ -260,6 +260,15 @@ const BASIC_FRAMES = [
     free: false,
     icon: "⭐",
     gradient: "linear-gradient(135deg,#9333ea,#facc15,#ec4899)"
+  },
+  {
+    id: "frame_svip",
+    name: "SVIP Diamond Frame",
+    price: 50000,
+    free: false,
+    tier: "SVIP",
+    icon: "💎",
+    gradient: "linear-gradient(135deg,#00e5ff,#a855f7,#ff4fd8,#fff1a8)"
   }
 ];
 
