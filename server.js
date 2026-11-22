@@ -717,6 +717,9 @@ io.on("connection", socket => {
       frame: profile.frame || "frame_free"
     };
 
+    profile.frame ||= "frame_free";
+    user.frame = profile.frame;
+     
     online.set(socket.id, user);
     saveDB();
 
