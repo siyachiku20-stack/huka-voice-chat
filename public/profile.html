@@ -1945,5 +1945,27 @@ if (socket.connected) {
 }
 
 </script>
+
+<style>
+@keyframes hukaProfileGlow {
+  0% {
+    filter: brightness(1);
+    box-shadow: 0 0 6px rgba(190, 100, 255, 0.5);
+  }
+  50% {
+    filter: brightness(1.3);
+    box-shadow: 0 0 22px rgba(255, 100, 220, 1);
+  }
+  100% {
+    filter: brightness(1);
+    box-shadow: 0 0 6px rgba(190, 100, 255, 0.5);
+  }
+}
+
+#avatarFrame {
+  animation: hukaProfileGlow 2s ease-in-out infinite;
+}
+</style>
+
 </body>
-</html>
+</html>  
