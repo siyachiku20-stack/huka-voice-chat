@@ -925,7 +925,89 @@ button {
       onclick="closeModal('familyModal')">Close</button>
   </div>
 </div>
+<!-- CP SPACE MODAL -->
 
+<div class="modal" id="cpModal">
+  <div class="modal-box">
+
+    <h2>💞 CP Space</h2>
+
+    <div class="frame-card">
+      <div style="font-size:42px;">💑</div>
+      <h3 id="cpPartnerName">No CP Partner</h3>
+      <p id="cpPartnerInfo">Abhi aapka koi CP Partner nahi hai.</p>
+
+      <div class="info-row">
+        <span>CP Level</span>
+        <strong id="cpLevel">1</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Total CP XP</span>
+        <strong id="cpTotalXP">0</strong>
+      </div>
+
+      <div class="level-progress-track" style="margin-top:12px;">
+        <div class="level-progress-fill" id="cpXPBar"></div>
+      </div>
+
+      <p id="cpXPText" style="font-size:12px;">0 / 100 XP</p>
+
+      <button
+        class="secondary"
+        id="cpUnpairButton"
+        style="width:100%;display:none;margin-top:10px;"
+        onclick="unpairCP()">
+        Unpair CP
+      </button>
+    </div>
+
+    <h3 style="margin-top:20px;">💌 Send CP Request</h3>
+
+    <label>Enter User ID</label>
+    <input
+      id="cpTargetUserId"
+      maxlength="40"
+      placeholder="Enter partner User ID">
+
+    <button
+      class="primary"
+      style="width:100%;margin-top:10px;"
+      onclick="sendCPRequest()">
+      Send CP Request
+    </button>
+
+    <h3 style="margin-top:22px;">📩 Incoming Requests</h3>
+    <div id="cpIncomingRequests">
+      No incoming requests.
+    </div>
+
+    <h3 style="margin-top:22px;">📤 Sent Requests</h3>
+    <div id="cpOutgoingRequests">
+      No sent requests.
+    </div>
+
+    <h3 style="margin-top:22px;">🏆 CP Ranking</h3>
+
+    <select id="cpRankingPeriod" onchange="loadCPRanking()">
+      <option value="weekly">Weekly Ranking</option>
+      <option value="monthly">Monthly Ranking</option>
+    </select>
+
+    <div id="cpRankingList" style="margin-top:12px;">
+      Loading ranking...
+    </div>
+
+    <button
+      class="secondary"
+      style="width:100%;margin-top:18px;"
+      onclick="closeModal('cpModal')">
+      Close
+    </button>
+
+  </div>
+</div>
+  
 <!-- CD KEY MODAL -->
 
 <div class="modal" id="cdkeyModal">
