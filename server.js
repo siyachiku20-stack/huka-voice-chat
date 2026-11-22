@@ -58,6 +58,7 @@ let db = {
   profiles: {},
   inbox: {},
   families: {},
+  cpRequests: {},
   cdKeys: { HUKA100: { reward: 100000, usedBy: [] } }
 };
 
