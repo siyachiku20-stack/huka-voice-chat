@@ -1974,140 +1974,6 @@ function renderLevelRewards() {
   
 /* ---------- BAG AND FRAMES ---------- */
 
-async function openBag() {
-    showModal("bagModal");
-
-    const container = $("levelRewardsList");
-
-    if (container) {
-        container.textContent = "Loading level rewards...";
-    }
-
-    // Server se latest profile aur level rewards lao
-    await loadProfile();
-
-    // Latest rewards display karo
-    renderLevelRewards();
-}
-
-async function loadFrames() {
-    const container = $("bagFrames");
-
-    if (container) {
-        container.textContent = "Loading frames...";
-    }
-
-    const result = await emitRequest("get-frames", {
-        userId: getUserId()
-    });
-
-    if (!result || result.ok === false) {
-        if (container) {
-            container.textContent = result.message || "Frames load nahi hue.";
-        }
-        return;
-    }
-
-    const ownedFrames = result.ownedFrames || [];
-    const activeFrame = result.activeFrame || "frame_free";
-  
-    currentFrames = (result.frames || []).map(frame => ({
-        ...frame,
-        owned: ownedFrames.includes(frame.id),
-        equipped: activeFrame === frame.id
-    }));
-
-    if (profile) {
-        profile.activeFrame = activeFrame;
-        renderProfile();
-    }
-
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    if (!currentFrames.length) {
-        container.textContent = "Abhi koi frame available nahi hai.";
-        return;
-    }
-
-    currentFrames.forEach((frame) => {
-        const card = document.createElement("div");
-        card.className = "frame-card";
-
-        // Frame visual preview
-        const preview = document.createElement("div");
-
-        preview.className = "frame-preview";
-        preview.style.width = "82px";
-        preview.style.height = "82px";
-        preview.style.margin = "0 auto 12px";
-        preview.style.padding = "6px";
-        preview.style.borderRadius = "50%";
-        preview.style.background = frame.gradient ||
-            "linear-gradient(135deg,#ffffff,#d9d9d9)";
-        preview.style.boxShadow = "0 0 12px rgba(0,0,0,.20)";
-
-        const inner = document.createElement("div");
-
-        inner.style.width = "100%";
-        inner.style.height = "100%";
-        inner.style.borderRadius = "50%";
-        inner.style.background = "#ffffff";
-        inner.style.display = "grid";
-        inner.style.placeItems = "center";
-        inner.style.fontSize = "30px";
-        inner.textContent = frame.icon || "👤";
-
-        preview.appendChild(inner);
-
-        const title = document.createElement("h4");
-        title.textContent = frame.name || "Profile Frame";
-
-        if (frame.tier === "VIP" || frame.tier === "SVIP") {
-            const badge = document.createElement("div");
-
-            badge.textContent = frame.tier === "SVIP"
-                ? "♛ SVIP FRAME"
-                : "👑 VIP FRAME";
-
-            badge.style.fontWeight = "bold";
-            badge.style.fontSize = "12px";
-            badge.style.margin = "6px 0";
-            badge.style.color = frame.tier === "SVIP"
-                ? "#a855f7"
-                : "#d49a00";
-
-             card.appendChild(badge);
-        }
-      
-        const price = document.createElement("p");
-        price.textContent =
-            frame.price === 0
-                ? "FREE"
-                : "Coins: " + Number(frame.price || 0).toLocaleString("en-IN");
-
-       const button = document.createElement("button");
-       button.className = "primary";
-
-       const owned = frame.owned === true;
-       const equipped = frame.equipped === true;
-
-       if (equipped) {
-           button.textContent = "Equipped";
-           button.disabled = true;
-       } else if (owned) {
-           button.textContent = "Use Frame";
-           button.onclick = () => equipFrame(frame.id);
-       } else {
-           button.textContent = "Buy Frame";
-           button.onclick = () => buyFrame(frame.id);
-       }
-
-/* =========================================
-   HUKA STORE + MY BAG
-========================================= */
-
 let bagItems = [];
 let bagOwnedItems = [];
 let bagEquippedItems = {};
@@ -2139,6 +2005,17 @@ const BAG_CATEGORY_ICONS = {
     specialEffect: "💎"
 };
 
+async function openBag() {
+    showModal("bagModal");
+
+    $("bagItemsGrid").innerHTML =
+        '<p class="bag-empty">Loading items...</p>';
+
+    await loadProfile();
+    await loadBagItems();
+    renderLevelRewards();
+}
+
 function switchBagView(view) {
     bagCurrentView = view;
 
@@ -2158,36 +2035,9 @@ function selectBagCategory(category, button) {
         item.classList.remove("active");
     });
 
-    if (button) {
-        button.classList.add("active");
-    }
+    if (button) button.classList.add("active");
 
     renderBagItems();
-}
-
-async function openBag() {
-    showModal("bagModal");
-
-    $("bagItemsGrid").innerHTML =
-        '<p class="bag-empty">Loading store...</p>';
-
-    $("levelRewardsList").textContent =
-        "Loading level rewards...";
-
-    bagCurrentCategory = "all";
-    bagCurrentView = "store";
-
-    document.querySelectorAll(".bag-category").forEach(button => {
-        button.classList.toggle(
-            "active",
-            button.textContent.trim() === "All"
-        );
-    });
-
-    await loadProfile();
-    await loadBagItems();
-
-    renderLevelRewards();
 }
 
 async function loadBagItems() {
@@ -2197,43 +2047,33 @@ async function loadBagItems() {
 
     if (!result || result.ok === false) {
         $("bagItemsGrid").innerHTML =
-            '<p class="bag-empty">Bag load nahi hua. Dobara try karein.</p>';
+            '<p class="bag-empty">Bag load nahi hua.</p>';
 
         showToast(result?.message || "Bag load nahi hua.");
         return;
     }
 
-    bagItems = Array.isArray(result.items)
-        ? result.items
-        : [];
-
+    bagItems = Array.isArray(result.items) ? result.items : [];
     bagOwnedItems = Array.isArray(result.ownedItems)
         ? result.ownedItems
         : [];
 
     bagEquippedItems = result.equipped || {};
 
-    if ($("bagCoins")) {
-        $("bagCoins").textContent =
-            Number(result.coins ?? profile?.coins ?? 0)
-            .toLocaleString("en-IN");
-    }
+    $("bagCoins").textContent =
+        Number(result.coins ?? profile?.coins ?? 0)
+        .toLocaleString("en-IN");
 
     renderBagItems();
 }
 
 function isBagItemOwned(item) {
-    if (!item || !item.id) return false;
+    if (!item) return false;
 
-    if (bagOwnedItems.includes(item.id)) {
-        return true;
-    }
+    if (bagOwnedItems.includes(item.id)) return true;
 
     if (item.category === "frame") {
-        return (
-            Array.isArray(profile?.ownedFrames) &&
-            profile.ownedFrames.includes(item.id)
-        );
+        return profile?.ownedFrames?.includes(item.id) || false;
     }
 
     return false;
@@ -2244,8 +2084,8 @@ function isBagItemEquipped(item) {
 
     if (item.category === "frame") {
         return (
-            profile?.frame === item.id ||
             profile?.activeFrame === item.id ||
+            profile?.frame === item.id ||
             bagEquippedItems.frame === item.id
         );
     }
@@ -2255,31 +2095,27 @@ function isBagItemEquipped(item) {
 
 function renderBagItems() {
     const container = $("bagItemsGrid");
-
     if (!container) return;
 
     container.innerHTML = "";
 
-    let items = bagItems.filter(item => {
+    const items = bagItems.filter(item => {
         if (
             bagCurrentCategory !== "all" &&
             item.category !== bagCurrentCategory
-        ) {
-            return false;
-        }
+        ) return false;
 
-        const owned = isBagItemOwned(item);
-
-        if (bagCurrentView === "owned" && !owned) {
-            return false;
-        }
+        if (
+            bagCurrentView === "owned" &&
+            !isBagItemOwned(item)
+        ) return false;
 
         return true;
     });
 
     if (!items.length) {
         container.innerHTML =
-            '<p class="bag-empty">Is category mein abhi koi item nahi hai.</p>';
+            '<p class="bag-empty">Is category mein koi item nahi hai.</p>';
         return;
     }
 
@@ -2310,52 +2146,30 @@ function renderBagItems() {
         const owned = isBagItemOwned(item);
         const equipped = isBagItemEquipped(item);
 
-        if (equipped) {
-            const label = document.createElement("div");
-            label.className = "bag-equipped-label";
-            label.textContent = "✓ EQUIPPED";
-            card.appendChild(label);
+        const button = document.createElement("button");
 
-            const button = document.createElement("button");
+        if (equipped) {
             button.className = "secondary";
             button.textContent = "Unequip";
             button.onclick = () => unequipBagItem(item.id);
 
-            card.appendChild(button);
-
         } else if (owned) {
-            const label = document.createElement("div");
-            label.className = "bag-owned-label";
-            label.textContent = "✓ OWNED";
-            card.appendChild(label);
-
-            const button = document.createElement("button");
             button.className = "primary";
             button.textContent = "Equip";
             button.onclick = () => equipBagItem(item.id);
 
-            card.appendChild(button);
-
         } else {
-            const button = document.createElement("button");
             button.className = "primary";
             button.textContent = "Buy";
-
             button.onclick = () => buyBagItem(item.id);
-
-            card.appendChild(button);
         }
 
+        card.appendChild(button);
         container.appendChild(card);
     });
 }
 
 async function buyBagItem(itemId) {
-    if (!itemId) {
-        showToast("Item ID nahi mili.");
-        return;
-    }
-
     const item = bagItems.find(item => item.id === itemId);
 
     if (!item) {
@@ -2364,23 +2178,17 @@ async function buyBagItem(itemId) {
     }
 
     if (isBagItemOwned(item)) {
-        showToast("Ye item pehle se aapke Bag mein hai.");
+        showToast("Ye item pehle se owned hai.");
         return;
     }
 
-    const price = Number(item.price || 0);
+    const confirmed = confirm(
+        item.name + " ko " +
+        Number(item.price || 0).toLocaleString("en-IN") +
+        " Coins mein kharidein?"
+    );
 
-    if (
-        !confirm(
-            "Kya aap " +
-            item.name +
-            " ko " +
-            price.toLocaleString("en-IN") +
-            " Coins mein kharidna chahte hain?"
-        )
-    ) {
-        return;
-    }
+    if (!confirmed) return;
 
     const result = await emitRequest("buy-bag-item", {
         userId: getUserId(),
@@ -2388,25 +2196,19 @@ async function buyBagItem(itemId) {
     });
 
     if (isSuccess(result)) {
-        showToast(result.message || "Item successfully purchased!");
+        showToast(result.message || "Item kharid liya!");
 
-        if (result.profile) {
-            profile = result.profile;
-            renderProfile();
-        }
+        if (result.profile) profile = result.profile;
 
-        await loadBagItems();
         await loadProfile();
-        await loadWalletHistory();
+        await loadBagItems();
 
     } else {
-        showToast(result.message || "Item purchase nahi hua.");
+        showToast(result.message || "Purchase nahi hua.");
     }
 }
 
 async function equipBagItem(itemId) {
-    if (!itemId) return;
-
     const result = await emitRequest("equip-bag-item", {
         userId: getUserId(),
         itemId: itemId
@@ -2415,13 +2217,8 @@ async function equipBagItem(itemId) {
     if (isSuccess(result)) {
         showToast(result.message || "Item equip ho gaya!");
 
-        if (result.profile) {
-            profile = result.profile;
-            renderProfile();
-        }
-
-        await loadBagItems();
         await loadProfile();
+        await loadBagItems();
 
     } else {
         showToast(result.message || "Item equip nahi hua.");
@@ -2429,8 +2226,6 @@ async function equipBagItem(itemId) {
 }
 
 async function unequipBagItem(itemId) {
-    if (!itemId) return;
-
     const result = await emitRequest("unequip-bag-item", {
         userId: getUserId(),
         itemId: itemId
@@ -2439,29 +2234,22 @@ async function unequipBagItem(itemId) {
     if (isSuccess(result)) {
         showToast(result.message || "Item unequip ho gaya!");
 
-        if (result.profile) {
-            profile = result.profile;
-            renderProfile();
-        }
-
-        await loadBagItems();
         await loadProfile();
+        await loadBagItems();
 
     } else {
         showToast(result.message || "Item unequip nahi hua.");
     }
 }
 
-/* ---------- LEGACY FRAME SUPPORT ---------- */
+/* ---------- FRAME SUPPORT ---------- */
 
 async function loadFrames() {
     const result = await emitRequest("get-frames", {
         userId: getUserId()
     });
 
-    if (!result || result.ok === false) {
-        return;
-    }
+    if (!result || result.ok === false) return;
 
     const ownedFrames = result.ownedFrames || [];
     const activeFrame = result.activeFrame || "frame_free";
@@ -2487,9 +2275,8 @@ async function buyFrame(frameId) {
 
     if (isSuccess(result)) {
         showToast(result.message || "Frame kharid liya!");
-        await loadFrames();
-        await loadBagItems();
         await loadProfile();
+        await loadBagItems();
     } else {
         showToast(result.message || "Frame purchase nahi hua.");
     }
@@ -2503,13 +2290,12 @@ async function equipFrame(frameId) {
 
     if (isSuccess(result)) {
         showToast(result.message || "Frame equip ho gaya!");
-        await loadFrames();
-        await loadBagItems();
         await loadProfile();
+        await loadBagItems();
     } else {
         showToast(result.message || "Frame equip nahi hua.");
     }
-  }
+}
 
 /* ---------- LANGUAGE ---------- */
 
