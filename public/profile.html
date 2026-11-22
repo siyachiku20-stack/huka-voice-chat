@@ -1618,6 +1618,50 @@ async function leaveFamily() {
     }
 }
 
+/* ---------- LEVEL REWARDS DISPLAY ---------- */
+
+function renderLevelRewards() {
+    const container = $("levelRewardsList");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const rewards = profile?.levelRewards || [];
+
+    if (!rewards.length) {
+        container.textContent =
+            "Level rewards data abhi server se nahi aaya.";
+        return;
+    }
+
+    rewards.forEach((reward) => {
+        const card = document.createElement("div");
+        card.className = "frame-card";
+
+        const icon = document.createElement("div");
+        icon.className = "frame-preview";
+        icon.textContent = reward.owned ? "🎁" : "🔒";
+
+        const title = document.createElement("h4");
+        title.textContent = "Level " + reward.level;
+
+        const coins = document.createElement("p");
+        coins.textContent =
+            Number(reward.coins).toLocaleString("en-IN") + " Coins";
+
+        const name = document.createElement("p");
+        name.textContent = reward.name;
+
+        const status = document.createElement("strong");
+        status.textContent = reward.owned ? "✅ OWNED" : "🔒 LOCKED";
+        status.style.color = reward.owned ? "#16a34a" : "#888";
+
+        card.append(icon, title, coins, name, status);
+        container.appendChild(card);
+    });
+  } 
+  
 /* ---------- BAG AND FRAMES ---------- */
 
 async function openBag() {
