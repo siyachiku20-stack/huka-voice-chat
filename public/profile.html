@@ -1197,7 +1197,35 @@ function renderProfile() {
         $("profileLevel").textContent = profile.level || 1;
     }
 
-    if ($("followersCount")) {
+    // LEVEL XP PROGRESS DISPLAY
+
+    const levelData = profile.levelProgress || {};
+
+    const currentXP = Number(
+        levelData.currentXP ?? profile.xp ?? 0
+    );
+
+   const requiredXP = Number(
+       levelData.requiredXP ?? levelData.nextLevelXP ?? 100
+    );
+
+   const safeRequiredXP = Math.max(1, requiredXP);
+
+   const progress = Math.min(
+       100,
+       Math.max(0, (currentXP / safeRequiredXP) * 100)
+   );
+
+   if ($("levelXPText")) {
+       $("levelXPText").textContent =
+           currentXP + " / " + safeRequiredXP + " XP";
+   }
+
+   if ($("levelXPBar")) {
+       $("levelXPBar").style.width = progress + "%";
+   }
+  
+   if ($("followersCount")) {
         $("followersCount").textContent =
             profile.followersCount ??
             (Array.isArray(profile.followers) ? profile.followers.length : 0);
