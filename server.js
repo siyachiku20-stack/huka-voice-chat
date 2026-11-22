@@ -956,9 +956,15 @@ io.on("connection", socket => {
 
     saveDB();
 
+    const currentRoom = getRoom(socket);
+    if (currentRoom) {
+      updateRoom(currentRoom);
+    }
+
     reply(callback, {
       ok: true,
-      frame: frameId
+      frame: frameId,
+      frameData: getFrameDesign(frameId)
     });
   });
 
