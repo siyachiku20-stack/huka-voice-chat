@@ -408,7 +408,7 @@ async function handleSeatClick(index) {
 }
 
 /* ==========================================
-   MEMBERS
+   MEMBERS WITH PROFILE FRAMES
 ========================================== */
 
 function renderMembers() {
@@ -423,7 +423,58 @@ function renderMembers() {
 
     row.className = "member-item";
 
+    // Member DP frame
+    const avatarFrame = document.createElement("div");
+
+    avatarFrame.className = "member-avatar-frame";
+
+    const frameData = member.frameData || {};
+
+    avatarFrame.style.width = "42px";
+    avatarFrame.style.height = "42px";
+    avatarFrame.style.minWidth = "42px";
+    avatarFrame.style.padding = "3px";
+    avatarFrame.style.boxSizing = "border-box";
+    avatarFrame.style.borderRadius = "50%";
+
+    avatarFrame.style.background =
+      frameData.gradient ||
+      "linear-gradient(135deg,#9333ea,#ec4899)";
+
+    const avatarInner = document.createElement("div");
+
+    avatarInner.style.width = "100%";
+    avatarInner.style.height = "100%";
+    avatarInner.style.borderRadius = "50%";
+    avatarInner.style.overflow = "hidden";
+    avatarInner.style.background = "#241638";
+    avatarInner.style.display = "grid";
+    avatarInner.style.placeItems = "center";
+
+    if (member.avatar) {
+      const img = document.createElement("img");
+
+      img.src = member.avatar;
+      img.alt = "Profile";
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+
+      img.onerror = () => {
+        img.remove();
+        avatarInner.textContent = "👤";
+      };
+
+      avatarInner.appendChild(img);
+    } else {
+      avatarInner.textContent = "👤";
+    }
+
+    avatarFrame.appendChild(avatarInner);
+
     const name = document.createElement("span");
+
+    name.className = "member-name";
 
     name.textContent =
       (member.isOwner ? "👑 " : "") +
@@ -435,17 +486,20 @@ function renderMembers() {
     status.textContent =
       member.micOn === false ? "🔇" : "🎙️";
 
+    row.appendChild(avatarFrame);
     row.appendChild(name);
     row.appendChild(status);
 
     list.appendChild(row);
   });
 
-  $("memberCount").textContent =
-    currentMembers.length;
+  if ($("memberCount")) {
+    $("memberCount").textContent = currentMembers.length;
+  }
 
-  $("membersTotal").textContent =
-    currentMembers.length;
+  if ($("membersTotal")) {
+    $("membersTotal").textContent = currentMembers.length;
+  }
 
   updateGiftReceivers();
 }
