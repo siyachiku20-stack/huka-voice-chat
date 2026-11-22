@@ -457,6 +457,7 @@ function getMembers(room) {
       avatar: user.avatar || "",
       level: user.level || 1,
       frame: user.frame || "frame_free",
+      frameData: getFrameDesign(user.frame || "frame_free"),
       socketId,
       seat: seatIndex === -1 ? null : seatIndex + 1,
       micOn: room.micStates.get(socketId) !== false,
