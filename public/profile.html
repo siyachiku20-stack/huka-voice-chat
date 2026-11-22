@@ -142,7 +142,37 @@ button {
   color: white;
   font-size: 11px;
 }
+  
+/* LEVEL XP PROGRESS */
 
+.level-progress {
+  margin: 12px 0 0 115px;
+  max-width: 260px;
+}
+
+.level-progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #69758b;
+  margin-bottom: 6px;
+}
+
+.level-progress-track {
+  height: 8px;
+  background: #ffffffa8;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.level-progress-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #9252d9, #e45ca9);
+  transition: width .4s ease;
+}
+  
 .edit-button {
   position: absolute;
   top: 24px;
