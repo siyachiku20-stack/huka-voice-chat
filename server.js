@@ -1290,10 +1290,19 @@ io.on("connection", socket => {
     room.micStates.set(socket.id, true);
 
     const joinedProfile = db.profiles[user.id];
-    joinedProfile.roomJoins = (Number(joinedProfile.roomJoins) || 0) + 1;
+
+    joinedProfile.roomJoins =
+      (Number(joinedProfile.roomJoins) || 0) + 1;
+
+    // Give 10 XP for joining a room.
+    // Maximum 100 XP per day.
+    addExperience(joinedProfile, 10);
+
+    user.level = joinedProfile.level;
+
     saveDB();
     completeTask(user.id, "join_room");
-
+  
     reply(callback, {
       ok: true,
       room: {
