@@ -890,6 +890,8 @@ io.on("connection", socket => {
         level: 1,
         totalGifts: 0,
         totalExperience: 0,
+        claimedLevelRewards: [],
+        levelRewardItems: [], 
         walletHistory: [],
         svipUntil: 0,
         medals: [],
