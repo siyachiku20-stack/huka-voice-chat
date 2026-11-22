@@ -201,60 +201,114 @@ const ALLOWED_EMOJIS = [
 ];
 
 /* =========================================
-   FRAMES
+   FRAMES - 50 DESIGNS
 ========================================= */
 
-const FRAMES = [
+const BASIC_FRAMES = [
   {
     id: "frame_free",
     name: "Basic Frame",
     price: 0,
     free: true,
-    icon: "🖼️"
+    icon: "🖼️",
+    gradient: "linear-gradient(135deg,#d1d5db,#6b7280)"
   },
   {
     id: "frame_pink",
     name: "Pink Love",
     price: 500,
     free: false,
-    icon: "💗"
+    icon: "💗",
+    gradient: "linear-gradient(135deg,#ff4fa3,#ffb6d9)"
   },
   {
     id: "frame_blue",
     name: "Blue Galaxy",
     price: 1000,
     free: false,
-    icon: "🌌"
+    icon: "🌌",
+    gradient: "linear-gradient(135deg,#2563eb,#a855f7)"
   },
   {
     id: "frame_gold",
     name: "Golden Royal",
     price: 2500,
     free: false,
-    icon: "👑"
+    icon: "👑",
+    gradient: "linear-gradient(135deg,#facc15,#b45309)"
   },
   {
     id: "frame_diamond",
     name: "Diamond Frame",
     price: 5000,
     free: false,
-    icon: "💎"
+    icon: "💎",
+    gradient: "linear-gradient(135deg,#67e8f9,#2563eb)"
   },
   {
     id: "frame_rainbow",
     name: "Rainbow Frame",
     price: 7500,
     free: false,
-    icon: "🌈"
+    icon: "🌈",
+    gradient: "linear-gradient(135deg,#ff0000,#ff9900,#ffff00,#00cc66,#3399ff,#9933ff)"
   },
   {
     id: "frame_vip",
     name: "VIP Frame",
     price: 10000,
     free: false,
-    icon: "⭐"
+    icon: "⭐",
+    gradient: "linear-gradient(135deg,#9333ea,#facc15,#ec4899)"
   }
 ];
+
+const EXTRA_FRAME_NAMES = [
+  "Royal Purple", "Ocean Wave", "Red Fire", "Emerald Green",
+  "Silver Shine", "Sunset Glow", "Moon Light", "Crystal Blue",
+  "Rose Gold", "Dark Galaxy", "Neon Pink", "Neon Green",
+  "Ice Queen", "Golden Star", "Magic Purple", "Aqua Dream",
+  "Ruby Red", "Sapphire", "Jade Royal", "Lavender Love",
+  "Electric Blue", "Orange Flame", "Mystic Night", "Pearl White",
+  "Cyber Neon", "Butterfly", "Flower Garden", "Aurora",
+  "Diamond Rose", "Royal Crown", "Star Light", "Galaxy Ring",
+  "Rainbow Pearl", "Pink Princess", "Blue Angel", "Golden Dragon",
+  "Cosmic Heart", "Emerald Crown", "Luxury Shine", "Magic Rainbow",
+  "Huka Special", "Huka Legend", "Huka Premium"
+];
+
+const FRAME_ICONS = [
+  "💜", "🌊", "🔥", "💚", "🥈",
+  "🌅", "🌙", "🧊", "🌹", "🌌",
+  "💖", "🍀", "❄️", "⭐", "🔮",
+  "🩵", "♦️", "💠", "🍃", "💐",
+  "⚡", "🧡", "🌃", "🤍", "💫",
+  "🦋", "🌸", "🌈", "💎", "👑",
+  "✨", "🌠", "🦄", "👸", "👼",
+  "🐉", "💗", "💚", "💰", "🌈",
+  "❤️", "🏆", "💎"
+];
+
+const EXTRA_FRAMES = EXTRA_FRAME_NAMES.map((name, index) => {
+  const hue = (index * 29 + 15) % 360;
+  const hue2 = (hue + 75) % 360;
+  const hue3 = (hue + 155) % 360;
+
+  return {
+    id: `frame_${String(index + 8).padStart(2, "0")}`,
+    name,
+    price: (index + 1) * 500 + 500,
+    free: false,
+    icon: FRAME_ICONS[index],
+    gradient: `linear-gradient(135deg,hsl(${hue},90%,60%),hsl(${hue2},90%,55%),hsl(${hue3},85%,60%))`
+  };
+});
+
+const FRAMES = [...BASIC_FRAMES, ...EXTRA_FRAMES];
+
+function getFrameDesign(frameId) {
+  return FRAMES.find(frame => frame.id === frameId) || FRAMES[0];
+     }
 
 /* =========================================
    ROOM TASKS
