@@ -1667,6 +1667,7 @@ function renderLevelRewards() {
 async function openBag() {
     showModal("bagModal");
     await loadFrames();
+    renderLevelRewards();
 }
 
 async function loadFrames() {
