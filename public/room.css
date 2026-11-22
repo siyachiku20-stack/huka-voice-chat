@@ -840,3 +840,29 @@ button {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* =====================================
+   ANIMATED PROFILE FRAME GLOW
+===================================== */
+
+@keyframes hukaFrameGlow {
+  0% {
+    filter: brightness(1);
+    box-shadow: 0 0 5px rgba(190, 100, 255, 0.4);
+  }
+
+  50% {
+    filter: brightness(1.3);
+    box-shadow: 0 0 18px rgba(255, 100, 220, 0.9);
+  }
+
+  100% {
+    filter: brightness(1);
+    box-shadow: 0 0 5px rgba(190, 100, 255, 0.4);
+  }
+}
+
+.seat-card .seat-avatar,
+.member-avatar-frame {
+  animation: hukaFrameGlow 2s ease-in-out infinite;
+}
