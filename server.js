@@ -1458,7 +1458,14 @@ io.on("connection", socket => {
     addExperience(joinedProfile, 10);
 
     user.level = joinedProfile.level;
+    user.coins = Number(joinedProfile.coins) || 0;
 
+    socket.emit("profile-update", {
+      id: user.id,
+      level: joinedProfile.level,
+      coins: joinedProfile.coins
+    });
+     
     saveDB();
     completeTask(user.id, "join_room");
   
