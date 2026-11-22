@@ -1666,7 +1666,17 @@ function renderLevelRewards() {
 
 async function openBag() {
     showModal("bagModal");
-    await loadFrames();
+
+    const container = $("levelRewardsList");
+
+    if (container) {
+        container.textContent = "Loading level rewards...";
+    }
+
+    // Server se latest profile aur level rewards lao
+    await loadProfile();
+
+    // Latest rewards display karo
     renderLevelRewards();
 }
 
