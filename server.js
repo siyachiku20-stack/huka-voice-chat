@@ -74,6 +74,7 @@ try {
       profiles: saved.profiles || {},
       inbox: saved.inbox || {},
       families: saved.families || {},
+      cpRequests: saved.cpRequests || {},
       cdKeys: saved.cdKeys || { HUKA100: { reward: 100000, usedBy: [] } }
     };
   }
