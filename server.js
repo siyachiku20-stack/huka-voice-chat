@@ -818,7 +818,8 @@ io.on("connection", socket => {
     }
 
     const result = { ...profile };
-
+    result.levelProgress = getLevelProgress(profile);
+     
     // Do not expose private information.
     delete result.taskProgress;
     delete result.walletHistory;
