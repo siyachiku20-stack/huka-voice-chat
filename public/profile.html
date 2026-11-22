@@ -1595,31 +1595,61 @@ async function loadFrames() {
         const card = document.createElement("div");
         card.className = "frame-card";
 
+        // Frame visual preview
+        const preview = document.createElement("div");
+
+        preview.className = "frame-preview";
+        preview.style.width = "82px";
+        preview.style.height = "82px";
+        preview.style.margin = "0 auto 12px";
+        preview.style.padding = "6px";
+        preview.style.borderRadius = "50%";
+        preview.style.background = frame.gradient ||
+            "linear-gradient(135deg,#ffffff,#d9d9d9)";
+        preview.style.boxShadow = "0 0 12px rgba(0,0,0,.20)";
+
+        const inner = document.createElement("div");
+
+        inner.style.width = "100%";
+        inner.style.height = "100%";
+        inner.style.borderRadius = "50%";
+        inner.style.background = "#ffffff";
+        inner.style.display = "grid";
+        inner.style.placeItems = "center";
+        inner.style.fontSize = "30px";
+        inner.textContent = frame.icon || "👤";
+
+        preview.appendChild(inner);
+
         const title = document.createElement("h4");
         title.textContent = frame.name || "Profile Frame";
 
         const price = document.createElement("p");
-        price.textContent = "Coins: " + Number(frame.price || 0);
+        price.textContent =
+            frame.price === 0
+                ? "FREE"
+                : "Coins: " + Number(frame.price || 0).toLocaleString("en-IN");
 
-        const button = document.createElement("button");
+       const button = document.createElement("button");
+       button.className = "primary";
 
-        const owned = frame.owned === true;
-        const equipped = frame.equipped === true;
+       const owned = frame.owned === true;
+       const equipped = frame.equipped === true;
 
-        if (equipped) {
-            button.textContent = "Equipped";
-            button.disabled = true;
-        } else if (owned) {
-            button.textContent = "Use Frame";
-            button.onclick = () => equipFrame(frame.id || frame.frameId);
-        } else {
-            button.textContent = "Buy Frame";
-            button.onclick = () => buyFrame(frame.id || frame.frameId);
-        }
+       if (equipped) {
+           button.textContent = "Equipped";
+           button.disabled = true;
+       } else if (owned) {
+           button.textContent = "Use Frame";
+           button.onclick = () => equipFrame(frame.id);
+       } else {
+           button.textContent = "Buy Frame";
+           button.onclick = () => buyFrame(frame.id);
+       }
 
-        card.append(title, price, button);
-        container.appendChild(card);
-    });
+       card.append(preview, title, price, button);
+       container.appendChild(card);
+  });
 }
 
 async function buyFrame(frameId) {
