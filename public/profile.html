@@ -1653,7 +1653,8 @@ async function leaveFamily() {
 /* ---------- LEVEL REWARDS DISPLAY ---------- */
 
 function renderLevelRewards() {
-    const container = $("levelRewardsList");
+   const container =
+       $("levelPageRewardsList") || $("levelRewardsList");
 
     if (!container) return;
 
