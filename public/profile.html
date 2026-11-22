@@ -440,9 +440,7 @@ button {
   margin-bottom: 7px;
 }
 
-#toast.show {
-    display: block;
-}
+#toast {
   display: none;
   position: fixed;
   z-index: 150;
@@ -456,6 +454,10 @@ button {
   font-size: 12px;
   max-width: 90%;
   text-align: center;
+}
+
+#toast.show {
+  display: block;
 }
 
 @media(min-width:600px) {
