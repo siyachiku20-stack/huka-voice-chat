@@ -1649,7 +1649,35 @@ async function leaveFamily() {
         showToast(result.message || "Family leave nahi hui.");
     }
 }
+async function openLevel() {
+    showModal("levelModal");
 
+    if ($("levelPageRewardsList")) {
+        $("levelPageRewardsList").textContent =
+            "Loading rewards...";
+    }
+
+    await loadProfile();
+
+    if (!profile) {
+        showToast("Level data load nahi hua.");
+        return;
+    }
+
+    if ($("levelPageCurrent")) {
+        $("levelPageCurrent").textContent =
+            profile.level || 1;
+    }
+
+    if ($("levelPageXP")) {
+        $("levelPageXP").textContent =
+            Number(profile.levelProgress?.totalXP || 0)
+            .toLocaleString("en-IN");
+    }
+
+    renderLevelRewards();
+}
+  
 /* ---------- LEVEL REWARDS DISPLAY ---------- */
 
 function renderLevelRewards() {
