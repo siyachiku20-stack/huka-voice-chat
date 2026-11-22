@@ -2104,17 +2104,382 @@ async function loadFrames() {
            button.onclick = () => buyFrame(frame.id);
        }
 
-       card.append(preview, title, price, button);
-       container.appendChild(card);
-  });
+/* =========================================
+   HUKA STORE + MY BAG
+========================================= */
+
+let bagItems = [];
+let bagOwnedItems = [];
+let bagEquippedItems = {};
+let bagCurrentCategory = "all";
+let bagCurrentView = "store";
+
+const BAG_CATEGORY_NAMES = {
+    all: "All Items",
+    frame: "Avatar Frames",
+    vehicle: "Vehicles",
+    chatBubble: "Chat Bubbles",
+    profileCard: "Profile Cards",
+    rgbName: "RGB Names",
+    entryEffect: "Entry Effects",
+    micEffect: "Mic Effects",
+    nameDecoration: "Name Decorations",
+    specialEffect: "Special Effects"
+};
+
+const BAG_CATEGORY_ICONS = {
+    frame: "🖼️",
+    vehicle: "🚗",
+    chatBubble: "💬",
+    profileCard: "🪪",
+    rgbName: "🌈",
+    entryEffect: "✨",
+    micEffect: "🎤",
+    nameDecoration: "👑",
+    specialEffect: "💎"
+};
+
+function switchBagView(view) {
+    bagCurrentView = view;
+
+    $("bagStoreTab").className =
+        view === "store" ? "primary" : "secondary";
+
+    $("bagOwnedTab").className =
+        view === "owned" ? "primary" : "secondary";
+
+    renderBagItems();
 }
 
-async function buyFrame(frameId) {
-    if (!frameId) {
-        showToast("Frame ID nahi mili.");
+function selectBagCategory(category, button) {
+    bagCurrentCategory = category;
+
+    document.querySelectorAll(".bag-category").forEach(item => {
+        item.classList.remove("active");
+    });
+
+    if (button) {
+        button.classList.add("active");
+    }
+
+    renderBagItems();
+}
+
+async function openBag() {
+    showModal("bagModal");
+
+    $("bagItemsGrid").innerHTML =
+        '<p class="bag-empty">Loading store...</p>';
+
+    $("levelRewardsList").textContent =
+        "Loading level rewards...";
+
+    bagCurrentCategory = "all";
+    bagCurrentView = "store";
+
+    document.querySelectorAll(".bag-category").forEach(button => {
+        button.classList.toggle(
+            "active",
+            button.textContent.trim() === "All"
+        );
+    });
+
+    await loadProfile();
+    await loadBagItems();
+
+    renderLevelRewards();
+}
+
+async function loadBagItems() {
+    const result = await emitRequest("get-bag", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        $("bagItemsGrid").innerHTML =
+            '<p class="bag-empty">Bag load nahi hua. Dobara try karein.</p>';
+
+        showToast(result?.message || "Bag load nahi hua.");
         return;
     }
 
+    bagItems = Array.isArray(result.items)
+        ? result.items
+        : [];
+
+    bagOwnedItems = Array.isArray(result.ownedItems)
+        ? result.ownedItems
+        : [];
+
+    bagEquippedItems = result.equipped || {};
+
+    if ($("bagCoins")) {
+        $("bagCoins").textContent =
+            Number(result.coins ?? profile?.coins ?? 0)
+            .toLocaleString("en-IN");
+    }
+
+    renderBagItems();
+}
+
+function isBagItemOwned(item) {
+    if (!item || !item.id) return false;
+
+    if (bagOwnedItems.includes(item.id)) {
+        return true;
+    }
+
+    if (item.category === "frame") {
+        return (
+            Array.isArray(profile?.ownedFrames) &&
+            profile.ownedFrames.includes(item.id)
+        );
+    }
+
+    return false;
+}
+
+function isBagItemEquipped(item) {
+    if (!item) return false;
+
+    if (item.category === "frame") {
+        return (
+            profile?.frame === item.id ||
+            profile?.activeFrame === item.id ||
+            bagEquippedItems.frame === item.id
+        );
+    }
+
+    return bagEquippedItems[item.category] === item.id;
+}
+
+function renderBagItems() {
+    const container = $("bagItemsGrid");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    let items = bagItems.filter(item => {
+        if (
+            bagCurrentCategory !== "all" &&
+            item.category !== bagCurrentCategory
+        ) {
+            return false;
+        }
+
+        const owned = isBagItemOwned(item);
+
+        if (bagCurrentView === "owned" && !owned) {
+            return false;
+        }
+
+        return true;
+    });
+
+    if (!items.length) {
+        container.innerHTML =
+            '<p class="bag-empty">Is category mein abhi koi item nahi hai.</p>';
+        return;
+    }
+
+    items.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "bag-item-card";
+
+        const icon = document.createElement("div");
+        icon.className = "bag-item-icon";
+        icon.textContent =
+            item.icon || BAG_CATEGORY_ICONS[item.category] || "🎁";
+
+        const title = document.createElement("h4");
+        title.textContent = item.name || "Huka Item";
+
+        const category = document.createElement("p");
+        category.textContent =
+            BAG_CATEGORY_NAMES[item.category] || item.category || "Item";
+
+        const price = document.createElement("p");
+        price.textContent =
+            Number(item.price || 0) === 0
+                ? "FREE"
+                : "💰 " + Number(item.price).toLocaleString("en-IN") + " Coins";
+
+        card.append(icon, title, category, price);
+
+        const owned = isBagItemOwned(item);
+        const equipped = isBagItemEquipped(item);
+
+        if (equipped) {
+            const label = document.createElement("div");
+            label.className = "bag-equipped-label";
+            label.textContent = "✓ EQUIPPED";
+            card.appendChild(label);
+
+            const button = document.createElement("button");
+            button.className = "secondary";
+            button.textContent = "Unequip";
+            button.onclick = () => unequipBagItem(item.id);
+
+            card.appendChild(button);
+
+        } else if (owned) {
+            const label = document.createElement("div");
+            label.className = "bag-owned-label";
+            label.textContent = "✓ OWNED";
+            card.appendChild(label);
+
+            const button = document.createElement("button");
+            button.className = "primary";
+            button.textContent = "Equip";
+            button.onclick = () => equipBagItem(item.id);
+
+            card.appendChild(button);
+
+        } else {
+            const button = document.createElement("button");
+            button.className = "primary";
+            button.textContent = "Buy";
+
+            button.onclick = () => buyBagItem(item.id);
+
+            card.appendChild(button);
+        }
+
+        container.appendChild(card);
+    });
+}
+
+async function buyBagItem(itemId) {
+    if (!itemId) {
+        showToast("Item ID nahi mili.");
+        return;
+    }
+
+    const item = bagItems.find(item => item.id === itemId);
+
+    if (!item) {
+        showToast("Item nahi mila.");
+        return;
+    }
+
+    if (isBagItemOwned(item)) {
+        showToast("Ye item pehle se aapke Bag mein hai.");
+        return;
+    }
+
+    const price = Number(item.price || 0);
+
+    if (
+        !confirm(
+            "Kya aap " +
+            item.name +
+            " ko " +
+            price.toLocaleString("en-IN") +
+            " Coins mein kharidna chahte hain?"
+        )
+    ) {
+        return;
+    }
+
+    const result = await emitRequest("buy-bag-item", {
+        userId: getUserId(),
+        itemId: itemId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Item successfully purchased!");
+
+        if (result.profile) {
+            profile = result.profile;
+            renderProfile();
+        }
+
+        await loadBagItems();
+        await loadProfile();
+        await loadWalletHistory();
+
+    } else {
+        showToast(result.message || "Item purchase nahi hua.");
+    }
+}
+
+async function equipBagItem(itemId) {
+    if (!itemId) return;
+
+    const result = await emitRequest("equip-bag-item", {
+        userId: getUserId(),
+        itemId: itemId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Item equip ho gaya!");
+
+        if (result.profile) {
+            profile = result.profile;
+            renderProfile();
+        }
+
+        await loadBagItems();
+        await loadProfile();
+
+    } else {
+        showToast(result.message || "Item equip nahi hua.");
+    }
+}
+
+async function unequipBagItem(itemId) {
+    if (!itemId) return;
+
+    const result = await emitRequest("unequip-bag-item", {
+        userId: getUserId(),
+        itemId: itemId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Item unequip ho gaya!");
+
+        if (result.profile) {
+            profile = result.profile;
+            renderProfile();
+        }
+
+        await loadBagItems();
+        await loadProfile();
+
+    } else {
+        showToast(result.message || "Item unequip nahi hua.");
+    }
+}
+
+/* ---------- LEGACY FRAME SUPPORT ---------- */
+
+async function loadFrames() {
+    const result = await emitRequest("get-frames", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        return;
+    }
+
+    const ownedFrames = result.ownedFrames || [];
+    const activeFrame = result.activeFrame || "frame_free";
+
+    currentFrames = (result.frames || []).map(frame => ({
+        ...frame,
+        owned: ownedFrames.includes(frame.id),
+        equipped: activeFrame === frame.id
+    }));
+
+    if (profile) {
+        profile.activeFrame = activeFrame;
+    }
+
+    renderProfile();
+}
+
+async function buyFrame(frameId) {
     const result = await emitRequest("buy-frame", {
         userId: getUserId(),
         frameId: frameId
@@ -2123,6 +2488,7 @@ async function buyFrame(frameId) {
     if (isSuccess(result)) {
         showToast(result.message || "Frame kharid liya!");
         await loadFrames();
+        await loadBagItems();
         await loadProfile();
     } else {
         showToast(result.message || "Frame purchase nahi hua.");
@@ -2130,11 +2496,6 @@ async function buyFrame(frameId) {
 }
 
 async function equipFrame(frameId) {
-    if (!frameId) {
-        showToast("Frame ID nahi mili.");
-        return;
-    }
-
     const result = await emitRequest("equip-frame", {
         userId: getUserId(),
         frameId: frameId
@@ -2143,11 +2504,12 @@ async function equipFrame(frameId) {
     if (isSuccess(result)) {
         showToast(result.message || "Frame equip ho gaya!");
         await loadFrames();
+        await loadBagItems();
         await loadProfile();
     } else {
         showToast(result.message || "Frame equip nahi hua.");
     }
-}
+  }
 
 /* ---------- LANGUAGE ---------- */
 
