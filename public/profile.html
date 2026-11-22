@@ -2283,57 +2283,102 @@ async function equipFrame(frameId) {
 
 /* ---------- LANGUAGE ---------- */
 
+const HUKA_LANGUAGES = {
+    en: "English",
+    hi: "हिन्दी",
+    ar: "العربية",
+    bn: "বাংলা",
+    ur: "اردو",
+    ne: "नेपाली"
+};
+
 function openLanguage() {
-    const modal = $("languageModal");
-
-    if (!modal) return;
-
-    let select = modal.querySelector("#hukaLanguageSelect");
+    const select = $("languageSelect");
 
     if (!select) {
-        select = document.createElement("select");
-        select.id = "hukaLanguageSelect";
-
-        const languages = [
-            ["en", "English"],
-            ["hi", "हिन्दी"],
-            ["ur", "اردو"],
-            ["bn", "বাংলা"],
-            ["ne", "नेपाली"],
-            ["ar", "العربية"]
-        ];
-
-        languages.forEach(([value, label]) => {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = label;
-            select.appendChild(option);
-        });
-
-        const button = document.createElement("button");
-        button.textContent = "Save Language";
-        button.onclick = saveLanguage;
-
-        modal.append(select, button);
+        showToast("Language selection nahi mila.");
+        return;
     }
 
-    select.value = localStorage.getItem("hukaLanguage") || "en";
+    const savedLanguage =
+        localStorage.getItem("hukaLanguage") || "en";
+
+    select.value = savedLanguage;
+
+    if ($("languageLabel")) {
+        $("languageLabel").textContent =
+            HUKA_LANGUAGES[savedLanguage] || "English";
+    }
+
     showModal("languageModal");
 }
 
 function saveLanguage() {
-    const select = $("hukaLanguageSelect");
+    const select = $("languageSelect");
 
-    if (!select) return;
+    if (!select) {
+        showToast("Language select nahi mili.");
+        return;
+    }
 
-    localStorage.setItem("hukaLanguage", select.value);
+    const selectedLanguage = select.value;
+
+    if (!HUKA_LANGUAGES[selectedLanguage]) {
+        showToast("Please select a valid language.");
+        return;
+    }
+
+    localStorage.setItem(
+        "hukaLanguage",
+        selectedLanguage
+    );
+
+    document.documentElement.lang = selectedLanguage;
+
+    document.documentElement.dir =
+        (selectedLanguage === "ar" ||
+         selectedLanguage === "ur")
+            ? "rtl"
+            : "ltr";
+
+    if ($("languageLabel")) {
+        $("languageLabel").textContent =
+            HUKA_LANGUAGES[selectedLanguage];
+    }
 
     closeModal("languageModal");
 
     showToast(
-        "Language preference save ho gayi. Puri app translation ke liye baaki pages mein bhi translation support add karna hoga."
+        "Language preference save ho gayi: " +
+        HUKA_LANGUAGES[selectedLanguage]
     );
 }
+
+/* RESTORE SAVED LANGUAGE */
+
+function restoreLanguage() {
+    const selectedLanguage =
+        localStorage.getItem("hukaLanguage") || "en";
+
+    document.documentElement.lang = selectedLanguage;
+
+    document.documentElement.dir =
+        (selectedLanguage === "ar" ||
+         selectedLanguage === "ur")
+            ? "rtl"
+            : "ltr";
+
+    if ($("languageSelect")) {
+        $("languageSelect").value = selectedLanguage;
+    }
+
+    if ($("languageLabel")) {
+        $("languageLabel").textContent =
+            HUKA_LANGUAGES[selectedLanguage] || "English";
+    }
+}
+
+restoreLanguage();
   
 /* =========================================
    CP SPACE FRONTEND
