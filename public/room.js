@@ -256,7 +256,7 @@ function updateRoomSettings(settings) {
 }
 
 /* ==========================================
-   SEAT RENDERING
+   SEAT RENDERING WITH PROFILE FRAMES
 ========================================== */
 
 function renderSeats() {
@@ -289,10 +289,59 @@ function renderSeats() {
 
     card.dataset.seat = i;
 
+    // Avatar frame
     const avatar = document.createElement("div");
     avatar.className = "seat-avatar";
 
-    avatar.textContent = seat ? "👤" : "🎙️";
+    if (seat) {
+      const frameData =
+        member?.frameData || seat.frameData || {};
+
+      avatar.style.background =
+        frameData.gradient ||
+        "linear-gradient(135deg,#9333ea,#ec4899)";
+
+      avatar.style.padding = "4px";
+      avatar.style.boxSizing = "border-box";
+      avatar.style.overflow = "hidden";
+      avatar.style.borderRadius = "50%";
+
+      const avatarInner = document.createElement("div");
+
+      avatarInner.style.width = "100%";
+      avatarInner.style.height = "100%";
+      avatarInner.style.borderRadius = "50%";
+      avatarInner.style.overflow = "hidden";
+      avatarInner.style.background = "#241638";
+      avatarInner.style.display = "grid";
+      avatarInner.style.placeItems = "center";
+
+      const avatarUrl =
+        member?.avatar || seat.avatar || "";
+
+      if (avatarUrl) {
+        const img = document.createElement("img");
+
+        img.src = avatarUrl;
+        img.alt = "Profile";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        img.onerror = () => {
+          img.remove();
+          avatarInner.textContent = "👤";
+        };
+
+        avatarInner.appendChild(img);
+      } else {
+        avatarInner.textContent = "👤";
+      }
+
+      avatar.appendChild(avatarInner);
+
+    } else {
+      avatar.textContent = "🎙️";
+    }
 
     const name = document.createElement("b");
 
