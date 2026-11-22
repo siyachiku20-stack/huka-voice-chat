@@ -1624,6 +1624,23 @@ async function loadFrames() {
         const title = document.createElement("h4");
         title.textContent = frame.name || "Profile Frame";
 
+        if (frame.tier === "VIP" || frame.tier === "SVIP") {
+            const badge = document.createElement("div");
+
+            badge.textContent = frame.tier === "SVIP"
+                ? "♛ SVIP FRAME"
+                : "👑 VIP FRAME";
+
+            badge.style.fontWeight = "bold";
+            badge.style.fontSize = "12px";
+            badge.style.margin = "6px 0";
+            badge.style.color = frame.tier === "SVIP"
+                ? "#a855f7"
+                : "#d49a00";
+
+             card.appendChild(badge);
+        }
+      
         const price = document.createElement("p");
         price.textContent =
             frame.price === 0
