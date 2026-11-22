@@ -1881,6 +1881,22 @@ io.on("connection", socket => {
     }
 
     profile.coins -= totalCost;
+    // CP XP is earned only when gifting to your CP Partner.
+    if (
+      receiver &&
+      profile.cpPartnerId === receiverId &&
+      receiver.cpPartnerId === user.id
+    ) {
+      const cpReward = Math.max(
+        1,
+        Math.floor(totalCost / 1000)
+      );
+
+      addCPExperience(profile, receiver, cpReward);
+
+      emitCPUpdate(user.id);
+      emitCPUpdate(receiverId);
+    }
     addWalletHistory(profile, "gift", -totalCost, `Sent ${quantity} x ${gift.name}`);
 
     if (receiver) {
