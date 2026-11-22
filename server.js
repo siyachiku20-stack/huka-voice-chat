@@ -635,6 +635,112 @@ function addExperience(profile, amount) {
   return reward;
 }
 
+/* =========================================
+   CP SPACE SYSTEM
+========================================= */
+
+function ensureCPProfile(profile) {
+  profile.cpPartnerId ||= "";
+  profile.cpXP = Number(profile.cpXP) || 0;
+  profile.cpWeeklyXP = Number(profile.cpWeeklyXP) || 0;
+  profile.cpMonthlyXP = Number(profile.cpMonthlyXP) || 0;
+  profile.cpDailyXP = Number(profile.cpDailyXP) || 0;
+
+  const today = getIndiaDate();
+
+  if (profile.cpDailyDate !== today) {
+    profile.cpDailyDate = today;
+    profile.cpDailyXP = 0;
+  }
+
+  const date = new Date(today + "T00:00:00Z");
+  const day = (date.getUTCDay() + 6) % 7;
+
+  date.setUTCDate(date.getUTCDate() - day);
+
+  const weekKey = date.toISOString().slice(0, 10);
+  const monthKey = today.slice(0, 7);
+
+  if (profile.cpWeekKey !== weekKey) {
+    profile.cpWeekKey = weekKey;
+    profile.cpWeeklyXP = 0;
+  }
+
+  if (profile.cpMonthKey !== monthKey) {
+    profile.cpMonthKey = monthKey;
+    profile.cpMonthlyXP = 0;
+  }
+}
+
+function getCPLevel(xp) {
+  return Math.max(
+    1,
+    Math.floor(Math.sqrt(Math.max(0, Number(xp) || 0) / 100)) + 1
+  );
+}
+
+function getCPProgress(profile) {
+  ensureCPProfile(profile);
+
+  const xp = profile.cpXP;
+  const level = getCPLevel(xp);
+
+  const currentXP = (level - 1) ** 2 * 100;
+  const nextXP = level ** 2 * 100;
+
+  return {
+    level,
+    totalXP: xp,
+    currentXP: xp - currentXP,
+    requiredXP: nextXP - currentXP
+  };
+}
+
+function addCPExperience(profileA, profileB, amount) {
+  ensureCPProfile(profileA);
+  ensureCPProfile(profileB);
+
+  if (
+    profileA.cpPartnerId !== profileB.id ||
+    profileB.cpPartnerId !== profileA.id
+  ) {
+    return 0;
+  }
+
+  const earnedToday = Math.min(
+    profileA.cpDailyXP,
+    profileB.cpDailyXP
+  );
+
+  const remaining = Math.max(0, 100 - earnedToday);
+
+  const reward = Math.min(
+    Math.max(0, Number(amount) || 0),
+    remaining
+  );
+
+  if (reward <= 0) return 0;
+
+  for (const profile of [profileA, profileB]) {
+    profile.cpXP += reward;
+    profile.cpWeeklyXP += reward;
+    profile.cpMonthlyXP += reward;
+    profile.cpDailyXP = earnedToday + reward;
+  }
+
+  return reward;
+}
+
+function emitCPUpdate(userId) {
+  for (const [socketId, user] of online.entries()) {
+    if (user.id === userId) {
+      io.to(socketId).emit("cp-space-update", {
+        updated: true
+      });
+    }
+  }
+}
+
 function getRoom(socket) {
   return rooms.get(socket.data.roomId) || null;
 }
