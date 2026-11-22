@@ -2035,7 +2035,335 @@ function saveLanguage() {
         "Language preference save ho gayi. Puri app translation ke liye baaki pages mein bhi translation support add karna hoga."
     );
 }
+  
+/* =========================================
+   CP SPACE FRONTEND
+========================================= */
 
+let currentCPData = null;
+
+/* OPEN CP SPACE */
+
+async function openCPSpace() {
+    showModal("cpModal");
+
+    if ($("cpPartnerName")) {
+        $("cpPartnerName").textContent = "Loading...";
+    }
+
+    if ($("cpIncomingRequests")) {
+        $("cpIncomingRequests").textContent = "Loading...";
+    }
+
+    if ($("cpOutgoingRequests")) {
+        $("cpOutgoingRequests").textContent = "Loading...";
+    }
+
+    await loadCPSpace();
+    await loadCPRanking();
+}
+
+
+/* LOAD CP SPACE */
+
+async function loadCPSpace() {
+    const result = await emitRequest("get-cp-space", {});
+
+    if (!result || result.ok === false) {
+        showToast(result?.message || "CP details load nahi hui.");
+        return;
+    }
+
+    currentCPData = result;
+
+    renderCPSpace(result);
+}
+
+
+/* DISPLAY CP SPACE */
+
+function renderCPSpace(data) {
+    if (!data) return;
+
+    const partner = data.partner;
+    const progress = data.progress || {};
+
+    if (partner) {
+        $("cpPartnerName").textContent =
+            partner.name || "CP Partner";
+
+        $("cpPartnerInfo").textContent =
+            "ID: " + (partner.id || "Unknown") +
+            " | Level: " + (partner.level || progress.level || 1);
+
+        $("cpUnpairButton").style.display = "block";
+    } else {
+        $("cpPartnerName").textContent = "No CP Partner";
+
+        $("cpPartnerInfo").textContent =
+            "Abhi aapka koi CP Partner nahi hai.";
+
+        $("cpUnpairButton").style.display = "none";
+    }
+
+    const level = Number(progress.level || 1);
+    const totalXP = Number(progress.totalXP || 0);
+    const currentXP = Number(progress.currentXP || 0);
+    const requiredXP = Math.max(
+        1,
+        Number(progress.requiredXP || 100)
+    );
+
+    $("cpLevel").textContent = level;
+    $("cpTotalXP").textContent =
+        totalXP.toLocaleString("en-IN");
+
+    $("cpXPText").textContent =
+        currentXP + " / " + requiredXP + " XP";
+
+    const percentage = Math.min(
+        100,
+        Math.max(0, (currentXP / requiredXP) * 100)
+    );
+
+    $("cpXPBar").style.width = percentage + "%";
+
+    renderCPRequests(
+        data.incomingRequests || [],
+        data.outgoingRequests || []
+    );
+}
+
+
+/* DISPLAY REQUESTS */
+
+function renderCPRequests(incoming, outgoing) {
+    const incomingBox = $("cpIncomingRequests");
+    const outgoingBox = $("cpOutgoingRequests");
+
+    incomingBox.innerHTML = "";
+    outgoingBox.innerHTML = "";
+
+    if (!incoming.length) {
+        incomingBox.textContent = "No incoming requests.";
+    }
+
+    incoming.forEach((request) => {
+        const card = document.createElement("div");
+        card.className = "cp-request-card";
+
+        const name = document.createElement("strong");
+        name.textContent =
+            (request.fromName || "Huka User") +
+            " (ID: " + request.fromId + ")";
+
+        const actions = document.createElement("div");
+        actions.className = "cp-request-actions";
+
+        const accept = document.createElement("button");
+        accept.className = "primary";
+        accept.textContent = "Accept";
+
+        accept.onclick = () => {
+            respondCPRequest(request.id, true);
+        };
+
+        const reject = document.createElement("button");
+        reject.className = "secondary";
+        reject.textContent = "Reject";
+
+        reject.onclick = () => {
+            respondCPRequest(request.id, false);
+        };
+
+        actions.append(accept, reject);
+        card.append(name, actions);
+        incomingBox.appendChild(card);
+    });
+
+    if (!outgoing.length) {
+        outgoingBox.textContent = "No sent requests.";
+    }
+
+    outgoing.forEach((request) => {
+        const card = document.createElement("div");
+        card.className = "cp-request-card";
+
+        const name = document.createElement("strong");
+        name.textContent =
+            (request.toName || "Huka User") +
+            " (ID: " + request.toId + ")";
+
+        const status = document.createElement("span");
+        status.textContent = "⏳ Waiting for response";
+
+        card.append(name, status);
+        outgoingBox.appendChild(card);
+    });
+}
+
+
+/* SEND CP REQUEST */
+
+async function sendCPRequest() {
+    const userId = $("cpTargetUserId").value.trim();
+
+    if (!userId) {
+        showToast("User ID enter karein.");
+        return;
+    }
+
+    if (userId === getUserId()) {
+        showToast("Aap khud ko CP request nahi bhej sakte.");
+        return;
+    }
+
+    const result = await emitRequest("send-cp-request", {
+        userId: userId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "CP Request send ho gayi.");
+
+        $("cpTargetUserId").value = "";
+
+        await loadCPSpace();
+    } else {
+        showToast(result.message || "CP Request send nahi hui.");
+    }
+}
+
+
+/* ACCEPT OR REJECT CP REQUEST */
+
+async function respondCPRequest(requestId, accept) {
+    if (!requestId) {
+        showToast("Request ID nahi mili.");
+        return;
+    }
+
+    const result = await emitRequest("respond-cp-request", {
+        requestId: requestId,
+        accept: accept
+    });
+
+    if (isSuccess(result)) {
+        showToast(
+            result.message ||
+            (accept ? "CP Request accepted." : "CP Request rejected.")
+        );
+
+        await loadCPSpace();
+    } else {
+        showToast(result.message || "Request process nahi hui.");
+    }
+}
+
+
+/* UNPAIR CP */
+
+async function unpairCP() {
+    const confirmed = confirm(
+        "Kya aap apne CP Partner se unpair hona chahte hain?"
+    );
+
+    if (!confirmed) return;
+
+    const result = await emitRequest("unpair-cp", {});
+
+    if (isSuccess(result)) {
+        showToast(result.message || "CP Partner remove ho gaya.");
+
+        await loadCPSpace();
+    } else {
+        showToast(result.message || "Unpair nahi ho paya.");
+    }
+}
+
+
+/* CP WEEKLY / MONTHLY RANKING */
+
+async function loadCPRanking() {
+    const container = $("cpRankingList");
+
+    if (!container) return;
+
+    container.textContent = "Loading ranking...";
+
+    const period =
+        $("cpRankingPeriod")?.value || "weekly";
+
+    const result = await emitRequest("get-cp-ranking", {
+        period: period
+    });
+
+    if (!result || result.ok === false) {
+        container.textContent =
+            result?.message || "Ranking load nahi hui.";
+        return;
+    }
+
+    const ranking = result.ranking || [];
+
+    container.innerHTML = "";
+
+    if (!ranking.length) {
+        container.textContent = "Abhi ranking available nahi hai.";
+        return;
+    }
+
+    ranking.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "cp-ranking-item";
+
+        const position = document.createElement("div");
+        position.className = "cp-ranking-position";
+
+        if (index === 0) {
+            position.textContent = "🥇";
+        } else if (index === 1) {
+            position.textContent = "🥈";
+        } else if (index === 2) {
+            position.textContent = "🥉";
+        } else {
+            position.textContent = "#" + (index + 1);
+        }
+
+        const details = document.createElement("div");
+        details.className = "cp-ranking-details";
+
+        const names = document.createElement("strong");
+        names.textContent =
+            (item.name || "User") +
+            " ❤️ " +
+            (item.partnerName || "CP Partner");
+
+        const xp = document.createElement("span");
+        xp.textContent =
+            "CP Level " + (item.level || 1) +
+            " • " +
+            Number(item.xp || 0).toLocaleString("en-IN") +
+            " XP";
+
+        details.append(names, xp);
+        row.append(position, details);
+
+        container.appendChild(row);
+    });
+}
+
+
+/* LIVE CP UPDATE */
+
+socket.on("cp-space-update", async () => {
+    const modal = $("cpModal");
+
+    if (modal && modal.style.display === "flex") {
+        await loadCPSpace();
+        await loadCPRanking();
+    }
+});
+  
 /* ---------- OTHER PROFILE PAGES ---------- */
 
 function openPage(pageName) {
