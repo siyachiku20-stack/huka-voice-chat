@@ -3408,7 +3408,156 @@ async function loadCPRanking() {
     });
 }
 
+/* =========================================
+   CP GIFTS - LOAD AND SEND
+========================================= */
 
+let selectedCPGiftId = "";
+
+/* LOAD AVAILABLE GIFTS */
+
+async function loadCPGifts() {
+    const giftList = $("cpGiftList");
+
+    if (!giftList) return;
+
+    giftList.textContent = "Loading gifts...";
+
+    const result = await emitRequest("get-gifts", {});
+
+    if (!result || result.ok === false) {
+        giftList.textContent =
+            result?.message || "Gifts load nahi hue.";
+        return;
+    }
+
+    const gifts = result.gifts || [];
+
+    giftList.innerHTML = "";
+
+    if (!gifts.length) {
+        giftList.textContent = "Abhi gifts available nahi hain.";
+        return;
+    }
+
+    gifts.forEach((gift) => {
+        const card = document.createElement("button");
+
+        card.type = "button";
+        card.className = "secondary";
+
+        card.style.cssText =
+            "display:inline-flex;flex-direction:column;" +
+            "align-items:center;gap:5px;margin:5px;" +
+            "padding:12px;min-width:85px;";
+
+        const icon = document.createElement("span");
+        icon.style.fontSize = "28px";
+        icon.textContent = gift.icon || "🎁";
+
+        const name = document.createElement("span");
+        name.textContent = gift.name || "Gift";
+
+        const price = document.createElement("small");
+        price.textContent =
+            Number(gift.price || 0).toLocaleString("en-IN") +
+            " Coins";
+
+        card.append(icon, name, price);
+
+        card.onclick = () => {
+            selectedCPGiftId = gift.id;
+
+            giftList.querySelectorAll("button").forEach((button) => {
+                button.style.outline = "none";
+            });
+
+            card.style.outline = "2px solid #ff65c5";
+
+            const message = $("cpGiftMessage");
+
+            if (message) {
+                message.textContent =
+                    gift.name + " selected. Ab Send Gift dabao.";
+            }
+        };
+
+        giftList.appendChild(card);
+    });
+}
+
+
+/* SEND GIFT TO CP PARTNER */
+
+async function sendCPGift() {
+    const message = $("cpGiftMessage");
+
+    if (!selectedCPGiftId) {
+        if (message) {
+            message.textContent = "Pehle ek gift select karo.";
+        }
+        return;
+    }
+
+    const quantity = Math.max(
+        1,
+        Math.min(10, Number($("cpGiftQuantity")?.value) || 1)
+    );
+
+    if (message) {
+        message.textContent = "Gift send ho raha hai...";
+    }
+
+    const result = await emitRequest("send-cp-gift", {
+        giftId: selectedCPGiftId,
+        quantity: quantity
+    });
+
+    if (!result || result.ok === false) {
+        if (message) {
+            message.textContent =
+                result?.message || "Gift send nahi hua.";
+        }
+        return;
+    }
+
+    selectedCPGiftId = "";
+
+    if (message) {
+        message.textContent =
+            "🎉 " + (result.message || "CP Gift sent successfully!");
+    }
+
+    await loadCPSpace();
+    await loadCPRanking();
+}
+
+
+/* CP GIFT RECEIVED NOTIFICATION */
+
+socket.on("cp-gift-received", (gift) => {
+    showToast(
+        "🎁 " + (gift.senderName || "Your CP Partner") +
+        " ne aapko " + (gift.giftName || "gift") + " bheja!"
+    );
+
+    if ($("cpModal")?.style.display === "flex") {
+        loadCPSpace();
+        loadCPRanking();
+    }
+});
+
+
+/* CP GIFT SENT NOTIFICATION */
+
+socket.on("cp-gift-sent", (gift) => {
+    showToast(
+        "🎁 " + (gift.giftName || "Gift") +
+        " CP Partner ko send ho gaya!"
+    );
+});
+
+  
 /* LIVE CP UPDATE */
 
 socket.on("cp-space-update", async () => {
