@@ -3250,6 +3250,10 @@ function renderCPSpace(data) {
         data.incomingRequests || [],
         data.outgoingRequests || []
     );
+
+    // ANNIVERSARY AND MEMORIES
+    renderCPAnniversary(partner);
+    renderCPMemories(partner?.memories || []);
 }
 
   
