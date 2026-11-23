@@ -2261,7 +2261,7 @@ socket.on("unequip-bag-item", (data, callback) => {
      GIFTS
   ======================================= */
 
-  socket.on("get-gifts", callback => {
+  socket.on("get-gifts", (data, callback) => {
     reply(callback, {
       ok: true,
       gifts: GIFTS,
