@@ -3425,7 +3425,20 @@ socket.on("add-cp-memory", (data, callback) => {
 
   profile.cpMemories = profile.cpMemories.slice(0, 50);
   partner.cpMemories = partner.cpMemories.slice(0, 50);
+ 
+  // CP MEMORY DAILY TASK REWARD
+  const taskReward = completeCPDailyTask(
+    profile,
+    partner,
+    "save_memory",
+    10000,
+    2000
+  );
 
+  if (!taskReward.ok) {
+    console.log("CP Memory Task:", taskReward.message);
+            }
+   
   saveDB();
 
   emitCPUpdate(user.id);
