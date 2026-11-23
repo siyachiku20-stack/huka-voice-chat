@@ -507,43 +507,576 @@ function searchRooms(){
   if(!found.length)toast('No matching rooms found.');
 }
   
+/* =====================================
+   HUKA VOICE CHAT - HOME TRANSLATION
+   Shared language preference
+===================================== */
+
+const HOME_TEXT = {
+  en: {
+    Me:"Me",
+    Popular:"Popular",
+    "Meet • Talk • Play":"Meet • Talk • Play",
+    "Need Help?":"Need Help?",
+    "Contact Manager":"Contact Manager",
+    "Explore by Country":"Explore by Country",
+    "Hottest Voice Rooms":"Hottest Voice Rooms",
+    "Popular Rooms":"Popular Rooms",
+    "Create Your Room":"Create Your Room",
+    "Enter room name":"Enter room name",
+    "Create Room":"Create Room",
+    "Refresh ↻":"Refresh ↻",
+    "Voice Room":"Voice Room",
+    Join:"Join",
+    Home:"Home",
+    Voice:"Voice",
+    Help:"Help",
+    Profile:"Profile",
+    "Select Language":"Select Language",
+    Cancel:"Cancel",
+    Save:"Save"
+  },
+
+  hi: {
+    Me:"मैं",
+    Popular:"लोकप्रिय",
+    "Meet • Talk • Play":"मिलें • बात करें • खेलें",
+    "Need Help?":"मदद चाहिए?",
+    "Contact Manager":"मैनेजर से संपर्क करें",
+    "Explore by Country":"देश के अनुसार देखें",
+    "Hottest Voice Rooms":"लोकप्रिय वॉइस रूम",
+    "Popular Rooms":"लोकप्रिय रूम",
+    "Create Your Room":"अपना रूम बनाएं",
+    "Enter room name":"रूम का नाम लिखें",
+    "Create Room":"रूम बनाएं",
+    "Refresh ↻":"रिफ्रेश ↻",
+    "Voice Room":"वॉइस रूम",
+    Join:"जुड़ें",
+    Home:"होम",
+    Voice:"वॉइस",
+    Help:"मदद",
+    Profile:"प्रोफाइल",
+    "Select Language":"भाषा चुनें",
+    Cancel:"रद्द करें",
+    Save:"सेव करें"
+  },
+
+  ar: {
+    Me:"أنا",
+    Popular:"شائع",
+    "Meet • Talk • Play":"تعرّف • تحدث • العب",
+    "Need Help?":"هل تحتاج مساعدة؟",
+    "Contact Manager":"اتصل بالمدير",
+    "Explore by Country":"استكشف حسب الدولة",
+    "Hottest Voice Rooms":"غرف صوتية مميزة",
+    "Popular Rooms":"الغرف الشائعة",
+    "Create Your Room":"أنشئ غرفتك",
+    "Enter room name":"أدخل اسم الغرفة",
+    "Create Room":"إنشاء غرفة",
+    "Refresh ↻":"تحديث ↻",
+    "Voice Room":"غرفة صوتية",
+    Join:"انضم",
+    Home:"الرئيسية",
+    Voice:"الصوت",
+    Help:"المساعدة",
+    Profile:"الملف الشخصي",
+    "Select Language":"اختر اللغة",
+    Cancel:"إلغاء",
+    Save:"حفظ"
+  },
+
+  bn: {
+    Me:"আমি",
+    Popular:"জনপ্রিয়",
+    "Meet • Talk • Play":"দেখা করুন • কথা বলুন • খেলুন",
+    "Need Help?":"সাহায্য দরকার?",
+    "Contact Manager":"ম্যানেজারের সাথে যোগাযোগ",
+    "Explore by Country":"দেশ অনুযায়ী দেখুন",
+    "Hottest Voice Rooms":"জনপ্রিয় ভয়েস রুম",
+    "Popular Rooms":"জনপ্রিয় রুম",
+    "Create Your Room":"আপনার রুম তৈরি করুন",
+    "Enter room name":"রুমের নাম লিখুন",
+    "Create Room":"রুম তৈরি করুন",
+    "Refresh ↻":"রিফ্রেশ ↻",
+    "Voice Room":"ভয়েস রুম",
+    Join:"যোগ দিন",
+    Home:"হোম",
+    Voice:"ভয়েস",
+    Help:"সাহায্য",
+    Profile:"প্রোফাইল",
+    "Select Language":"ভাষা নির্বাচন করুন",
+    Cancel:"বাতিল",
+    Save:"সংরক্ষণ"
+  },
+
+  ur: {
+    Me:"میں",
+    Popular:"مقبول",
+    "Meet • Talk • Play":"ملیں • بات کریں • کھیلیں",
+    "Need Help?":"مدد چاہیے؟",
+    "Contact Manager":"منیجر سے رابطہ کریں",
+    "Explore by Country":"ملک کے لحاظ سے دیکھیں",
+    "Hottest Voice Rooms":"مقبول وائس رومز",
+    "Popular Rooms":"مقبول رومز",
+    "Create Your Room":"اپنا روم بنائیں",
+    "Enter room name":"روم کا نام لکھیں",
+    "Create Room":"روم بنائیں",
+    "Refresh ↻":"ریفریش ↻",
+    "Voice Room":"وائس روم",
+    Join:"شامل ہوں",
+    Home:"ہوم",
+    Voice:"وائس",
+    Help:"مدد",
+    Profile:"پروفائل",
+    "Select Language":"زبان منتخب کریں",
+    Cancel:"منسوخ",
+    Save:"محفوظ کریں"
+  },
+
+  ne: {
+    Me:"म",
+    Popular:"लोकप्रिय",
+    "Meet • Talk • Play":"भेट्नुहोस् • कुरा गर्नुहोस् • खेल्नुहोस्",
+    "Need Help?":"सहयोग चाहिन्छ?",
+    "Contact Manager":"म्यानेजरलाई सम्पर्क गर्नुहोस्",
+    "Explore by Country":"देश अनुसार हेर्नुहोस्",
+    "Hottest Voice Rooms":"लोकप्रिय भ्वाइस रुम",
+    "Popular Rooms":"लोकप्रिय रुम",
+    "Create Your Room":"आफ्नो रुम बनाउनुहोस्",
+    "Enter room name":"रुमको नाम लेख्नुहोस्",
+    "Create Room":"रुम बनाउनुहोस्",
+    "Refresh ↻":"रिफ्रेस ↻",
+    "Voice Room":"भ्वाइस रुम",
+    Join:"जोडिनुहोस्",
+    Home:"होम",
+    Voice:"भ्वाइस",
+    Help:"सहयोग",
+    Profile:"प्रोफाइल",
+    "Select Language":"भाषा छान्नुहोस्",
+    Cancel:"रद्द गर्नुहोस्",
+    Save:"सेभ गर्नुहोस्"
+  },
+
+  si: {
+    Me:"මම",
+    Popular:"ජනප්‍රිය",
+    "Need Help?":"උදව් අවශ්‍යද?",
+    "Contact Manager":"කළමනාකරු අමතන්න",
+    "Explore by Country":"රට අනුව බලන්න",
+    "Hottest Voice Rooms":"ජනප්‍රිය හඬ කාමර",
+    "Popular Rooms":"ජනප්‍රිය කාමර",
+    "Create Your Room":"ඔබේ කාමරය සාදන්න",
+    "Enter room name":"කාමරයේ නම ඇතුළත් කරන්න",
+    "Create Room":"කාමරය සාදන්න",
+    "Voice Room":"හඬ කාමරය",
+    Join:"එක්වන්න",
+    Home:"මුල් පිටුව",
+    Voice:"හඬ",
+    Help:"උදව්",
+    Profile:"පැතිකඩ",
+    "Select Language":"භාෂාව තෝරන්න",
+    Cancel:"අවලංගු කරන්න",
+    Save:"සුරකින්න"
+  },
+
+  ta: {
+    Me:"நான்",
+    Popular:"பிரபலமானவை",
+    "Need Help?":"உதவி வேண்டுமா?",
+    "Contact Manager":"மேலாளரைத் தொடர்பு கொள்ளவும்",
+    "Explore by Country":"நாட்டின்படி பார்க்கவும்",
+    "Hottest Voice Rooms":"பிரபலமான குரல் அறைகள்",
+    "Popular Rooms":"பிரபலமான அறைகள்",
+    "Create Your Room":"உங்கள் அறையை உருவாக்கவும்",
+    "Enter room name":"அறையின் பெயரை உள்ளிடவும்",
+    "Create Room":"அறையை உருவாக்கவும்",
+    "Voice Room":"குரல் அறை",
+    Join:"சேரவும்",
+    Home:"முகப்பு",
+    Voice:"குரல்",
+    Help:"உதவி",
+    Profile:"சுயவிவரம்",
+    "Select Language":"மொழியைத் தேர்ந்தெடுக்கவும்",
+    Cancel:"ரத்து",
+    Save:"சேமி"
+  },
+
+  zh: {
+    Me:"我的",
+    Popular:"热门",
+    "Need Help?":"需要帮助吗？",
+    "Contact Manager":"联系管理员",
+    "Explore by Country":"按国家探索",
+    "Hottest Voice Rooms":"热门语音房",
+    "Popular Rooms":"热门房间",
+    "Create Your Room":"创建你的房间",
+    "Enter room name":"输入房间名称",
+    "Create Room":"创建房间",
+    "Voice Room":"语音房间",
+    Join:"加入",
+    Home:"首页",
+    Voice:"语音",
+    Help:"帮助",
+    Profile:"个人资料",
+    "Select Language":"选择语言",
+    Cancel:"取消",
+    Save:"保存"
+  },
+
+  id: {
+    Me:"Saya",
+    Popular:"Populer",
+    "Need Help?":"Butuh bantuan?",
+    "Contact Manager":"Hubungi Manajer",
+    "Explore by Country":"Jelajahi berdasarkan Negara",
+    "Hottest Voice Rooms":"Ruang Suara Terpopuler",
+    "Popular Rooms":"Ruang Populer",
+    "Create Your Room":"Buat Ruangan Anda",
+    "Enter room name":"Masukkan nama ruangan",
+    "Create Room":"Buat Ruangan",
+    "Voice Room":"Ruang Suara",
+    Join:"Gabung",
+    Home:"Beranda",
+    Voice:"Suara",
+    Help:"Bantuan",
+    Profile:"Profil",
+    "Select Language":"Pilih Bahasa",
+    Cancel:"Batal",
+    Save:"Simpan"
+  },
+
+  ja: {
+    Me:"マイページ",
+    Popular:"人気",
+    "Need Help?":"お困りですか？",
+    "Contact Manager":"管理者に連絡",
+    "Explore by Country":"国別に見る",
+    "Hottest Voice Rooms":"人気のボイスルーム",
+    "Popular Rooms":"人気のルーム",
+    "Create Your Room":"ルームを作成",
+    "Enter room name":"ルーム名を入力",
+    "Create Room":"ルームを作成",
+    "Voice Room":"ボイスルーム",
+    Join:"参加",
+    Home:"ホーム",
+    Voice:"ボイス",
+    Help:"ヘルプ",
+    Profile:"プロフィール",
+    "Select Language":"言語を選択",
+    Cancel:"キャンセル",
+    Save:"保存"
+  },
+
+  ko: {
+    Me:"내 정보",
+    Popular:"인기",
+    "Need Help?":"도움이 필요하신가요?",
+    "Contact Manager":"관리자에게 문의",
+    "Explore by Country":"국가별 탐색",
+    "Hottest Voice Rooms":"인기 음성방",
+    "Popular Rooms":"인기 방",
+    "Create Your Room":"내 방 만들기",
+    "Enter room name":"방 이름 입력",
+    "Create Room":"방 만들기",
+    "Voice Room":"음성방",
+    Join:"참여",
+    Home:"홈",
+    Voice:"음성",
+    Help:"도움말",
+    Profile:"프로필",
+    "Select Language":"언어 선택",
+    Cancel:"취소",
+    Save:"저장"
+  },
+
+  th: {
+    Me:"ฉัน",
+    Popular:"ยอดนิยม",
+    "Need Help?":"ต้องการความช่วยเหลือไหม?",
+    "Contact Manager":"ติดต่อผู้จัดการ",
+    "Explore by Country":"สำรวจตามประเทศ",
+    "Hottest Voice Rooms":"ห้องเสียงยอดนิยม",
+    "Popular Rooms":"ห้องยอดนิยม",
+    "Create Your Room":"สร้างห้องของคุณ",
+    "Enter room name":"ใส่ชื่อห้อง",
+    "Create Room":"สร้างห้อง",
+    "Voice Room":"ห้องเสียง",
+    Join:"เข้าร่วม",
+    Home:"หน้าหลัก",
+    Voice:"เสียง",
+    Help:"ช่วยเหลือ",
+    Profile:"โปรไฟล์",
+    "Select Language":"เลือกภาษา",
+    Cancel:"ยกเลิก",
+    Save:"บันทึก"
+  },
+
+  vi: {
+    Me:"Tôi",
+    Popular:"Phổ biến",
+    "Need Help?":"Bạn cần trợ giúp?",
+    "Contact Manager":"Liên hệ quản lý",
+    "Explore by Country":"Khám phá theo quốc gia",
+    "Hottest Voice Rooms":"Phòng thoại nổi bật",
+    "Popular Rooms":"Phòng phổ biến",
+    "Create Your Room":"Tạo phòng của bạn",
+    "Enter room name":"Nhập tên phòng",
+    "Create Room":"Tạo phòng",
+    "Voice Room":"Phòng thoại",
+    Join:"Tham gia",
+    Home:"Trang chủ",
+    Voice:"Giọng nói",
+    Help:"Trợ giúp",
+    Profile:"Hồ sơ",
+    "Select Language":"Chọn ngôn ngữ",
+    Cancel:"Hủy",
+    Save:"Lưu"
+  },
+
+  ms: {
+    Me:"Saya",
+    Popular:"Popular",
+    "Need Help?":"Perlukan bantuan?",
+    "Contact Manager":"Hubungi Pengurus",
+    "Explore by Country":"Teroka mengikut Negara",
+    "Hottest Voice Rooms":"Bilik Suara Popular",
+    "Popular Rooms":"Bilik Popular",
+    "Create Your Room":"Cipta Bilik Anda",
+    "Enter room name":"Masukkan nama bilik",
+    "Create Room":"Cipta Bilik",
+    "Voice Room":"Bilik Suara",
+    Join:"Sertai",
+    Home:"Utama",
+    Voice:"Suara",
+    Help:"Bantuan",
+    Profile:"Profil",
+    "Select Language":"Pilih Bahasa",
+    Cancel:"Batal",
+    Save:"Simpan"
+  },
+
+  fil: {
+    Me:"Ako",
+    Popular:"Sikat",
+    "Need Help?":"Kailangan ng tulong?",
+    "Contact Manager":"Makipag-ugnayan sa Manager",
+    "Explore by Country":"Tuklasin ayon sa Bansa",
+    "Hottest Voice Rooms":"Mga Sikat na Voice Room",
+    "Popular Rooms":"Mga Sikat na Room",
+    "Create Your Room":"Gumawa ng Room",
+    "Enter room name":"Ilagay ang pangalan ng room",
+    "Create Room":"Gumawa ng Room",
+    "Voice Room":"Voice Room",
+    Join:"Sumali",
+    Home:"Home",
+    Voice:"Boses",
+    Help:"Tulong",
+    Profile:"Profile",
+    "Select Language":"Pumili ng Wika",
+    Cancel:"Kanselahin",
+    Save:"I-save"
+  },
+
+  tr: {
+    Me:"Ben",
+    Popular:"Popüler",
+    "Need Help?":"Yardıma mı ihtiyacınız var?",
+    "Contact Manager":"Yöneticiyle iletişime geç",
+    "Explore by Country":"Ülkeye göre keşfet",
+    "Hottest Voice Rooms":"En Popüler Ses Odaları",
+    "Popular Rooms":"Popüler Odalar",
+    "Create Your Room":"Odanı Oluştur",
+    "Enter room name":"Oda adını gir",
+    "Create Room":"Oda Oluştur",
+    "Voice Room":"Ses Odası",
+    Join:"Katıl",
+    Home:"Ana Sayfa",
+    Voice:"Ses",
+    Help:"Yardım",
+    Profile:"Profil",
+    "Select Language":"Dil Seç",
+    Cancel:"İptal",
+    Save:"Kaydet"
+  },
+
+  ru: {
+    Me:"Я",
+    Popular:"Популярное",
+    "Need Help?":"Нужна помощь?",
+    "Contact Manager":"Связаться с менеджером",
+    "Explore by Country":"Поиск по странам",
+    "Hottest Voice Rooms":"Популярные голосовые комнаты",
+    "Popular Rooms":"Популярные комнаты",
+    "Create Your Room":"Создать свою комнату",
+    "Enter room name":"Введите название комнаты",
+    "Create Room":"Создать комнату",
+    "Voice Room":"Голосовая комната",
+    Join:"Войти",
+    Home:"Главная",
+    Voice:"Голос",
+    Help:"Помощь",
+    Profile:"Профиль",
+    "Select Language":"Выберите язык",
+    Cancel:"Отмена",
+    Save:"Сохранить"
+  },
+
+  fr: {
+    Me:"Moi",
+    Popular:"Populaire",
+    "Need Help?":"Besoin d'aide ?",
+    "Contact Manager":"Contacter le responsable",
+    "Explore by Country":"Explorer par pays",
+    "Hottest Voice Rooms":"Salons vocaux populaires",
+    "Popular Rooms":"Salons populaires",
+    "Create Your Room":"Créer votre salon",
+    "Enter room name":"Entrez le nom du salon",
+    "Create Room":"Créer un salon",
+    "Voice Room":"Salon vocal",
+    Join:"Rejoindre",
+    Home:"Accueil",
+    Voice:"Voix",
+    Help:"Aide",
+    Profile:"Profil",
+    "Select Language":"Choisir la langue",
+    Cancel:"Annuler",
+    Save:"Enregistrer"
+  },
+
+  de: {
+    Me:"Ich",
+    Popular:"Beliebt",
+    "Need Help?":"Brauchst du Hilfe?",
+    "Contact Manager":"Manager kontaktieren",
+    "Explore by Country":"Nach Land entdecken",
+    "Hottest Voice Rooms":"Beliebte Sprachräume",
+    "Popular Rooms":"Beliebte Räume",
+    "Create Your Room":"Eigenen Raum erstellen",
+    "Enter room name":"Raumnamen eingeben",
+    "Create Room":"Raum erstellen",
+    "Voice Room":"Sprachraum",
+    Join:"Beitreten",
+    Home:"Startseite",
+    Voice:"Stimme",
+    Help:"Hilfe",
+    Profile:"Profil",
+    "Select Language":"Sprache auswählen",
+    Cancel:"Abbrechen",
+    Save:"Speichern"
+  },
+
+  es: {
+    Me:"Yo",
+    Popular:"Popular",
+    "Need Help?":"¿Necesitas ayuda?",
+    "Contact Manager":"Contactar al administrador",
+    "Explore by Country":"Explorar por país",
+    "Hottest Voice Rooms":"Salas de voz populares",
+    "Popular Rooms":"Salas populares",
+    "Create Your Room":"Crea tu sala",
+    "Enter room name":"Escribe el nombre de la sala",
+    "Create Room":"Crear sala",
+    "Voice Room":"Sala de voz",
+    Join:"Unirse",
+    Home:"Inicio",
+    Voice:"Voz",
+    Help:"Ayuda",
+    Profile:"Perfil",
+    "Select Language":"Seleccionar idioma",
+    Cancel:"Cancelar",
+    Save:"Guardar"
+  },
+
+  ku: {
+    Me:"من",
+    Popular:"بەناوبانگ",
+    "Need Help?":"پێویستت بە یارمەتییە؟",
+    "Contact Manager":"پەیوەندی بە بەڕێوەبەرەوە بکە",
+    "Explore by Country":"بەپێی وڵات بگەڕێ",
+    "Hottest Voice Rooms":"ژوورە دەنگییە بەناوبانگەکان",
+    "Popular Rooms":"ژوورە بەناوبانگەکان",
+    "Create Your Room":"ژووری خۆت دروست بکە",
+    "Enter room name":"ناوی ژوور بنووسە",
+    "Create Room":"ژوور دروست بکە",
+    "Voice Room":"ژووری دەنگ",
+    Join:"بەشداربە",
+    Home:"سەرەتا",
+    Voice:"دەنگ",
+    Help:"یارمەتی",
+    Profile:"پرۆفایل",
+    "Select Language":"زمان هەڵبژێرە",
+    Cancel:"هەڵوەشاندنەوە",
+    Save:"پاشەکەوت"
+  }
+};
+
+/* Languages not yet translated above use English
+   until their dictionary entries are added. */
+const HOME_RTL = ["ar", "ur", "ku"];
+
+function translateHome() {
+  const lang = localStorage.getItem("hukaLanguage") || "en";
+  const words = HOME_TEXT[lang] || HOME_TEXT.en;
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir = HOME_RTL.includes(lang) ? "rtl" : "ltr";
+
+  // Translate visible text nodes without changing room/user names.
+  const walker = document.createTreeWalker(
+    document.querySelector("main.app").parentNode,
+    NodeFilter.SHOW_TEXT
+  );
+
+  let node;
+  while (node = walker.nextNode()) {
+    const original = node.nodeValue.trim();
+    if (words[original]) {
+      node.nodeValue = node.nodeValue.replace(original, words[original]);
+    }
+  }
+
+  // Translate placeholders
+  document.querySelectorAll("[placeholder]").forEach(el => {
+    const original = el.getAttribute("placeholder");
+    if (words[original]) el.setAttribute("placeholder", words[original]);
+  });
+
+  // Translate language modal buttons
+  const modal = document.getElementById("homeLanguageModal");
+  if (modal) {
+    modal.querySelectorAll("button").forEach(btn => {
+      const original = btn.textContent.trim();
+      if (words[original]) btn.textContent = words[original];
+    });
+  }
+}
+
 function openHomeLanguage() {
   const select = document.getElementById("homeLanguageSelect");
   const modal = document.getElementById("homeLanguageModal");
 
-  if (!select || !modal) {
-    alert("Language modal nahi mila!");
-    return;
-  }
+  if (!select || !modal) return;
 
   select.value = localStorage.getItem("hukaLanguage") || "en";
   modal.classList.add("show");
 }
 
 function closeHomeLanguage() {
-  const modal = document.getElementById("homeLanguageModal");
-  if (modal) modal.classList.remove("show");
+  document.getElementById("homeLanguageModal")?.classList.remove("show");
 }
 
 function saveHomeLanguage() {
   const select = document.getElementById("homeLanguageSelect");
+  if (!select) return;
 
-  if (!select) {
-    alert("Language select nahi mila!");
-    return;
-  }
+  localStorage.setItem("hukaLanguage", select.value);
 
-  const lang = select.value;
-
-  localStorage.setItem("hukaLanguage", lang);
-  document.documentElement.lang = lang;
-  document.documentElement.dir =
-    ["ar", "ur", "ku"].includes(lang) ? "rtl" : "ltr";
-
-  closeHomeLanguage();
-
-  alert("Language saved successfully!");
+  // Reload so all Home text and room cards are created in the chosen language.
+  location.reload();
 }
+
+// Apply saved language whenever Home opens
+document.addEventListener("DOMContentLoaded", translateHome);
 </script>
   
 </body>
