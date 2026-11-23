@@ -3252,7 +3252,162 @@ function renderCPSpace(data) {
     );
 }
 
+  
+/* =========================================
+   CP ANNIVERSARY & MEMORIES FRONTEND
+========================================= */
 
+// ANNIVERSARY DISPLAY
+function renderCPAnniversary(partner) {
+    const startDate = $("cpStartDate");
+    const daysText = $("cpDaysTogether");
+    const nextDate = $("cpNextAnniversary");
+    const message = $("cpAnniversaryMessage");
+
+    if (!partner || !partner.pairedAt) {
+        if (startDate) startDate.textContent = "Not available";
+        if (daysText) daysText.textContent = "0 Days";
+        if (nextDate) nextDate.textContent = "Not available";
+        if (message) {
+            message.textContent = "CP partner milne par journey shuru hogi ❤️";
+        }
+        return;
+    }
+
+    const pairedAt = Number(partner.pairedAt);
+    const start = new Date(pairedAt);
+    const today = new Date();
+
+    const days = Math.max(
+        1,
+        Math.floor((today - start) / 86400000) + 1
+    );
+
+    const next = new Date(today.getFullYear(), start.getMonth(), start.getDate());
+
+    if (next <= today) {
+        next.setFullYear(today.getFullYear() + 1);
+    }
+
+    if (startDate) {
+        startDate.textContent = start.toLocaleDateString("en-IN");
+    }
+
+    if (daysText) {
+        daysText.textContent = days + " Days ❤️";
+    }
+
+    if (nextDate) {
+        nextDate.textContent = next.toLocaleDateString("en-IN");
+    }
+
+    if (message) {
+        message.textContent =
+            days + " days of your special CP journey together! 💞";
+    }
+}
+
+
+// ADD CP MEMORY
+async function addCPMemory() {
+    const titleInput = $("cpMemoryTitle");
+    const descriptionInput = $("cpMemoryDescription");
+    const message = $("cpMemoryMessage");
+
+    const title = titleInput?.value.trim() || "";
+    const description = descriptionInput?.value.trim() || "";
+
+    if (!title) {
+        if (message) message.textContent = "Memory title likho.";
+        return;
+    }
+
+    if (message) message.textContent = "Saving memory...";
+
+    const result = await emitRequest("add-cp-memory", {
+        title,
+        description
+    });
+
+    if (!result || result.ok === false) {
+        if (message) {
+            message.textContent = result?.message || "Memory save nahi hui.";
+        }
+        return;
+    }
+
+    if (titleInput) titleInput.value = "";
+    if (descriptionInput) descriptionInput.value = "";
+
+    if (message) message.textContent = "❤️ Memory saved successfully!";
+
+    await loadCPSpace();
+}
+
+
+// RENDER CP MEMORIES
+function renderCPMemories(memories) {
+    const list = $("cpMemoriesList");
+
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    if (!Array.isArray(memories) || !memories.length) {
+        list.textContent = "Abhi koi memory saved nahi hai.";
+        return;
+    }
+
+    memories.forEach(memory => {
+        const card = document.createElement("div");
+
+        card.className = "frame-card";
+        card.style.marginTop = "10px";
+
+        const title = document.createElement("h4");
+        title.textContent = "❤️ " + (memory.title || "Special Memory");
+
+        const description = document.createElement("p");
+        description.textContent = memory.description || "";
+
+        const date = document.createElement("small");
+        date.textContent = memory.createdAt
+            ? new Date(memory.createdAt).toLocaleDateString("en-IN")
+            : "";
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "secondary";
+        deleteButton.textContent = "Delete Memory";
+
+        deleteButton.onclick = () => {
+            deleteCPMemory(memory.id);
+        };
+
+        card.append(title, description, date, deleteButton);
+        list.appendChild(card);
+    });
+}
+
+
+// DELETE CP MEMORY
+async function deleteCPMemory(memoryId) {
+    if (!confirm("Is memory ko delete karna hai?")) return;
+
+    const result = await emitRequest("delete-cp-memory", {
+        memoryId
+    });
+
+    if (!result || result.ok === false) {
+        showToast(result?.message || "Memory delete nahi hui.");
+        return;
+    }
+
+    showToast("Memory deleted.");
+    await loadCPSpace();
+}
+
+  
 /* DISPLAY REQUESTS */
 
 function renderCPRequests(incoming, outgoing) {
