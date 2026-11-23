@@ -509,25 +509,41 @@ function searchRooms(){
   
 <script>
 function openHomeLanguage() {
-  const saved = localStorage.getItem("hukaLanguage") || "en";
-  document.getElementById("homeLanguageSelect").value = saved;
-  document.getElementById("homeLanguageModal").classList.add("show");
+  const select = document.getElementById("homeLanguageSelect");
+  const modal = document.getElementById("homeLanguageModal");
+
+  if (!select || !modal) {
+    alert("Language modal nahi mila!");
+    return;
+  }
+
+  select.value = localStorage.getItem("hukaLanguage") || "en";
+  modal.classList.add("show");
 }
 
 function closeHomeLanguage() {
-  document.getElementById("homeLanguageModal").classList.remove("show");
+  const modal = document.getElementById("homeLanguageModal");
+  if (modal) modal.classList.remove("show");
 }
 
 function saveHomeLanguage() {
-  const lang = document.getElementById("homeLanguageSelect").value;
-  localStorage.setItem("hukaLanguage", lang);
+  const select = document.getElementById("homeLanguageSelect");
 
+  if (!select) {
+    alert("Language select nahi mila!");
+    return;
+  }
+
+  const lang = select.value;
+
+  localStorage.setItem("hukaLanguage", lang);
   document.documentElement.lang = lang;
   document.documentElement.dir =
     ["ar", "ur", "ku"].includes(lang) ? "rtl" : "ltr";
 
   closeHomeLanguage();
-  toast("Language preference saved!");
+
+  alert("Language saved successfully!");
 }
 </script>
   
