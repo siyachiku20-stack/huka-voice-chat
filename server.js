@@ -2318,6 +2318,26 @@ socket.on("unequip-bag-item", (data, callback) => {
 
     completeTask(user.id, "send_message");
 
+    // CP PARTNER MESSAGE DAILY TASK
+    const senderProfile = db.profiles[user.id];
+
+    if (senderProfile) {
+      const partnerId = senderProfile.cpPartnerId;
+      const partnerProfile = partnerId
+        ? db.profiles[partnerId]
+        : null;
+
+    if (partnerProfile) {
+      completeCPDailyTask(
+        senderProfile,
+        partnerProfile,
+        "send_partner_message",
+        10000,
+        2000
+     );
+   }
+ }
+     
     io.to(room.id).emit("room-message", message);
 
     saveDB();
