@@ -2297,7 +2297,7 @@ async function equipFrame(frameId) {
     }
 }
 
-/* ---------- LANGUAGE ---------- */
+/* ---------- HUKA MULTI LANGUAGE ---------- */
 
 const HUKA_LANGUAGES = {
     en: "English",
@@ -2305,10 +2305,693 @@ const HUKA_LANGUAGES = {
     ar: "العربية",
     bn: "বাংলা",
     ur: "اردو",
-    ne: "नेपाली"
+    ne: "नेपाली",
+    si: "සිංහල",
+    ta: "தமிழ்",
+    zh: "中文",
+    id: "Bahasa Indonesia",
+    ku: "Kurdî",
+    ja: "日本語",
+    ko: "한국어",
+    th: "ไทย",
+    vi: "Tiếng Việt",
+    ms: "Bahasa Melayu",
+    fil: "Filipino",
+    tr: "Türkçe",
+    ru: "Русский",
+    fr: "Français",
+    de: "Deutsch",
+    es: "Español"
 };
 
+/* LANGUAGE TRANSLATIONS */
+
+const HUKA_TRANSLATIONS = {
+
+en: {
+    language: "Language",
+    selectLanguage: "Select Language",
+    home: "Home",
+    rooms: "Rooms",
+    me: "Me",
+    editProfile: "Edit Profile",
+    wallet: "Wallet",
+    level: "Level",
+    medal: "Medal",
+    cpSpace: "CP Space",
+    family: "Family",
+    bag: "Bag",
+    dress: "Dress",
+    customerService: "Customer Service",
+    helpFeedback: "Help & Feedback",
+    settings: "Settings",
+    save: "Save",
+    cancel: "Cancel",
+    name: "Name",
+    bio: "Bio",
+    country: "Country",
+    gender: "Gender",
+    followers: "Followers",
+    following: "Following",
+    visitors: "Visitors"
+},
+
+hi: {
+    language: "भाषा",
+    selectLanguage: "भाषा चुनें",
+    home: "होम",
+    rooms: "रूम",
+    me: "मैं",
+    editProfile: "प्रोफाइल एडिट करें",
+    wallet: "वॉलेट",
+    level: "लेवल",
+    medal: "मेडल",
+    cpSpace: "CP स्पेस",
+    family: "फैमिली",
+    bag: "बैग",
+    dress: "ड्रेस",
+    customerService: "कस्टमर सर्विस",
+    helpFeedback: "मदद और सुझाव",
+    settings: "सेटिंग्स",
+    save: "सेव करें",
+    cancel: "रद्द करें",
+    name: "नाम",
+    bio: "बायो",
+    country: "देश",
+    gender: "लिंग",
+    followers: "फॉलोअर्स",
+    following: "फॉलोइंग",
+    visitors: "विजिटर्स"
+},
+
+ar: {
+    language: "اللغة",
+    selectLanguage: "اختر اللغة",
+    home: "الرئيسية",
+    rooms: "الغرف",
+    me: "حسابي",
+    editProfile: "تعديل الملف الشخصي",
+    wallet: "المحفظة",
+    level: "المستوى",
+    medal: "الميدالية",
+    cpSpace: "مساحة CP",
+    family: "العائلة",
+    bag: "الحقيبة",
+    dress: "الملابس",
+    customerService: "خدمة العملاء",
+    helpFeedback: "المساعدة والملاحظات",
+    settings: "الإعدادات",
+    save: "حفظ",
+    cancel: "إلغاء",
+    name: "الاسم",
+    bio: "نبذة",
+    country: "الدولة",
+    gender: "الجنس",
+    followers: "المتابعون",
+    following: "يتابع",
+    visitors: "الزوار"
+},
+
+bn: {
+    language: "ভাষা",
+    selectLanguage: "ভাষা নির্বাচন করুন",
+    home: "হোম",
+    rooms: "রুম",
+    me: "আমি",
+    editProfile: "প্রোফাইল সম্পাদনা",
+    wallet: "ওয়ালেট",
+    level: "লেভেল",
+    medal: "মেডেল",
+    cpSpace: "CP স্পেস",
+    family: "পরিবার",
+    bag: "ব্যাগ",
+    dress: "পোশাক",
+    customerService: "কাস্টমার সার্ভিস",
+    helpFeedback: "সাহায্য ও মতামত",
+    settings: "সেটিংস",
+    save: "সংরক্ষণ",
+    cancel: "বাতিল",
+    name: "নাম",
+    bio: "বায়ো",
+    country: "দেশ",
+    gender: "লিঙ্গ",
+    followers: "অনুসরণকারী",
+    following: "অনুসরণ করছে",
+    visitors: "দর্শক"
+},
+
+ur: {
+    language: "زبان",
+    selectLanguage: "زبان منتخب کریں",
+    home: "ہوم",
+    rooms: "رومز",
+    me: "میرا پروفائل",
+    editProfile: "پروفائل تبدیل کریں",
+    wallet: "والیٹ",
+    level: "لیول",
+    medal: "میڈل",
+    cpSpace: "CP اسپیس",
+    family: "فیملی",
+    bag: "بیگ",
+    dress: "ڈریس",
+    customerService: "کسٹمر سروس",
+    helpFeedback: "مدد اور تجاویز",
+    settings: "سیٹنگز",
+    save: "محفوظ کریں",
+    cancel: "منسوخ",
+    name: "نام",
+    bio: "بائیو",
+    country: "ملک",
+    gender: "جنس",
+    followers: "فالورز",
+    following: "فالوونگ",
+    visitors: "وزیٹرز"
+},
+
+ne: {
+    language: "भाषा",
+    selectLanguage: "भाषा छान्नुहोस्",
+    home: "होम",
+    rooms: "रूम",
+    me: "म",
+    editProfile: "प्रोफाइल सम्पादन",
+    wallet: "वालेट",
+    level: "लेभल",
+    medal: "मेडल",
+    cpSpace: "CP स्पेस",
+    family: "परिवार",
+    bag: "झोला",
+    dress: "ड्रेस",
+    customerService: "ग्राहक सेवा",
+    helpFeedback: "सहयोग र सुझाव",
+    settings: "सेटिङ",
+    save: "सेभ",
+    cancel: "रद्द",
+    name: "नाम",
+    bio: "बायो",
+    country: "देश",
+    gender: "लिङ्ग",
+    followers: "फलोअर्स",
+    following: "फलोइङ",
+    visitors: "भिजिटर्स"
+},
+
+si: {
+    language: "භාෂාව",
+    selectLanguage: "භාෂාව තෝරන්න",
+    home: "මුල් පිටුව",
+    rooms: "කාමර",
+    me: "මම",
+    editProfile: "පැතිකඩ සංස්කරණය",
+    wallet: "පසුම්බිය",
+    level: "මට්ටම",
+    medal: "පදක්කම",
+    cpSpace: "CP අවකාශය",
+    family: "පවුල",
+    bag: "බෑගය",
+    dress: "ඇඳුම්",
+    customerService: "පාරිභෝගික සේවය",
+    helpFeedback: "උදව් සහ ප්‍රතිචාර",
+    settings: "සැකසුම්",
+    save: "සුරකින්න",
+    cancel: "අවලංගු කරන්න",
+    name: "නම",
+    bio: "විස්තර",
+    country: "රට",
+    gender: "ස්ත්‍රී පුරුෂ භාවය",
+    followers: "අනුගාමිකයින්",
+    following: "අනුගමනය",
+    visitors: "අමුත්තන්"
+},
+
+ta: {
+    language: "மொழி",
+    selectLanguage: "மொழியைத் தேர்ந்தெடுக்கவும்",
+    home: "முகப்பு",
+    rooms: "அறைகள்",
+    me: "நான்",
+    editProfile: "சுயவிவரத்தைத் திருத்து",
+    wallet: "பணப்பை",
+    level: "நிலை",
+    medal: "பதக்கம்",
+    cpSpace: "CP இடம்",
+    family: "குடும்பம்",
+    bag: "பை",
+    dress: "ஆடை",
+    customerService: "வாடிக்கையாளர் சேவை",
+    helpFeedback: "உதவி மற்றும் கருத்து",
+    settings: "அமைப்புகள்",
+    save: "சேமி",
+    cancel: "ரத்துசெய்",
+    name: "பெயர்",
+    bio: "சுயவிவரம்",
+    country: "நாடு",
+    gender: "பாலினம்",
+    followers: "பின்தொடர்பவர்கள்",
+    following: "பின்தொடர்பவை",
+    visitors: "பார்வையாளர்கள்"
+},
+
+zh: {
+    language: "语言",
+    selectLanguage: "选择语言",
+    home: "首页",
+    rooms: "房间",
+    me: "我的",
+    editProfile: "编辑个人资料",
+    wallet: "钱包",
+    level: "等级",
+    medal: "勋章",
+    cpSpace: "CP空间",
+    family: "家族",
+    bag: "背包",
+    dress: "装扮",
+    customerService: "客服",
+    helpFeedback: "帮助与反馈",
+    settings: "设置",
+    save: "保存",
+    cancel: "取消",
+    name: "姓名",
+    bio: "简介",
+    country: "国家",
+    gender: "性别",
+    followers: "粉丝",
+    following: "关注",
+    visitors: "访客"
+},
+
+id: {
+    language: "Bahasa",
+    selectLanguage: "Pilih Bahasa",
+    home: "Beranda",
+    rooms: "Ruangan",
+    me: "Saya",
+    editProfile: "Edit Profil",
+    wallet: "Dompet",
+    level: "Level",
+    medal: "Medali",
+    cpSpace: "Ruang CP",
+    family: "Keluarga",
+    bag: "Tas",
+    dress: "Pakaian",
+    customerService: "Layanan Pelanggan",
+    helpFeedback: "Bantuan & Masukan",
+    settings: "Pengaturan",
+    save: "Simpan",
+    cancel: "Batal",
+    name: "Nama",
+    bio: "Bio",
+    country: "Negara",
+    gender: "Jenis Kelamin",
+    followers: "Pengikut",
+    following: "Mengikuti",
+    visitors: "Pengunjung"
+},
+
+ku: {
+    language: "زمان",
+    selectLanguage: "زمان هەڵبژێرە",
+    home: "ماڵەوە",
+    rooms: "ژوورەکان",
+    me: "من",
+    editProfile: "دەستکاری پرۆفایل",
+    wallet: "جزدان",
+    level: "ئاست",
+    medal: "مەدال",
+    cpSpace: "CP شوێن",
+    family: "خێزان",
+    bag: "جانتا",
+    dress: "جل",
+    customerService: "خزمەتگوزاری کڕیار",
+    helpFeedback: "یارمەتی و بۆچوون",
+    settings: "ڕێکخستنەکان",
+    save: "پاشەکەوت",
+    cancel: "هەڵوەشاندنەوە",
+    name: "ناو",
+    bio: "ژیاننامە",
+    country: "وڵات",
+    gender: "ڕەگەز",
+    followers: "شوێنکەوتووان",
+    following: "شوێنکەوتن",
+    visitors: "سەردانکەران"
+},
+
+ja: {
+    language: "言語",
+    selectLanguage: "言語を選択",
+    home: "ホーム",
+    rooms: "ルーム",
+    me: "マイページ",
+    editProfile: "プロフィール編集",
+    wallet: "ウォレット",
+    level: "レベル",
+    medal: "メダル",
+    cpSpace: "CPスペース",
+    family: "ファミリー",
+    bag: "バッグ",
+    dress: "着せ替え",
+    customerService: "カスタマーサービス",
+    helpFeedback: "ヘルプとフィードバック",
+    settings: "設定",
+    save: "保存",
+    cancel: "キャンセル",
+    name: "名前",
+    bio: "自己紹介",
+    country: "国",
+    gender: "性別",
+    followers: "フォロワー",
+    following: "フォロー中",
+    visitors: "訪問者"
+},
+
+ko: {
+    language: "언어",
+    selectLanguage: "언어 선택",
+    home: "홈",
+    rooms: "방",
+    me: "내 정보",
+    editProfile: "프로필 수정",
+    wallet: "지갑",
+    level: "레벨",
+    medal: "메달",
+    cpSpace: "CP 공간",
+    family: "패밀리",
+    bag: "가방",
+    dress: "꾸미기",
+    customerService: "고객 서비스",
+    helpFeedback: "도움말 및 피드백",
+    settings: "설정",
+    save: "저장",
+    cancel: "취소",
+    name: "이름",
+    bio: "소개",
+    country: "국가",
+    gender: "성별",
+    followers: "팔로워",
+    following: "팔로잉",
+    visitors: "방문자"
+},
+
+th: {
+    language: "ภาษา",
+    selectLanguage: "เลือกภาษา",
+    home: "หน้าหลัก",
+    rooms: "ห้อง",
+    me: "ฉัน",
+    editProfile: "แก้ไขโปรไฟล์",
+    wallet: "กระเป๋าเงิน",
+    level: "ระดับ",
+    medal: "เหรียญรางวัล",
+    cpSpace: "พื้นที่ CP",
+    family: "ครอบครัว",
+    bag: "กระเป๋า",
+    dress: "เสื้อผ้า",
+    customerService: "บริการลูกค้า",
+    helpFeedback: "ช่วยเหลือและข้อเสนอแนะ",
+    settings: "การตั้งค่า",
+    save: "บันทึก",
+    cancel: "ยกเลิก",
+    name: "ชื่อ",
+    bio: "ประวัติ",
+    country: "ประเทศ",
+    gender: "เพศ",
+    followers: "ผู้ติดตาม",
+    following: "กำลังติดตาม",
+    visitors: "ผู้เข้าชม"
+},
+
+vi: {
+    language: "Ngôn ngữ",
+    selectLanguage: "Chọn ngôn ngữ",
+    home: "Trang chủ",
+    rooms: "Phòng",
+    me: "Tôi",
+    editProfile: "Chỉnh sửa hồ sơ",
+    wallet: "Ví",
+    level: "Cấp độ",
+    medal: "Huy chương",
+    cpSpace: "Không gian CP",
+    family: "Gia đình",
+    bag: "Túi",
+    dress: "Trang phục",
+    customerService: "Chăm sóc khách hàng",
+    helpFeedback: "Trợ giúp và phản hồi",
+    settings: "Cài đặt",
+    save: "Lưu",
+    cancel: "Hủy",
+    name: "Tên",
+    bio: "Tiểu sử",
+    country: "Quốc gia",
+    gender: "Giới tính",
+    followers: "Người theo dõi",
+    following: "Đang theo dõi",
+    visitors: "Khách truy cập"
+},
+
+ms: {
+    language: "Bahasa",
+    selectLanguage: "Pilih Bahasa",
+    home: "Laman Utama",
+    rooms: "Bilik",
+    me: "Saya",
+    editProfile: "Edit Profil",
+    wallet: "Dompet",
+    level: "Tahap",
+    medal: "Pingat",
+    cpSpace: "Ruang CP",
+    family: "Keluarga",
+    bag: "Beg",
+    dress: "Pakaian",
+    customerService: "Khidmat Pelanggan",
+    helpFeedback: "Bantuan & Maklum Balas",
+    settings: "Tetapan",
+    save: "Simpan",
+    cancel: "Batal",
+    name: "Nama",
+    bio: "Bio",
+    country: "Negara",
+    gender: "Jantina",
+    followers: "Pengikut",
+    following: "Mengikuti",
+    visitors: "Pelawat"
+},
+
+fil: {
+    language: "Wika",
+    selectLanguage: "Pumili ng Wika",
+    home: "Home",
+    rooms: "Mga Room",
+    me: "Ako",
+    editProfile: "I-edit ang Profile",
+    wallet: "Wallet",
+    level: "Level",
+    medal: "Medalya",
+    cpSpace: "CP Space",
+    family: "Pamilya",
+    bag: "Bag",
+    dress: "Damit",
+    customerService: "Customer Service",
+    helpFeedback: "Tulong at Feedback",
+    settings: "Settings",
+    save: "I-save",
+    cancel: "Kanselahin",
+    name: "Pangalan",
+    bio: "Bio",
+    country: "Bansa",
+    gender: "Kasarian",
+    followers: "Mga Tagasubaybay",
+    following: "Sinusubaybayan",
+    visitors: "Mga Bisita"
+},
+
+tr: {
+    language: "Dil",
+    selectLanguage: "Dil Seçin",
+    home: "Ana Sayfa",
+    rooms: "Odalar",
+    me: "Ben",
+    editProfile: "Profili Düzenle",
+    wallet: "Cüzdan",
+    level: "Seviye",
+    medal: "Madalya",
+    cpSpace: "CP Alanı",
+    family: "Aile",
+    bag: "Çanta",
+    dress: "Kıyafet",
+    customerService: "Müşteri Hizmetleri",
+    helpFeedback: "Yardım ve Geri Bildirim",
+    settings: "Ayarlar",
+    save: "Kaydet",
+    cancel: "İptal",
+    name: "İsim",
+    bio: "Biyografi",
+    country: "Ülke",
+    gender: "Cinsiyet",
+    followers: "Takipçiler",
+    following: "Takip Edilenler",
+    visitors: "Ziyaretçiler"
+},
+
+ru: {
+    language: "Язык",
+    selectLanguage: "Выберите язык",
+    home: "Главная",
+    rooms: "Комнаты",
+    me: "Я",
+    editProfile: "Редактировать профиль",
+    wallet: "Кошелёк",
+    level: "Уровень",
+    medal: "Медаль",
+    cpSpace: "Пространство CP",
+    family: "Семья",
+    bag: "Сумка",
+    dress: "Одежда",
+    customerService: "Служба поддержки",
+    helpFeedback: "Помощь и отзывы",
+    settings: "Настройки",
+    save: "Сохранить",
+    cancel: "Отмена",
+    name: "Имя",
+    bio: "Биография",
+    country: "Страна",
+    gender: "Пол",
+    followers: "Подписчики",
+    following: "Подписки",
+    visitors: "Посетители"
+},
+
+fr: {
+    language: "Langue",
+    selectLanguage: "Choisir la langue",
+    home: "Accueil",
+    rooms: "Salons",
+    me: "Moi",
+    editProfile: "Modifier le profil",
+    wallet: "Portefeuille",
+    level: "Niveau",
+    medal: "Médaille",
+    cpSpace: "Espace CP",
+    family: "Famille",
+    bag: "Sac",
+    dress: "Tenue",
+    customerService: "Service client",
+    helpFeedback: "Aide et commentaires",
+    settings: "Paramètres",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    name: "Nom",
+    bio: "Bio",
+    country: "Pays",
+    gender: "Genre",
+    followers: "Abonnés",
+    following: "Abonnements",
+    visitors: "Visiteurs"
+},
+
+de: {
+    language: "Sprache",
+    selectLanguage: "Sprache auswählen",
+    home: "Startseite",
+    rooms: "Räume",
+    me: "Ich",
+    editProfile: "Profil bearbeiten",
+    wallet: "Geldbörse",
+    level: "Level",
+    medal: "Medaille",
+    cpSpace: "CP-Bereich",
+    family: "Familie",
+    bag: "Tasche",
+    dress: "Kleidung",
+    customerService: "Kundenservice",
+    helpFeedback: "Hilfe & Feedback",
+    settings: "Einstellungen",
+    save: "Speichern",
+    cancel: "Abbrechen",
+    name: "Name",
+    bio: "Bio",
+    country: "Land",
+    gender: "Geschlecht",
+    followers: "Follower",
+    following: "Folge ich",
+    visitors: "Besucher"
+},
+
+es: {
+    language: "Idioma",
+    selectLanguage: "Seleccionar idioma",
+    home: "Inicio",
+    rooms: "Salas",
+    me: "Yo",
+    editProfile: "Editar perfil",
+    wallet: "Cartera",
+    level: "Nivel",
+    medal: "Medalla",
+    cpSpace: "Espacio CP",
+    family: "Familia",
+    bag: "Bolsa",
+    dress: "Vestimenta",
+    customerService: "Atención al cliente",
+    helpFeedback: "Ayuda y comentarios",
+    settings: "Configuración",
+    save: "Guardar",
+    cancel: "Cancelar",
+    name: "Nombre",
+    bio: "Biografía",
+    country: "País",
+    gender: "Género",
+    followers: "Seguidores",
+    following: "Siguiendo",
+    visitors: "Visitantes"
+}
+
+};
+
+/* APPLY LANGUAGE */
+
+function applyHukaLanguage(language) {
+
+    const selectedLanguage =
+        HUKA_TRANSLATIONS[language]
+            ? language
+            : "en";
+
+    const words =
+        HUKA_TRANSLATIONS[selectedLanguage];
+
+    document.documentElement.lang =
+        selectedLanguage;
+
+    document.documentElement.dir =
+        (selectedLanguage === "ar" ||
+         selectedLanguage === "ur")
+            ? "rtl"
+            : "ltr";
+
+    document.querySelectorAll("[data-huka]").forEach(element => {
+
+        const key = element.getAttribute("data-huka");
+
+        if (words[key]) {
+            element.textContent = words[key];
+        }
+
+    });
+
+    if ($("languageLabel")) {
+        $("languageLabel").textContent =
+            HUKA_LANGUAGES[selectedLanguage];
+    }
+
+    localStorage.setItem(
+        "hukaLanguage",
+        selectedLanguage
+    );
+}
+
+/* OPEN LANGUAGE */
+
 function openLanguage() {
+
     const select = $("languageSelect");
 
     if (!select) {
@@ -2316,20 +2999,16 @@ function openLanguage() {
         return;
     }
 
-    const savedLanguage =
+    select.value =
         localStorage.getItem("hukaLanguage") || "en";
-
-    select.value = savedLanguage;
-
-    if ($("languageLabel")) {
-        $("languageLabel").textContent =
-            HUKA_LANGUAGES[savedLanguage] || "English";
-    }
 
     showModal("languageModal");
 }
 
+/* SAVE LANGUAGE */
+
 function saveLanguage() {
+
     const select = $("languageSelect");
 
     if (!select) {
@@ -2344,54 +3023,29 @@ function saveLanguage() {
         return;
     }
 
-    localStorage.setItem(
-        "hukaLanguage",
-        selectedLanguage
-    );
-
-    document.documentElement.lang = selectedLanguage;
-
-    document.documentElement.dir =
-        (selectedLanguage === "ar" ||
-         selectedLanguage === "ur")
-            ? "rtl"
-            : "ltr";
-
-    if ($("languageLabel")) {
-        $("languageLabel").textContent =
-            HUKA_LANGUAGES[selectedLanguage];
-    }
+    applyHukaLanguage(selectedLanguage);
 
     closeModal("languageModal");
 
     showToast(
-        "Language preference save ho gayi: " +
+        "Language saved: " +
         HUKA_LANGUAGES[selectedLanguage]
     );
 }
 
-/* RESTORE SAVED LANGUAGE */
+/* RESTORE LANGUAGE */
 
 function restoreLanguage() {
+
     const selectedLanguage =
         localStorage.getItem("hukaLanguage") || "en";
 
-    document.documentElement.lang = selectedLanguage;
-
-    document.documentElement.dir =
-        (selectedLanguage === "ar" ||
-         selectedLanguage === "ur")
-            ? "rtl"
-            : "ltr";
-
     if ($("languageSelect")) {
-        $("languageSelect").value = selectedLanguage;
+        $("languageSelect").value =
+            selectedLanguage;
     }
 
-    if ($("languageLabel")) {
-        $("languageLabel").textContent =
-            HUKA_LANGUAGES[selectedLanguage] || "English";
-    }
+    applyHukaLanguage(selectedLanguage);
 }
 
 restoreLanguage();
