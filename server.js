@@ -2415,7 +2415,163 @@ socket.on("unequip-bag-item", (data, callback) => {
       diamonds: profile.diamonds
     });
   });
+   
+/* =========================================
+   CP PARTNER GIFT SYSTEM
+========================================= */
 
+socket.on("send-cp-gift", (data, callback) => {
+
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  ensureCPProfile(profile);
+
+  const partnerId = profile.cpPartnerId;
+  const partner = partnerId
+    ? db.profiles[partnerId]
+    : null;
+
+  if (
+    !partner ||
+    partner.cpPartnerId !== user.id
+  ) {
+    return reply(callback, {
+      ok: false,
+      message: "CP Partner not found"
+    });
+  }
+
+  const gift = findGift(data?.giftId);
+
+  if (!gift) {
+    return reply(callback, {
+      ok: false,
+      message: "Gift not found"
+    });
+  }
+
+  const quantity = Math.max(
+    1,
+    Math.min(10, Number(data?.quantity) || 1)
+  );
+
+  const totalCost = gift.price * quantity;
+
+  if (
+    !Number.isSafeInteger(totalCost) ||
+    totalCost <= 0 ||
+    Number(profile.coins || 0) < totalCost
+  ) {
+    return reply(callback, {
+      ok: false,
+      message: "Not enough coins"
+    });
+  }
+
+  // Deduct sender coins.
+  profile.coins -= totalCost;
+
+  // Add receiver diamonds.
+  partner.diamonds =
+    (Number(partner.diamonds) || 0) + totalCost;
+
+  partner.totalGifts =
+    (Number(partner.totalGifts) || 0) + quantity;
+
+  // Wallet history.
+  addWalletHistory(
+    profile,
+    "gift",
+    -totalCost,
+    `Sent ${quantity} x ${gift.name} to CP Partner`
+  );
+
+  partner.walletHistory ||= [];
+
+  partner.walletHistory.unshift({
+    id: `cp_gift_${Date.now()}`,
+    type: "gift",
+    amount: totalCost,
+    note: `Received ${quantity} x ${gift.name} from CP Partner`,
+    date: Date.now()
+  });
+
+  partner.walletHistory =
+    partner.walletHistory.slice(0, 100);
+
+  // CP XP reward.
+  const cpReward = Math.max(
+    1,
+    Math.floor(totalCost / 1000)
+  );
+
+  const xpAdded = addCPExperience(
+    profile,
+    partner,
+    cpReward
+  );
+
+  // Update online user coins.
+  user.coins = profile.coins;
+
+  const event = {
+    senderId: user.id,
+    senderName: user.name,
+    receiverId: partner.id,
+    receiverName: partner.name,
+    giftId: gift.id,
+    giftName: gift.name,
+    giftIcon: gift.icon,
+    quantity,
+    totalCost,
+    xpAdded,
+    time: Date.now()
+  };
+
+  saveDB();
+
+  // Update sender.
+  socket.emit("profile-update", {
+    id: user.id,
+    coins: profile.coins,
+    diamonds: profile.diamonds
+  });
+
+  socket.emit("cp-gift-sent", event);
+
+  // Notify partner on all their active connections.
+  for (const [socketId, onlineUser] of online.entries()) {
+    if (onlineUser.id === partner.id) {
+      io.to(socketId).emit("cp-gift-received", event);
+      io.to(socketId).emit("profile-update", {
+        id: partner.id,
+        coins: partner.coins,
+        diamonds: partner.diamonds
+      });
+    }
+  }
+
+  emitCPUpdate(user.id);
+  emitCPUpdate(partner.id);
+
+  reply(callback, {
+    ok: true,
+    message: "CP Gift sent successfully",
+    coins: profile.coins,
+    diamonds: partner.diamonds,
+    xpAdded
+  });
+
+});
+   
   /* =======================================
      MIC STATE
   ======================================= */    
