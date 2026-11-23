@@ -506,6 +506,30 @@ function searchRooms(){
   allRooms=old;
   if(!found.length)toast('No matching rooms found.');
 }
+  
+<script>
+function openHomeLanguage() {
+  const saved = localStorage.getItem("hukaLanguage") || "en";
+  document.getElementById("homeLanguageSelect").value = saved;
+  document.getElementById("homeLanguageModal").classList.add("show");
+}
+
+function closeHomeLanguage() {
+  document.getElementById("homeLanguageModal").classList.remove("show");
+}
+
+function saveHomeLanguage() {
+  const lang = document.getElementById("homeLanguageSelect").value;
+  localStorage.setItem("hukaLanguage", lang);
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir =
+    ["ar", "ur", "ku"].includes(lang) ? "rtl" : "ltr";
+
+  closeHomeLanguage();
+  toast("Language preference saved!");
+}
 </script>
+  
 </body>
 </html>
