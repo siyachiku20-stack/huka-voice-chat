@@ -3255,7 +3255,131 @@ socket.on("get-cp-space", (data, callback) => {
   });
 });
 
+   
+/* =========================================
+   CP MEMORIES SYSTEM
+========================================= */
 
+// SAVE CP MEMORY
+socket.on("add-cp-memory", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  ensureCPProfile(profile);
+
+  const partner = db.profiles[profile.cpPartnerId];
+
+  if (!partner || partner.cpPartnerId !== user.id) {
+    return reply(callback, {
+      ok: false,
+      message: "CP Partner not found"
+    });
+  }
+
+  const title = String(data?.title || "").trim().slice(0, 60);
+  const description = String(data?.description || "")
+    .trim()
+    .slice(0, 300);
+
+  if (!title) {
+    return reply(callback, {
+      ok: false,
+      message: "Memory title required"
+    });
+  }
+
+  const memory = {
+    id: "cp_memory_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    title,
+    description,
+    createdBy: user.id,
+    createdByName: user.name,
+    createdAt: Date.now()
+  };
+
+  profile.cpMemories.unshift(memory);
+  partner.cpMemories ||= [];
+  partner.cpMemories.unshift({ ...memory });
+
+  profile.cpMemories = profile.cpMemories.slice(0, 50);
+  partner.cpMemories = partner.cpMemories.slice(0, 50);
+
+  saveDB();
+
+  emitCPUpdate(user.id);
+  emitCPUpdate(partner.id);
+
+  reply(callback, {
+    ok: true,
+    message: "CP Memory saved successfully",
+    memory
+  });
+});
+
+
+// DELETE CP MEMORY
+socket.on("delete-cp-memory", (data, callback) => {
+  const user = getUser(socket);
+  const profile = getProfile(socket);
+
+  if (!user || !profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  ensureCPProfile(profile);
+
+  const partner = db.profiles[profile.cpPartnerId];
+
+  if (!partner || partner.cpPartnerId !== user.id) {
+    return reply(callback, {
+      ok: false,
+      message: "CP Partner not found"
+    });
+  }
+
+  const memoryId = String(data?.memoryId || "");
+
+  const memory = profile.cpMemories.find(
+    item => item.id === memoryId
+  );
+
+  if (!memory) {
+    return reply(callback, {
+      ok: false,
+      message: "Memory not found"
+    });
+  }
+
+  profile.cpMemories = profile.cpMemories.filter(
+    item => item.id !== memoryId
+  );
+
+  partner.cpMemories = (partner.cpMemories || []).filter(
+    item => item.id !== memoryId
+  );
+
+  saveDB();
+
+  emitCPUpdate(user.id);
+  emitCPUpdate(partner.id);
+
+  reply(callback, {
+    ok: true,
+    message: "CP Memory deleted"
+  });
+});
+
+   
 // SEND CP REQUEST
 socket.on("send-cp-request", (data, callback) => {
   const user = getUser(socket);
