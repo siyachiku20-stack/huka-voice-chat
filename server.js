@@ -942,6 +942,38 @@ function addCPExperience(profileA, profileB, amount) {
   return reward;
 }
 
+/* =========================================
+   CP TASK XP REWARDS
+========================================= */
+
+function addCPTaskExperience(profileA, profileB, amount) {
+  ensureCPProfile(profileA);
+  ensureCPProfile(profileB);
+
+  if (
+    profileA.cpPartnerId !== profileB.id ||
+    profileB.cpPartnerId !== profileA.id
+  ) {
+    return 0;
+  }
+
+  const reward = Math.max(
+    0,
+    Math.floor(Number(amount) || 0)
+  );
+
+  if (reward <= 0) return 0;
+
+  for (const profile of [profileA, profileB]) {
+    profile.cpXP += reward;
+    profile.cpWeeklyXP += reward;
+    profile.cpMonthlyXP += reward;
+    profile.cpDailyXP += reward;
+  }
+
+  return reward;
+}
+
 function emitCPUpdate(userId) {
   for (const [socketId, user] of online.entries()) {
     if (user.id === userId) {
