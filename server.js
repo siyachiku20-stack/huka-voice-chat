@@ -974,6 +974,89 @@ function addCPTaskExperience(profileA, profileB, amount) {
   return reward;
 }
 
+/* =========================================
+   CP DAILY TASK REWARD SYSTEM
+========================================= */
+
+function completeCPDailyTask(
+  profileA,
+  profileB,
+  taskId,
+  coinReward,
+  xpReward
+) {
+  ensureCPProfile(profileA);
+  ensureCPProfile(profileB);
+
+  if (
+    profileA.cpPartnerId !== profileB.id ||
+    profileB.cpPartnerId !== profileA.id
+  ) {
+    return {
+      ok: false,
+      message: "CP Partner not found"
+    };
+  }
+
+  const today = getIndiaDate();
+
+  profileA.cpDailyTaskClaims ||= {};
+  profileB.cpDailyTaskClaims ||= {};
+
+  if (profileA.cpTaskDate !== today) {
+    profileA.cpTaskDate = today;
+    profileA.cpDailyTaskClaims = {};
+  }
+
+  if (profileB.cpTaskDate !== today) {
+    profileB.cpTaskDate = today;
+    profileB.cpDailyTaskClaims = {};
+  }
+
+  if (
+    profileA.cpDailyTaskClaims[taskId] === today ||
+    profileB.cpDailyTaskClaims[taskId] === today
+  ) {
+    return {
+      ok: false,
+      message: "Aaj ka task reward pehle mil chuka hai."
+    };
+  }
+
+  const coins = Math.max(0, Math.floor(Number(coinReward) || 0));
+  const xp = Math.max(0, Math.floor(Number(xpReward) || 0));
+
+  for (const profile of [profileA, profileB]) {
+    profile.coins = (Number(profile.coins) || 0) + coins;
+
+    profile.cpDailyTaskClaims[taskId] = today;
+
+    addWalletHistory(
+      profile,
+      "cp-task",
+      coins,
+      "CP Daily Task Reward"
+    );
+  }
+
+  const xpAdded = addCPTaskExperience(
+    profileA,
+    profileB,
+    xp
+  );
+
+  saveDB();
+
+  emitCPUpdate(profileA.id);
+  emitCPUpdate(profileB.id);
+
+  return {
+    ok: true,
+    coins,
+    xpAdded
+  };
+}
+
 function emitCPUpdate(userId) {
   for (const [socketId, user] of online.entries()) {
     if (user.id === userId) {
