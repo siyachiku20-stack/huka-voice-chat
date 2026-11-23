@@ -3221,19 +3221,34 @@ socket.on("get-cp-space", (data, callback) => {
   if (partner && partner.cpPartnerId === user.id) {
     ensureCPProfile(partner);
 
+    const pairedAt = Number(profile.cpPairedAt) || 0;
+
+    const daysTogether = pairedAt
+      ? Math.max(
+          1,
+          Math.floor((Date.now() - pairedAt) / 86400000) + 1
+        )
+      : 0;
+
     partnerData = {
       id: partner.id,
       name: partner.name,
       avatar: partner.avatar || "",
       level: getCPLevel(profile.cpXP),
       xp: profile.cpXP,
-      pairedAt: profile.cpPairedAt || 0
+      pairedAt,
+      daysTogether,
+      anniversaryDate: pairedAt
+        ? new Date(pairedAt).toISOString().slice(0, 10)
+        : "",
+      memories: profile.cpMemories || []
     };
   }
 
   reply(callback, {
     ok: true,
     partner: partnerData,
+    pairedAt: profile.cpPairedAt || 0,
     progress: getCPProgress(profile),
     incomingRequests,
     outgoingRequests
