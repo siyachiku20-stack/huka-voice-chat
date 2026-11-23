@@ -1163,6 +1163,62 @@ button {
     <div id="cpRankingList" style="margin-top:12px;">
       Loading ranking...
     </div>
+    
+<!-- CP ANNIVERSARY & MEMORIES -->
+
+<div class="frame-card" style="margin-top:20px;">
+  <h3>💞 CP Anniversary</h3>
+
+  <div class="info-row">
+    <span>Relationship Start</span>
+    <strong id="cpStartDate">Not available</strong>
+  </div>
+
+  <div class="info-row">
+    <span>Days Together</span>
+    <strong id="cpDaysTogether">0 Days</strong>
+  </div>
+
+  <div class="info-row">
+    <span>Next Anniversary</span>
+    <strong id="cpNextAnniversary">Not available</strong>
+  </div>
+
+  <p id="cpAnniversaryMessage">
+    Your special journey starts here ❤️
+  </p>
+</div>
+
+<div class="frame-card" style="margin-top:20px;">
+  <h3>📸 Couple Memories</h3>
+
+  <label>Memory Title</label>
+  <input
+    id="cpMemoryTitle"
+    maxlength="60"
+    placeholder="Our First Meeting ❤️">
+
+  <label style="margin-top:10px;">Memory Description</label>
+  <textarea
+    id="cpMemoryDescription"
+    maxlength="300"
+    placeholder="Write your special moment..."></textarea>
+
+  <button
+    class="primary"
+    type="button"
+    style="width:100%;margin-top:10px;"
+    onclick="addCPMemory()">
+    ❤️ Save Memory
+  </button>
+
+  <p id="cpMemoryMessage"></p>
+
+  <div id="cpMemoriesList" style="margin-top:15px;">
+    No memories yet.
+  </div>
+</div>
+    
 <!-- CP GIFTS -->
 
 <div class="frame-card" style="margin-top:20px;">
