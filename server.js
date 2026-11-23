@@ -2644,7 +2644,16 @@ socket.on("send-cp-gift", (data, callback) => {
     partner,
     cpReward
   );
-
+   
+  // CP DAILY GIFT TASK REWARD
+  const giftTaskReward = completeCPDailyTask(
+    profile,
+    partner,
+    "send_cp_gift",
+    10000,
+    2000
+  );
+   
   // Update online user coins.
   user.coins = profile.coins;
 
