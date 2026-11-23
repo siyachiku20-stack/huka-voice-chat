@@ -836,15 +836,26 @@ function addExperience(profile, amount) {
 }
 
 /* =========================================
-   CP SPACE SYSTEM
+   CP SPACE + ANNIVERSARY + MEMORIES
 ========================================= */
 
 function ensureCPProfile(profile) {
   profile.cpPartnerId ||= "";
+
   profile.cpXP = Number(profile.cpXP) || 0;
   profile.cpWeeklyXP = Number(profile.cpWeeklyXP) || 0;
   profile.cpMonthlyXP = Number(profile.cpMonthlyXP) || 0;
   profile.cpDailyXP = Number(profile.cpDailyXP) || 0;
+
+  // CP Anniversary Data
+  profile.cpPairedAt = Number(profile.cpPairedAt) || 0;
+  profile.cpAnniversaryNotifiedYear =
+    Number(profile.cpAnniversaryNotifiedYear) || 0;
+
+  // CP Memories
+  if (!Array.isArray(profile.cpMemories)) {
+    profile.cpMemories = [];
+  }
 
   const today = getIndiaDate();
 
