@@ -1349,9 +1349,15 @@ function emitRequest(eventName, data = {}) {
         const timer = setTimeout(() => {
             if (!completed) {
                 completed = true;
+
+                console.error(
+                    "HUKA REQUEST TIMEOUT:",
+                    eventName
+                );
+
                 resolve({
                     ok: false,
-                    message: "Server response nahi mila."
+                    message: "Server response nahi mila: " + eventName
                 });
             }
         }, 10000);
