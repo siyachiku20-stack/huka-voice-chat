@@ -3415,12 +3415,15 @@ socket.on("cp-space-update", async () => {
 /* ---------- OTHER PROFILE PAGES ---------- */
 
 function openPage(pageName) {
+    if (pageName === "CP Space") {
+        openCPSpace();
+        return;
+    }
+
     let message = "";
 
     if (pageName === "Level") {
         message = "Your Level: " + (profile?.level || 1);
-    } else if (pageName === "CP Space") {
-        message = "CP Space feature abhi complete nahi hai.";
     } else if (pageName === "Dress") {
         message = "Dress feature abhi complete nahi hai.";
     } else {
@@ -3431,10 +3434,6 @@ function openPage(pageName) {
     if ($("infoText")) $("infoText").textContent = message;
 
     showModal("infoModal");
-}
-
-function openMedalsPage() {
-    openMedals();
 }
 
 function openDress() {
