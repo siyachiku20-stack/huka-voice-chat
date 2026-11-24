@@ -3465,8 +3465,14 @@ function renderCPDailyTasks(data) {
     list.innerHTML = "";
 
     const claims = data?.dailyTaskClaims || {};
+    const bonusClaims = data?.dailyBonusClaims || {};
     const today = data?.taskDate || "";
 
+    const completedCount = CP_DAILY_TASKS.filter(
+        task => claims[task.id] === today
+    ).length;
+
+    // DAILY TASKS
     CP_DAILY_TASKS.forEach(task => {
         const completed = claims[task.id] === today;
 
@@ -3497,7 +3503,69 @@ function renderCPDailyTasks(data) {
         card.append(title, reward, status);
         list.appendChild(card);
     });
-  }
+
+    // BONUS REWARDS HEADING
+    const heading = document.createElement("h3");
+    heading.textContent = "🎁 CP Bonus Rewards";
+    heading.style.marginTop = "22px";
+    list.appendChild(heading);
+
+    const bonuses = [
+        {
+            id: "three_tasks",
+            title: "Complete 3 Daily Tasks",
+            required: 3,
+            coins: 25000,
+            xp: 5000
+        },
+        {
+            id: "all_tasks",
+            title: "Complete All 4 Daily Tasks",
+            required: 4,
+            coins: 100000,
+            xp: 20000
+        }
+    ];
+
+    bonuses.forEach(bonus => {
+        const claimed = bonusClaims[bonus.id] === today;
+        const completed = completedCount >= bonus.required;
+
+        const card = document.createElement("div");
+        card.className = "frame-card";
+        card.style.marginTop = "10px";
+        card.style.padding = "12px";
+
+        const title = document.createElement("h4");
+        title.textContent = bonus.title;
+
+        const progress = document.createElement("p");
+        progress.textContent =
+            completedCount + " / " + bonus.required + " Tasks";
+
+        const reward = document.createElement("p");
+        reward.textContent =
+            bonus.coins.toLocaleString("en-IN") +
+            " Coins + " +
+            bonus.xp.toLocaleString("en-IN") +
+            " CP XP";
+
+        const status = document.createElement("strong");
+
+        status.textContent = claimed
+            ? "Reward Claimed ✓"
+            : completed
+                ? "Completed ✓"
+                : "In Progress";
+
+        status.style.color = claimed || completed
+            ? "#35d07f"
+            : "#f5bd55";
+
+        card.append(title, progress, reward, status);
+        list.appendChild(card);
+    });
+}
   
   
 /* DISPLAY REQUESTS */
