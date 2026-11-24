@@ -616,6 +616,55 @@ function getProfile(socket) {
   return user ? db.profiles[user.id] : null;
 }
 
+/* =========================================
+   HUKA FAMILY SYSTEM - HELPER FUNCTIONS
+========================================= */
+
+function getFamilyMemberInfo(memberId, family) {
+  const profile = db.profiles[String(memberId)] || {};
+
+  return {
+    id: memberId,
+    name: profile.username || profile.name || "Huka User",
+    avatar: profile.avatar || profile.dp || "",
+    role: String(memberId) === String(family.ownerId)
+      ? "Owner"
+      : (family.admins || []).some(id => String(id) === String(memberId))
+        ? "Admin"
+        : "Member"
+  };
+}
+
+function getFamilyData(family) {
+  if (!family) return null;
+
+  family.members ||= [];
+  family.admins ||= [];
+  family.chat ||= [];
+
+  return {
+    id: family.id,
+    name: family.name,
+    code: family.code,
+    ownerId: family.ownerId,
+    members: family.members.map(id =>
+      getFamilyMemberInfo(id, family)
+    ),
+    memberCount: family.members.length,
+    admins: family.admins,
+    createdAt: family.createdAt
+  };
+}
+
+function familyBroadcast(family) {
+  if (!family) return;
+
+  io.to("family_" + family.id).emit(
+    "family:updated",
+    getFamilyData(family)
+  );
+}
+
 function addWalletHistory(profile, type, amount, note) {
   profile.walletHistory ||= [];
   profile.walletHistory.unshift({
