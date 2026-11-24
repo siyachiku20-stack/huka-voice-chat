@@ -2297,30 +2297,33 @@ async function openMedals() {
 }
   
 async function openLevel() {
-    const result = await emitRequest("get-level-progress");
+    showModal("levelModal");
 
-    if (!isSuccess(result)) {
-        showToast(result.message || "Level details load nahi hue.");
+    const rewardsList = $("levelPageRewardsList");
+
+    if (rewardsList) {
+        rewardsList.textContent = "Loading rewards...";
+    }
+
+    await loadProfile();
+
+    if (!profile) {
+        showToast("Level data load nahi hua.");
         return;
     }
 
-    if (profile) {
-        profile.level = result.level;
-        profile.totalExperience = result.xp;
-        profile.levelProgress = result;
-        renderProfile();
+    if ($("levelPageCurrent")) {
+        $("levelPageCurrent").textContent =
+            profile.level || 1;
     }
 
-    if ($("infoTitle")) {
-        $("infoTitle").textContent = "🏆 Level & XP";
+    if ($("levelPageXP")) {
+        $("levelPageXP").textContent =
+            Number(profile.levelProgress?.totalXP || 0)
+            .toLocaleString("en-IN");
     }
 
-    if ($("infoText")) {
-        $("infoText").textContent =
-            `Level ${result.level} | Total XP: ${Number(result.xp).toLocaleString("en-IN")} | Next level ke liye ${Number(result.xpToNextLevel).toLocaleString("en-IN")} XP baaki.`;
-    }
-
-    showModal("infoModal");
+    renderLevelRewards();
 }
   
 /* ---------- HUKA FAMILY ---------- */
