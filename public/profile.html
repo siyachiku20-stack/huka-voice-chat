@@ -1219,49 +1219,105 @@ button {
   </div>
 </div>
     
-<!-- CP DAILY TASKS -->
+<!-- CP TASKS & GIFTS MENU -->
 
-<div class="frame-card" style="margin-top:20px;">
-
-  <h3>💞 CP Daily Tasks</h3>
-
-  <p>Complete tasks together and earn rewards!</p>
-
-  <div id="cpDailyTasksList">
-    Loading Daily Tasks...
-  </div>
-
-</div>    
-    
-<!-- CP GIFTS -->
-
-<div class="frame-card" style="margin-top:20px;">
-
-  <h3>🎁 Send Gift to CP Partner</h3>
-
-  <div id="cpGiftList">
-    Loading gifts...
-  </div>
-
-  <label>Gift Quantity</label>
-
-  <select id="cpGiftQuantity">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="5">5</option>
-    <option value="10">10</option>
-  </select>
-
-  <p id="cpGiftMessage"></p>
+<div id="cpRewardsMenu" class="frame-card" style="margin-top:20px;">
+  <h3>💞 CP Space</h3>
+  <p>Select what you want to open.</p>
 
   <button
     class="primary"
     type="button"
     style="width:100%;margin-top:10px;"
-    onclick="sendCPGift()">
-    🎁 Send Gift
+    onclick="
+      document.getElementById('cpRewardsMenu').style.display='none';
+      document.getElementById('cpTasksPanel').style.display='block';
+      document.getElementById('cpGiftsPanel').style.display='none';
+    ">
+    💞 CP Tasks & Rewards
   </button>
-  
+
+  <button
+    class="primary"
+    type="button"
+    style="width:100%;margin-top:12px;"
+    onclick="
+      document.getElementById('cpRewardsMenu').style.display='none';
+      document.getElementById('cpTasksPanel').style.display='none';
+      document.getElementById('cpGiftsPanel').style.display='block';
+    ">
+    🎁 Send Gift to CP Partner
+  </button>
+</div>
+
+
+<!-- CP DAILY TASKS & BONUS REWARDS -->
+
+<div id="cpTasksPanel" style="display:none;margin-top:20px;">
+
+  <div class="frame-card">
+    <h3>💞 CP Daily Tasks & Rewards</h3>
+    <p>Complete tasks together and earn rewards!</p>
+
+    <div id="cpDailyTasksList">
+      Loading Daily Tasks...
+    </div>
+  </div>
+
+  <button
+    class="secondary"
+    type="button"
+    style="width:100%;margin-top:12px;"
+    onclick="
+      document.getElementById('cpTasksPanel').style.display='none';
+      document.getElementById('cpRewardsMenu').style.display='block';
+    ">
+    ← Back
+  </button>
+</div>
+
+
+<!-- CP GIFTS -->
+
+<div id="cpGiftsPanel" style="display:none;margin-top:20px;">
+
+  <div class="frame-card">
+    <h3>🎁 Send Gift to CP Partner</h3>
+
+    <div id="cpGiftList">
+      Loading gifts...
+    </div>
+
+    <label>Gift Quantity</label>
+
+    <select id="cpGiftQuantity">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+    </select>
+
+    <p id="cpGiftMessage"></p>
+
+    <button
+      class="primary"
+      type="button"
+      style="width:100%;margin-top:10px;"
+      onclick="sendCPGift()">
+      🎁 Send Gift
+    </button>
+  </div>
+
+  <button
+    class="secondary"
+    type="button"
+    style="width:100%;margin-top:12px;"
+    onclick="
+      document.getElementById('cpGiftsPanel').style.display='none';
+      document.getElementById('cpRewardsMenu').style.display='block';
+    ">
+    ← Back
+  </button>
 </div>
     
     <button
