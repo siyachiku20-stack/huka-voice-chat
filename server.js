@@ -3496,6 +3496,15 @@ socket.on("get-cp-space", (data, callback) => {
 
   ensureCPProfile(profile);
 
+  const today = getIndiaDate();
+
+  profile.cpDailyTaskClaims ||= {};
+
+  if (profile.cpTaskDate !== today) {
+    profile.cpTaskDate = today;
+    profile.cpDailyTaskClaims = {};
+  }
+
   const partner = profile.cpPartnerId
     ? db.profiles[profile.cpPartnerId]
     : null;
@@ -3546,13 +3555,19 @@ socket.on("get-cp-space", (data, callback) => {
     };
   }
 
+  saveDB();
+
   reply(callback, {
     ok: true,
     partner: partnerData,
     pairedAt: profile.cpPairedAt || 0,
     progress: getCPProgress(profile),
     incomingRequests,
-    outgoingRequests
+    outgoingRequests,
+
+    // CP DAILY TASK STATUS
+    taskDate: profile.cpTaskDate,
+    dailyTaskClaims: profile.cpDailyTaskClaims || {}
   });
 });
 
