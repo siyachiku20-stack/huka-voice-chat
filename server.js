@@ -1096,7 +1096,7 @@ function addCPTaskExperience(profileA, profileB, amount) {
 }
 
 /* =========================================
-   CP DAILY TASK REWARD SYSTEM
+   CP DAILY TASK + BONUS REWARD SYSTEM
 ========================================= */
 
 function completeCPDailyTask(
@@ -1121,17 +1121,22 @@ function completeCPDailyTask(
 
   const today = getIndiaDate();
 
-  profileA.cpDailyTaskClaims ||= {};
-  profileB.cpDailyTaskClaims ||= {};
+  const taskIds = [
+    "send_cp_gift",
+    "save_memory",
+    "send_partner_message",
+    "voice_10_minutes"
+  ];
 
-  if (profileA.cpTaskDate !== today) {
-    profileA.cpTaskDate = today;
-    profileA.cpDailyTaskClaims = {};
-  }
+  for (const profile of [profileA, profileB]) {
+    profile.cpDailyTaskClaims ||= {};
+    profile.cpDailyBonusClaims ||= {};
 
-  if (profileB.cpTaskDate !== today) {
-    profileB.cpTaskDate = today;
-    profileB.cpDailyTaskClaims = {};
+    if (profile.cpTaskDate !== today) {
+      profile.cpTaskDate = today;
+      profile.cpDailyTaskClaims = {};
+      profile.cpDailyBonusClaims = {};
+    }
   }
 
   if (
@@ -1154,27 +1159,74 @@ function completeCPDailyTask(
     Math.floor(Number(xpReward) || 0)
   );
 
+  // MARK TASK COMPLETED
+  profileA.cpDailyTaskClaims[taskId] = today;
+  profileB.cpDailyTaskClaims[taskId] = today;
+
+  const completedCount = taskIds.filter(id =>
+    profileA.cpDailyTaskClaims[id] === today
+  ).length;
+
+  let bonusCoins = 0;
+  let bonusXP = 0;
+
+  // 3 TASK BONUS
+  if (
+    completedCount >= 3 &&
+    !profileA.cpDailyBonusClaims.three_tasks &&
+    !profileB.cpDailyBonusClaims.three_tasks
+  ) {
+    bonusCoins += 25000;
+    bonusXP += 5000;
+
+    profileA.cpDailyBonusClaims.three_tasks = today;
+    profileB.cpDailyBonusClaims.three_tasks = today;
+  }
+
+  // ALL 4 TASKS BONUS
+  if (
+    completedCount >= 4 &&
+    !profileA.cpDailyBonusClaims.all_tasks &&
+    !profileB.cpDailyBonusClaims.all_tasks
+  ) {
+    bonusCoins += 100000;
+    bonusXP += 20000;
+
+    profileA.cpDailyBonusClaims.all_tasks = today;
+    profileB.cpDailyBonusClaims.all_tasks = today;
+  }
+
+  // GIVE REWARDS TO BOTH PARTNERS
   for (const profile of [profileA, profileB]) {
     profile.coins =
-      (Number(profile.coins) || 0) + coins;
+      (Number(profile.coins) || 0) + coins + bonusCoins;
 
-    profile.cpDailyTaskClaims[taskId] = today;
+    if (coins > 0) {
+      addWalletHistory(
+        profile,
+        "cp-task",
+        coins,
+        "CP Daily Task Reward"
+      );
+    }
 
-    addWalletHistory(
-      profile,
-      "cp-task",
-      coins,
-      "CP Daily Task Reward"
-    );
+    if (bonusCoins > 0) {
+      addWalletHistory(
+        profile,
+        "cp-bonus",
+        bonusCoins,
+        "CP Daily Bonus Reward"
+      );
+    }
   }
 
   const xpAdded = addCPTaskExperience(
     profileA,
     profileB,
-    xp
+    xp + bonusXP
   );
 
-  // UPDATE BOTH PARTNERS ONLINE
+  // UPDATE ONLINE USERS
   for (const [socketId, onlineUser] of online.entries()) {
     if (
       onlineUser.id === profileA.id ||
@@ -1202,8 +1254,11 @@ function completeCPDailyTask(
 
   return {
     ok: true,
-    coins,
-    xpAdded
+    coins: coins + bonusCoins,
+    xpAdded,
+    bonusCoins,
+    bonusXP,
+    completedCount
   };
 }
 
