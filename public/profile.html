@@ -2660,7 +2660,7 @@ if (currentFamily) {
             currentFamily.code || "-";
 
         $("familyDisplayMembers").textContent =
-            (currentFamily.members || 1) + " / 50";
+            (currentFamily.memberCount || 0) + " / 50";
 
     } else {
         if (details) details.style.display = "none";
