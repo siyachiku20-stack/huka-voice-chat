@@ -3704,27 +3704,6 @@ Home Profile Design (44)
 
 इन दोनों के बीच नया कोड डालना है:
 
-function openCPSection(panelId) {
-  const panels = [
-    "cpRewardsMenu",
-    "cpTasksPanel",
-    "cpPrivilegePanel",
-    "cpRulesPanel",
-    "cpGiftsPanel"
-  ];
-
-  panels.forEach(id => {
-    const panel = document.getElementById(id);
-    if (panel) panel.style.display = "none";
-  });
-
-  const selected = document.getElementById(panelId);
-  if (selected) selected.style.display = "block";
-}
-
-function backToCPMenu() {
-  openCPSection("cpRewardsMenu");
-}
 
 नीचे की लाइन वैसी ही रहने देना:
 
