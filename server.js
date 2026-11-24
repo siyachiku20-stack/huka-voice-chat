@@ -3531,8 +3531,8 @@ socket.on("send-cp-gift", (data, callback) => {
     if (message.length < 5) return reply(callback, { ok: false, message: "Please enter at least 5 characters" });
     p.feedback ||= []; p.feedback.unshift({ message, date: Date.now() }); p.feedback = p.feedback.slice(0, 20); saveDB();
     reply(callback, { ok: true, message: "Feedback submitted" });
-  });
-   
+
+
 /* =========================================
    CP SPACE REQUESTS AND PARTNERS
 ========================================= */
@@ -3554,12 +3554,22 @@ socket.on("get-cp-space", (data, callback) => {
   const today = getIndiaDate();
 
   profile.cpDailyTaskClaims ||= {};
+  profile.cpDailyBonusClaims ||= {};
 
   if (profile.cpTaskDate !== today) {
     profile.cpTaskDate = today;
     profile.cpDailyTaskClaims = {};
+    profile.cpDailyBonusClaims = {};
   }
 
+  // CURRENT USER DETAILS
+  const selfData = {
+    id: user.id,
+    name: profile.name || user.name || "Huka User",
+    avatar: profile.avatar || ""
+  };
+
+  // CP PARTNER
   const partner = profile.cpPartnerId
     ? db.profiles[profile.cpPartnerId]
     : null;
@@ -3597,7 +3607,7 @@ socket.on("get-cp-space", (data, callback) => {
 
     partnerData = {
       id: partner.id,
-      name: partner.name,
+      name: partner.name || "CP Partner",
       avatar: partner.avatar || "",
       level: getCPLevel(profile.cpXP),
       xp: profile.cpXP,
@@ -3614,9 +3624,14 @@ socket.on("get-cp-space", (data, callback) => {
 
   reply(callback, {
     ok: true,
+
+    // USER AND PARTNER
+    self: selfData,
     partner: partnerData,
+
     pairedAt: profile.cpPairedAt || 0,
     progress: getCPProgress(profile),
+
     incomingRequests,
     outgoingRequests,
 
