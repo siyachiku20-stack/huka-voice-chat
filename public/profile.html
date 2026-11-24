@@ -1797,7 +1797,43 @@ let profile = null;
 let selectedAvatar = "";
 let currentFrames = [];
 let currentFamily = null;
+  
+/* ---------- FAMILY LIVE UPDATES ---------- */
 
+let familyChatMessages = [];
+
+socket.on("family:updated", (family) => {
+    if (!currentFamily || String(currentFamily.id) !== String(family.id)) {
+        return;
+    }
+
+    currentFamily = family;
+
+    renderFamilyManagement();
+
+    if ($("familyMemberCount")) {
+        $("familyMemberCount").textContent =
+            family.memberCount || 0;
+    }
+
+    if ($("familyDisplayMembers")) {
+        $("familyDisplayMembers").textContent =
+            (family.memberCount || 0) + " / 50";
+    }
+});
+
+socket.on("family:chat", (message) => {
+    if (!currentFamily) return;
+
+    familyChatMessages.push(message);
+
+    if (familyChatMessages.length > 50) {
+        familyChatMessages.shift();
+    }
+
+    renderFamilyChat(familyChatMessages);
+});
+  
 /* ---------- COMMON FUNCTIONS ---------- */
 
 function showToast(message) {
