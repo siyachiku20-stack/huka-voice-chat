@@ -2384,6 +2384,128 @@ async function openLevel() {
     renderLevelRewards();
 }
   
+/* =========================================
+   HUKA FAMILY CHAT + MANAGEMENT
+========================================= */
+
+function renderFamilyManagement() {
+    const box = $("familyManagementInfo");
+    if (!box || !currentFamily) return;
+
+    box.innerHTML = "";
+
+    const myId = String(getUserId());
+    const isOwner = String(currentFamily.ownerId) === myId;
+    const isAdmin = (currentFamily.admins || [])
+        .some(id => String(id) === myId);
+
+    const members = Array.isArray(currentFamily.members)
+        ? currentFamily.members
+        : [];
+
+    if (!isOwner && !isAdmin) {
+        box.textContent = "Only Owner and Admin can manage members.";
+        return;
+    }
+
+    members.forEach(member => {
+        if (String(member.id) === myId) return;
+
+        const row = document.createElement("div");
+        row.style.cssText =
+            "padding:10px;margin:8px 0;background:#39204d;border-radius:10px";
+
+        const title = document.createElement("b");
+        title.textContent = member.name + " — " + member.role;
+
+        row.appendChild(title);
+
+        if (isOwner && member.role !== "Admin") {
+            const promote = document.createElement("button");
+            promote.textContent = "🛡️ Make Admin";
+            promote.onclick = () =>
+                manageFamilyMember("family-promote-admin", member.id);
+            row.appendChild(promote);
+        }
+
+        if (isOwner && member.role === "Admin") {
+            const removeAdmin = document.createElement("button");
+            removeAdmin.textContent = "Remove Admin";
+            removeAdmin.onclick = () =>
+                manageFamilyMember("family-remove-admin", member.id);
+            row.appendChild(removeAdmin);
+        }
+
+        if (isOwner || (isAdmin && member.role === "Member")) {
+            const kick = document.createElement("button");
+            kick.textContent = "Remove Member";
+            kick.onclick = () =>
+                manageFamilyMember("family-remove-member", member.id);
+            row.appendChild(kick);
+        }
+
+        box.appendChild(row);
+    });
+}
+
+async function manageFamilyMember(eventName, memberId) {
+    if (!confirm("Kya aap ye action karna chahte hain?")) return;
+
+    const result = await emitRequest(eventName, {
+        memberId: memberId
+    });
+
+    if (isSuccess(result)) {
+        showToast(result.message || "Family updated");
+        await openFamily();
+    } else {
+        showToast(result.message || "Action failed");
+    }
+}
+
+async function sendFamilyMessage() {
+    const input = $("familyChatInput");
+    const message = input?.value.trim() || "";
+
+    if (!message) {
+        showToast("Message likhein.");
+        return;
+    }
+
+    const result = await emitRequest("family-chat", {
+        message: message
+    });
+
+    if (isSuccess(result)) {
+        input.value = "";
+    } else {
+        showToast(result.message || "Message send nahi hua.");
+    }
+}
+
+function renderFamilyChat(messages) {
+    const box = $("familyChatMessages");
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    (messages || []).forEach(item => {
+        const row = document.createElement("div");
+        row.style.cssText = "padding:7px;margin:5px 0;background:#39204d;border-radius:9px";
+
+        const name = document.createElement("b");
+        name.textContent = item.username || "Huka User";
+
+        const message = document.createElement("div");
+        message.textContent = item.message || "";
+
+        row.append(name, message);
+        box.appendChild(row);
+    });
+
+    box.scrollTop = box.scrollHeight;
+  }
+  
 /* ---------- HUKA FAMILY ---------- */
 
 async function openFamily() {
