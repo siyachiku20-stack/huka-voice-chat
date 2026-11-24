@@ -1137,7 +1137,46 @@ button {
       </button>
 
     </div>
+    
+<!-- FAMILY ADMIN MANAGEMENT -->
+<div class="family-card" style="margin-top:15px">
 
+  <h3>🛡️ Family Management</h3>
+
+  <p style="font-size:13px;color:#d9b9ef">
+    Owner और Admin यहाँ Family Members को manage कर सकते हैं।
+  </p>
+
+  <div id="familyManagementInfo"></div>
+
+</div>
+
+<!-- FAMILY CHAT -->
+<div class="family-card" style="margin-top:15px">
+
+  <h3>💬 Family Chat</h3>
+
+  <div id="familyChatMessages"
+       style="height:220px;overflow-y:auto;background:#241333;padding:10px;border-radius:12px">
+    Family chat messages यहाँ दिखेंगे।
+  </div>
+
+  <div style="display:flex;gap:7px;margin-top:10px">
+
+    <input id="familyChatInput"
+           maxlength="300"
+           placeholder="Write a message..."
+           style="flex:1;min-width:0">
+
+    <button class="primary"
+            onclick="sendFamilyMessage()">
+      Send
+    </button>
+
+  </div>
+
+</div>
+    
     <div id="familyCreateJoin">
 
       <h3>✨ Create Your Family</h3>
