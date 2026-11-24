@@ -3951,7 +3951,20 @@ socket.on("family-remove-member", (data, callback) => {
 
   family.admins = (family.admins || [])
     .filter(id => String(id) !== memberId);
+   
+// Removed member ke sabhi active sockets ko family room se nikalo
+for (const [socketId, connectedSocket] of io.sockets.sockets) {
+    const connectedUser = getUser(connectedSocket);
 
+    if (connectedUser && String(connectedUser.id) === memberId) {
+        connectedSocket.leave("family_" + family.id);
+
+        connectedSocket.emit("family:removed", {
+            message: "You have been removed from this family."
+        });
+    }
+     }
+   
   Object.values(db.profiles).forEach(profile => {
     if (String(profile.id) === memberId) {
       profile.familyId = "";
