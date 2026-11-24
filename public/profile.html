@@ -2524,6 +2524,20 @@ async function openFamily() {
     }
 
     currentFamily = result.family || null;
+
+  if (currentFamily) {
+    renderFamilyManagement();
+    renderFamilyChat(result.chat || []);
+} else {
+    if ($("familyManagementInfo")) {
+        $("familyManagementInfo").innerHTML = "";
+    }
+
+    if ($("familyChatMessages")) {
+        $("familyChatMessages").innerHTML =
+            "Pehle Family create ya join karein.";
+    }
+  }
   
 if (currentFamily) {
     if ($("familyIdDisplay")) {
