@@ -2204,6 +2204,10 @@ socket.on("unequip-bag-item", (data, callback) => {
     socket.data.roomId = roomId;
 
     room.members.add(socket.id);
+  
+    // START CP PARTNER VOICE SESSION
+    startCPVoiceSession(room, user);
+     
     room.micStates.set(socket.id, true);
 
     const joinedProfile = db.profiles[user.id];
