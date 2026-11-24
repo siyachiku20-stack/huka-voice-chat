@@ -1311,7 +1311,10 @@ function leaveRoom(socket) {
 
   const room = rooms.get(roomId);
   const user = getUser(socket);
-
+   
+  // STOP CP PARTNER VOICE SESSION
+  stopCPVoiceSession(roomId, user?.id);
+   
   if (room) {
     room.members.delete(socket.id);
     room.micStates.delete(socket.id);
