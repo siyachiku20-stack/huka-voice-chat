@@ -4083,7 +4083,14 @@ socket.on("leave-family", callback => {
       }
     }
 
-    socket.leave("family_" + family.id);
+     // Leave karne wale user ke sabhi active sockets ko family room se nikalo
+    for (const [socketId, connectedSocket] of io.sockets.sockets) {
+      const connectedUser = getUser(connectedSocket);
+
+      if (connectedUser && String(connectedUser.id) === String(u.id)) {
+        connectedSocket.leave("family_" + family.id);
+      }
+    }
 
     if (family.members.length === 0) {
       delete db.families[family.id];
