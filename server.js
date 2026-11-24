@@ -3984,7 +3984,7 @@ socket.on("family-chat", (data, callback) => {
 
   const family = db.families[p.familyId];
 
-  if (!family || !family.members.includes(u.id)) {
+  if (!family || !(family.members || []).some(id => String(id) === String(u.id))) {
     return reply(callback, {
       ok: false,
       message: "Family not found"
