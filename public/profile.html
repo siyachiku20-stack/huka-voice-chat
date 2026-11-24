@@ -2563,7 +2563,8 @@ async function openFamily() {
 
   if (currentFamily) {
     renderFamilyManagement();
-    renderFamilyChat(result.chat || []);
+    familyChatMessages = result.chat || [];
+    renderFamilyChat(familyChatMessages);
 } else {
     if ($("familyManagementInfo")) {
         $("familyManagementInfo").innerHTML = "";
