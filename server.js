@@ -3865,7 +3865,7 @@ socket.on("family-remove-admin", (data, callback) => {
 
   const family = db.families[p.familyId];
 
-  if (!family || family.ownerId !== u.id) {
+    if (!family || String(family.ownerId) !== String(u.id)) {
     return reply(callback, {
       ok: false,
       message: "Only Owner can remove Admins"
