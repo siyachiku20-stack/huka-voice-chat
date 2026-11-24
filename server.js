@@ -1144,11 +1144,19 @@ function completeCPDailyTask(
     };
   }
 
-  const coins = Math.max(0, Math.floor(Number(coinReward) || 0));
-  const xp = Math.max(0, Math.floor(Number(xpReward) || 0));
+  const coins = Math.max(
+    0,
+    Math.floor(Number(coinReward) || 0)
+  );
+
+  const xp = Math.max(
+    0,
+    Math.floor(Number(xpReward) || 0)
+  );
 
   for (const profile of [profileA, profileB]) {
-    profile.coins = (Number(profile.coins) || 0) + coins;
+    profile.coins =
+      (Number(profile.coins) || 0) + coins;
 
     profile.cpDailyTaskClaims[taskId] = today;
 
@@ -1165,6 +1173,27 @@ function completeCPDailyTask(
     profileB,
     xp
   );
+
+  // UPDATE BOTH PARTNERS ONLINE
+  for (const [socketId, onlineUser] of online.entries()) {
+    if (
+      onlineUser.id === profileA.id ||
+      onlineUser.id === profileB.id
+    ) {
+      const profile = db.profiles[onlineUser.id];
+
+      if (profile) {
+        onlineUser.coins =
+          Number(profile.coins) || 0;
+
+        io.to(socketId).emit("profile-update", {
+          id: onlineUser.id,
+          coins: profile.coins,
+          diamonds: profile.diamonds
+        });
+      }
+    }
+  }
 
   saveDB();
 
