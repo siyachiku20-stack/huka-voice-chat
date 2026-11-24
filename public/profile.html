@@ -1065,29 +1065,93 @@ button {
 </div>
 
 <!-- FAMILY MODAL -->
-
 <div class="modal" id="familyModal">
-  <div class="modal-box">
-    <h2>👑 Family</h2>
-    <div id="familyInfo">Loading family...</div>
+  <div class="modal-box family-box">
 
-    <label>Family Name</label>
-    <input id="familyName" maxlength="30" placeholder="Enter family name">
+    <div class="family-heading">
+      <div class="family-crown">👑</div>
+      <h2>Huka Family</h2>
+      <p>Make friends, build your family!</p>
+    </div>
 
-    <button class="primary" style="width:100%;margin-top:10px"
-      onclick="createFamily()">Create Family</button>
+    <div id="familyInfo" class="family-info">
+      Loading family...
+    </div>
 
-    <label>Join with Family Code</label>
-    <input id="familyCode" maxlength="12" placeholder="Enter family code">
+    <div id="familyDetails" style="display:none">
 
-    <button class="primary" style="width:100%;margin-top:10px"
-      onclick="joinFamily()">Join Family</button>
+      <div class="family-card">
+        <div class="family-row">
+          <span>Family Name</span>
+          <strong id="familyDisplayName">-</strong>
+        </div>
 
-    <button class="secondary" style="width:100%;margin-top:10px"
-      onclick="leaveFamily()">Leave Family</button>
+        <div class="family-row">
+          <span>Family ID</span>
+          <strong id="familyDisplayId">-</strong>
+        </div>
 
-    <button class="secondary" style="width:100%;margin-top:10px"
-      onclick="closeModal('familyModal')">Close</button>
+        <div class="family-row">
+          <span>Invite Code</span>
+          <strong id="familyDisplayCode">-</strong>
+        </div>
+
+        <div class="family-row">
+          <span>Members</span>
+          <strong id="familyDisplayMembers">0 / 50</strong>
+        </div>
+      </div>
+
+      <button class="primary family-button"
+        onclick="copyFamilyCode()">
+        📋 Copy Invite Code
+      </button>
+
+      <button class="secondary family-button"
+        onclick="shareFamily()">
+        📤 Share Family
+      </button>
+
+      <button class="secondary family-button"
+        onclick="leaveFamily()">
+        🚪 Leave Family
+      </button>
+
+    </div>
+
+    <div id="familyCreateJoin">
+
+      <h3>✨ Create Your Family</h3>
+
+      <label>Family Name</label>
+      <input id="familyName" maxlength="30"
+        placeholder="Enter family name">
+
+      <button class="primary family-button"
+        onclick="createFamily()">
+        👑 Create Family
+      </button>
+
+      <div class="family-divider">OR</div>
+
+      <h3>💜 Join a Family</h3>
+
+      <label>Family Invite Code</label>
+      <input id="familyCode" maxlength="12"
+        placeholder="Enter invite code">
+
+      <button class="primary family-button"
+        onclick="joinFamily()">
+        🤝 Join Family
+      </button>
+
+    </div>
+
+    <button class="secondary family-button"
+      onclick="closeModal('familyModal')">
+      Close
+    </button>
+
   </div>
 </div>
   
