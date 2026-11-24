@@ -1098,35 +1098,192 @@ button {
 
     <h2>💞 CP Space</h2>
 
-    <div class="frame-card">
-      <div style="font-size:42px;">💑</div>
-      <h3 id="cpPartnerName">No CP Partner</h3>
-      <p id="cpPartnerInfo">Abhi aapka koi CP Partner nahi hai.</p>
+<!-- CP SPACE PROFILE HEADER -->
 
-      <div class="info-row">
-        <span>CP Level</span>
-        <strong id="cpLevel">1</strong>
+<div class="frame-card cp-main-profile"
+     style="
+       margin-top:15px;
+       padding:18px 10px;
+       border:2px solid #f5b7ff;
+       border-radius:22px;
+       background:linear-gradient(145deg,#8e20c9,#e85bc9,#6810b9);
+       color:white;
+       text-align:center;
+     ">
+
+  <h2 style="margin:5px 0 20px;">💞 CP Space</h2>
+
+  <div style="
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    gap:5px;
+  ">
+
+    <!-- MY PROFILE -->
+
+    <div style="width:32%;text-align:center;">
+
+      <img
+        id="cpSelfAvatar"
+        src=""
+        alt="My DP"
+        style="
+          width:85px;
+          height:85px;
+          border-radius:50%;
+          border:4px solid white;
+          object-fit:cover;
+          background:#f8b8ed;
+        ">
+
+      <h4 id="cpSelfName"
+          style="margin:8px 0 3px;">
+        My Profile
+      </h4>
+
+      <small>Me</small>
+    </div>
+
+
+    <!-- CP LEVEL HEART -->
+
+    <div style="width:32%;text-align:center;">
+
+      <div style="
+        font-size:65px;
+        line-height:75px;
+        filter:drop-shadow(0 0 10px #ffb4f5);
+      ">💗</div>
+
+      <div style="
+        font-size:25px;
+        font-weight:bold;
+        color:#fff36b;
+        text-shadow:1px 2px 4px #750078;
+      ">
+        Lv <span id="cpLevel">1</span>
       </div>
 
-      <div class="info-row">
-        <span>Total CP XP</span>
-        <strong id="cpTotalXP">0</strong>
-      </div>
+      <p id="cpTotalXP" style="font-size:12px;">
+        0 XP
+      </p>
 
-      <div class="level-progress-track" style="margin-top:12px;">
-        <div class="level-progress-fill" id="cpXPBar"></div>
-      </div>
+    </div>
 
-      <p id="cpXPText" style="font-size:12px;">0 / 100 XP</p>
+
+    <!-- PARTNER PROFILE -->
+
+    <div style="width:32%;text-align:center;">
+
+      <img
+        id="cpPartnerAvatar"
+        src=""
+        alt="Partner DP"
+        style="
+          width:85px;
+          height:85px;
+          border-radius:50%;
+          border:4px solid white;
+          object-fit:cover;
+          background:#f8b8ed;
+          display:none;
+        ">
 
       <button
-        class="secondary"
-        id="cpUnpairButton"
-        style="width:100%;display:none;margin-top:10px;"
-        onclick="unpairCP()">
-        Unpair CP
+        id="cpAddButton"
+        type="button"
+        onclick="
+          document.getElementById('cpTargetUserId').scrollIntoView({
+            behavior:'smooth',
+            block:'center'
+          });
+          document.getElementById('cpTargetUserId').focus();
+        "
+        style="
+          width:85px;
+          height:85px;
+          border-radius:50%;
+          border:4px solid white;
+          background:#fff0fb;
+          color:#d72ca8;
+          font-size:55px;
+          cursor:pointer;
+        ">
+        +
       </button>
+
+      <h4 id="cpPartnerName"
+          style="margin:8px 0 3px;">
+        No CP Partner
+      </h4>
+
+      <small id="cpPartnerInfo">
+        Find your CP Partner
+      </small>
+
     </div>
+
+  </div>
+
+
+  <!-- NEXT LEVEL PROGRESS -->
+
+  <div style="
+    margin-top:25px;
+    padding:12px;
+    background:#6500a5;
+    border-radius:15px;
+  ">
+
+    <h3 style="margin:0 0 10px;">
+      💎 Next Level Progress
+    </h3>
+
+    <div class="level-progress-track"
+         style="
+           height:13px;
+           background:#ffffff55;
+           border-radius:20px;
+           overflow:hidden;
+         ">
+
+      <div
+        class="level-progress-fill"
+        id="cpXPBar"
+        style="
+          height:100%;
+          width:0%;
+          background:linear-gradient(90deg,#ff65c5,#ffe56b);
+          border-radius:20px;
+        ">
+      </div>
+
+    </div>
+
+    <p id="cpXPText"
+       style="font-size:13px;margin:10px 0 0;">
+      0 / 100 XP
+    </p>
+
+  </div>
+
+
+  <!-- UNPAIR BUTTON -->
+
+  <button
+    class="secondary"
+    id="cpUnpairButton"
+    style="
+      width:100%;
+      display:none;
+      margin-top:15px;
+    "
+    onclick="unpairCP()">
+    Unpair CP
+  </button>
+
+</div>
 
     <h3 style="margin-top:20px;">💌 Send CP Request</h3>
 
