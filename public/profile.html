@@ -2296,55 +2296,73 @@ async function openMedals() {
     });
 }
 
-/* ---------- FAMILY ---------- */
+/* ---------- HUKA FAMILY ---------- */
 
 async function openFamily() {
     showModal("familyModal");
 
-    const result = await emitRequest("get-family", {
-        userId: getUserId()
-    });
+    if ($("familyInfo")) {
+        $("familyInfo").textContent = "Loading family...";
+    }
+
+    const result = await emitRequest("get-family");
 
     if (!result || result.ok === false) {
-        if ($("familyInfo")) {
-            $("familyInfo").textContent =
-                result.message || "Family information load nahi hui.";
-        }
+        $("familyInfo").textContent =
+            result.message || "Family load nahi hui.";
         return;
     }
 
     currentFamily = result.family || null;
 
-    if ($("familyInfo")) {
-        $("familyInfo").textContent = currentFamily
-            ? (currentFamily.name || "Family joined")
-            : "Aap abhi kisi family mein nahi hain.";
-    }
+    const details = $("familyDetails");
+    const createJoin = $("familyCreateJoin");
 
-    if ($("familyName")) {
-        $("familyName").value = currentFamily?.name || "";
-    }
+    if (currentFamily) {
+        if (details) details.style.display = "block";
+        if (createJoin) createJoin.style.display = "none";
 
-    if ($("familyCode")) {
-    $("familyCode").value = currentFamily?.code || "";
+        $("familyInfo").textContent =
+            "🎉 You are a member of this family!";
+
+        $("familyDisplayName").textContent =
+            currentFamily.name || "-";
+
+        $("familyDisplayId").textContent =
+            currentFamily.id || "-";
+
+        $("familyDisplayCode").textContent =
+            currentFamily.code || "-";
+
+        $("familyDisplayMembers").textContent =
+            (currentFamily.members || 1) + " / 50";
+
+    } else {
+        if (details) details.style.display = "none";
+        if (createJoin) createJoin.style.display = "block";
+
+        $("familyInfo").textContent =
+            "💜 You are not in a family yet. Create or join one!";
+
+        $("familyName").value = "";
     }
 }
 
 async function createFamily() {
     const name = $("familyName")?.value.trim() || "";
 
-    if (!name) {
-        showToast("Family ka naam likhein.");
+    if (name.length < 3) {
+        showToast("Family name kam se kam 3 characters ka hona chahiye.");
         return;
     }
 
     const result = await emitRequest("create-family", {
-        userId: getUserId(),
         name: name
     });
 
     if (isSuccess(result)) {
-        showToast(result.message || "Family create ho gayi.");
+        showToast("🎉 Family create ho gayi!");
+        currentFamily = result.family || null;
         await openFamily();
     } else {
         showToast(result.message || "Family create nahi hui.");
@@ -2352,17 +2370,20 @@ async function createFamily() {
 }
 
 async function joinFamily() {
-    const code = $("familyCode")?.value.trim() || "";
+    const code = $("familyCode")?.value.trim().toUpperCase() || "";
 
-    if (!code || !code.trim()) return;
+    if (!code) {
+        showToast("Family invite code enter karein.");
+        return;
+    }
 
     const result = await emitRequest("join-family", {
-        userId: getUserId(),
-        code: code.trim()
+        code: code
     });
 
     if (isSuccess(result)) {
-        showToast(result.message || "Family join ho gayi.");
+        showToast("💜 Family join ho gayi!");
+        currentFamily = result.family || null;
         await openFamily();
     } else {
         showToast(result.message || "Family join nahi hui.");
@@ -2370,49 +2391,58 @@ async function joinFamily() {
 }
 
 async function leaveFamily() {
-    const confirmed = confirm("Kya aap family leave karna chahte hain?");
+    if (!confirm("Kya aap sach mein Family leave karna chahte hain?")) {
+        return;
+    }
 
-    if (!confirmed) return;
-
-    const result = await emitRequest("leave-family", {
-        userId: getUserId()
-    });
+    const result = await emitRequest("leave-family");
 
     if (isSuccess(result)) {
         currentFamily = null;
-        showToast(result.message || "Family leave ho gayi.");
+        showToast("Aapne Family leave kar di.");
         await openFamily();
     } else {
         showToast(result.message || "Family leave nahi hui.");
     }
 }
-async function openLevel() {
-    showModal("levelModal");
 
-    if ($("levelPageRewardsList")) {
-        $("levelPageRewardsList").textContent =
-            "Loading rewards...";
-    }
-
-    await loadProfile();
-
-    if (!profile) {
-        showToast("Level data load nahi hua.");
+function copyFamilyCode() {
+    if (!currentFamily?.code) {
+        showToast("Invite code nahi mila.");
         return;
     }
 
-    if ($("levelPageCurrent")) {
-        $("levelPageCurrent").textContent =
-            profile.level || 1;
-    }
+    const code = currentFamily.code;
 
-    if ($("levelPageXP")) {
-        $("levelPageXP").textContent =
-            Number(profile.levelProgress?.totalXP || 0)
-            .toLocaleString("en-IN");
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(code)
+            .then(() => showToast("Invite code copied!"))
+            .catch(() => showToast("Code: " + code));
+    } else {
+        showToast("Family Code: " + code);
     }
+}
 
-    renderLevelRewards();
+async function shareFamily() {
+    if (!currentFamily) return;
+
+    const message =
+        "Join my Huka Family! 💜\n" +
+        "Family: " + currentFamily.name + "\n" +
+        "Invite Code: " + currentFamily.code;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "Huka Family",
+                text: message
+            });
+        } catch (error) {
+            console.log("Share cancelled");
+        }
+    } else {
+        copyFamilyCode();
+    }
 }
   
 /* ---------- LEVEL REWARDS DISPLAY ---------- */
@@ -4718,6 +4748,93 @@ if (socket.connected) {
 .cp-ranking-details span {
   color: #858b9b;
 }
+  
+/* HUKA FAMILY DESIGN */
+
+.family-box {
+  background: linear-gradient(160deg,#fff,#f7edff);
+}
+
+.family-heading {
+  text-align: center;
+  padding: 10px 0 18px;
+}
+
+.family-crown {
+  font-size: 48px;
+}
+
+.family-heading h2 {
+  color: #8b42d8;
+  margin: 5px 0;
+  font-size: 25px;
+}
+
+.family-heading p {
+  color: #9292a5;
+  font-size: 12px;
+}
+
+.family-info {
+  padding: 15px;
+  border-radius: 13px;
+  background: #f0e6ff;
+  color: #7440aa;
+  text-align: center;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+.family-card {
+  background: white;
+  padding: 15px;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px #8d52c51c;
+  margin-bottom: 12px;
+}
+
+.family-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0e8f8;
+  font-size: 12px;
+}
+
+.family-row:last-child {
+  border-bottom: 0;
+}
+
+.family-row span {
+  color: #8b8498;
+}
+
+.family-row strong {
+  color: #863ed0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.family-button {
+  width: 100%;
+  margin-top: 10px;
+  min-height: 43px;
+}
+
+.family-divider {
+  text-align: center;
+  color: #a49ab2;
+  margin: 18px 0;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+#familyCreateJoin h3 {
+  color: #7c42b7;
+  font-size: 15px;
+  margin-top: 15px;
+}  
   
 </style>
 
