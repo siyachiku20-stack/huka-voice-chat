@@ -3753,7 +3753,8 @@ Fir code dalne ke bad kaisa dikhega cods
 
 // CP SPACE MENU FUNCTIONS
 
-function openCPSection(panelId) {
+window.openCPSection = function(panelId) {
+
   const panels = [
     "cpRewardsMenu",
     "cpTasksPanel",
@@ -3764,16 +3765,22 @@ function openCPSection(panelId) {
 
   panels.forEach(id => {
     const panel = document.getElementById(id);
-    if (panel) panel.style.display = "none";
+
+    if (panel) {
+      panel.style.display = "none";
+    }
   });
 
   const selected = document.getElementById(panelId);
-  if (selected) selected.style.display = "block";
-}
 
-function backToCPMenu() {
-  openCPSection("cpRewardsMenu");
+  if (selected) {
+    selected.style.display = "block";
   }
+};
+
+window.backToCPMenu = function() {
+  window.openCPSection("cpRewardsMenu");
+};
   
   
 /* =========================================
