@@ -1620,8 +1620,48 @@ io.on("connection", socket => {
 
     io.emit("online-count", online.size);
   });
+   
+// =====================================
+// GET LEVEL PROGRESS
+// =====================================
 
-  /* =======================================
+socket.on("get-level-progress", callback => {
+  const user = getUser(socket);
+
+  if (!user) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const profile = db.profiles[user.id];
+
+  if (!profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Profile not found"
+    });
+  }
+
+  const progress = getLevelProgress(profile);
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    level: progress.level,
+    xp: progress.totalXP,
+    currentXP: progress.currentXP,
+    requiredXP: progress.requiredXP,
+    xpToNextLevel: Math.max(
+      0,
+      progress.requiredXP - progress.currentXP
+    )
+  });
+});
+   
+ /* =======================================
      PROFILE
   ======================================= */
 
