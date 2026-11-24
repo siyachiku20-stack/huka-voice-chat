@@ -3412,6 +3412,79 @@ async function deleteCPMemory(memoryId) {
 }
 
   
+/* =========================================
+   CP DAILY TASKS FRONTEND
+========================================= */
+
+const CP_DAILY_TASKS = [
+    {
+        id: "send_cp_gift",
+        title: "Send CP Partner 1 Gift",
+        coins: 10000,
+        xp: 2000
+    },
+    {
+        id: "save_memory",
+        title: "Save 1 Couple Memory",
+        coins: 10000,
+        xp: 2000
+    },
+    {
+        id: "send_partner_message",
+        title: "Send Partner Message",
+        coins: 10000,
+        xp: 2000
+    },
+    {
+        id: "voice_10_minutes",
+        title: "10 Minutes Voice Together",
+        coins: 15000,
+        xp: 3000
+    }
+];
+
+function renderCPDailyTasks(data) {
+    const list = $("cpDailyTasksList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    const claims = data?.dailyTaskClaims || {};
+    const today = data?.taskDate || "";
+
+    CP_DAILY_TASKS.forEach(task => {
+        const completed = claims[task.id] === today;
+
+        const card = document.createElement("div");
+        card.className = "frame-card";
+        card.style.marginTop = "10px";
+        card.style.padding = "12px";
+
+        const title = document.createElement("h4");
+        title.textContent = task.title;
+
+        const reward = document.createElement("p");
+        reward.textContent =
+            task.coins.toLocaleString("en-IN") +
+            " Coins + " +
+            task.xp.toLocaleString("en-IN") +
+            " CP XP";
+
+        const status = document.createElement("strong");
+        status.textContent = completed
+            ? "Completed ✓"
+            : "In Progress";
+
+        status.style.color = completed
+            ? "#35d07f"
+            : "#f5bd55";
+
+        card.append(title, reward, status);
+        list.appendChild(card);
+    });
+  }
+  
+  
 /* DISPLAY REQUESTS */
 
 function renderCPRequests(incoming, outgoing) {
