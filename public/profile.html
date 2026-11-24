@@ -2295,7 +2295,34 @@ async function openMedals() {
         container.appendChild(item);
     });
 }
+  
+async function openLevel() {
+    const result = await emitRequest("get-level-progress");
 
+    if (!isSuccess(result)) {
+        showToast(result.message || "Level details load nahi hue.");
+        return;
+    }
+
+    if (profile) {
+        profile.level = result.level;
+        profile.totalExperience = result.xp;
+        profile.levelProgress = result;
+        renderProfile();
+    }
+
+    if ($("infoTitle")) {
+        $("infoTitle").textContent = "🏆 Level & XP";
+    }
+
+    if ($("infoText")) {
+        $("infoText").textContent =
+            `Level ${result.level} | Total XP: ${Number(result.xp).toLocaleString("en-IN")} | Next level ke liye ${Number(result.xpToNextLevel).toLocaleString("en-IN")} XP baaki.`;
+    }
+
+    showModal("infoModal");
+}
+  
 /* ---------- HUKA FAMILY ---------- */
 
 async function openFamily() {
