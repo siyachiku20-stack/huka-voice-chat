@@ -3873,7 +3873,14 @@ socket.on("family-remove-admin", (data, callback) => {
   }
 
   const memberId = String(data?.memberId);
-
+   
+  if (!(family.admins || []).some(id => String(id) === memberId)) {
+    return reply(callback, {
+      ok: false,
+      message: "Admin not found"
+    });
+}
+   
   family.admins = (family.admins || [])
     .filter(id => String(id) !== memberId);
 
