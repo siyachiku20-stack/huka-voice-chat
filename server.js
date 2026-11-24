@@ -3622,7 +3622,8 @@ socket.on("get-cp-space", (data, callback) => {
 
     // CP DAILY TASK STATUS
     taskDate: profile.cpTaskDate,
-    dailyTaskClaims: profile.cpDailyTaskClaims || {}
+    dailyTaskClaims: profile.cpDailyTaskClaims || {},
+    dailyBonusClaims: profile.cpDailyBonusClaims || {}
   });
 });
 
