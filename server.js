@@ -3531,8 +3531,9 @@ socket.on("send-cp-gift", (data, callback) => {
     if (message.length < 5) return reply(callback, { ok: false, message: "Please enter at least 5 characters" });
     p.feedback ||= []; p.feedback.unshift({ message, date: Date.now() }); p.feedback = p.feedback.slice(0, 20); saveDB();
     reply(callback, { ok: true, message: "Feedback submitted" });
+  });
 
-
+   
 /* =========================================
    CP SPACE REQUESTS AND PARTNERS
 ========================================= */
