@@ -916,6 +916,52 @@ function getCPProgress(profile) {
   };
 }
 
+/* =========================================
+   CP PARTNER VOICE TIME SYSTEM
+========================================= */
+
+function startCPVoiceSession(room, user) {
+  if (!room || !user) return;
+
+  const profile = db.profiles[user.id];
+  if (!profile?.cpPartnerId) return;
+
+  const partnerId = profile.cpPartnerId;
+  const partner = db.profiles[partnerId];
+
+  if (!partner || partner.cpPartnerId !== user.id) return;
+
+  const partnerSocket = [...room.members].find(socketId => {
+    const member = online.get(socketId);
+    return member?.id === partnerId;
+  });
+
+  if (!partnerSocket) return;
+
+  const sessionKey = `${room.id}:${user.id}:${partnerId}`;
+
+  if (cpVoiceSessions.has(sessionKey)) return;
+
+  const session = {
+    roomId: room.id,
+    userIds: [user.id, partnerId],
+    startedAt: Date.now()
+  };
+
+  cpVoiceSessions.set(sessionKey, session);
+}
+
+function stopCPVoiceSession(roomId, userId) {
+  for (const [key, session] of cpVoiceSessions.entries()) {
+    if (
+      session.roomId === roomId &&
+      session.userIds.includes(userId)
+    ) {
+      cpVoiceSessions.delete(key);
+    }
+  }
+}
+
 function addCPExperience(profileA, profileB, amount) {
   ensureCPProfile(profileA);
   ensureCPProfile(profileB);
