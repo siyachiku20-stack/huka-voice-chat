@@ -2363,7 +2363,108 @@ async function openFamily() {
     }
 
     currentFamily = result.family || null;
+  
+if (currentFamily) {
+    if ($("familyIdDisplay")) {
+        $("familyIdDisplay").textContent = currentFamily.id || "-";
+    }
 
+    if ($("familyCodeDisplay")) {
+        $("familyCodeDisplay").textContent = currentFamily.code || "-";
+    }
+
+    const members = Array.isArray(currentFamily.members)
+        ? currentFamily.members
+        : [];
+
+    if ($("familyMemberCount")) {
+        $("familyMemberCount").textContent =
+            currentFamily.memberCount || members.length;
+    }
+
+    const list = $("familyMembersList");
+
+    if (list) {
+        list.innerHTML = "";
+
+        members.forEach(member => {
+            const row = document.createElement("div");
+
+            row.style.cssText = `
+                display:flex;
+                align-items:center;
+                gap:10px;
+                padding:10px;
+                margin:7px 0;
+                background:#39204d;
+                border-radius:12px;
+            `;
+
+            const avatar = document.createElement("div");
+            avatar.style.cssText = `
+                width:42px;
+                height:42px;
+                border-radius:50%;
+                background:#70419a;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                overflow:hidden;
+                font-size:22px;
+            `;
+
+            if (member.avatar) {
+                const img = document.createElement("img");
+                img.src = member.avatar;
+                img.style.cssText =
+                    "width:100%;height:100%;object-fit:cover";
+                avatar.appendChild(img);
+            } else {
+                avatar.textContent = "👤";
+            }
+
+            const details = document.createElement("div");
+
+            const name = document.createElement("b");
+            name.textContent = member.name;
+
+            const role = document.createElement("div");
+            role.textContent =
+                member.role === "Owner" ? "👑 Owner" :
+                member.role === "Admin" ? "🛡️ Admin" :
+                "👤 Member";
+
+            role.style.cssText =
+                "font-size:12px;color:#ffc2ec;margin-top:3px";
+
+            details.append(name, role);
+            row.append(avatar, details);
+            list.appendChild(row);
+        });
+
+        if (!members.length) {
+            list.textContent = "No family members found.";
+        }
+    }
+} else {
+    if ($("familyMembersList")) {
+        $("familyMembersList").textContent =
+            "Pehle Family create ya join karein.";
+    }
+
+    if ($("familyIdDisplay")) {
+        $("familyIdDisplay").textContent = "-";
+    }
+
+    if ($("familyCodeDisplay")) {
+        $("familyCodeDisplay").textContent = "-";
+    }
+
+    if ($("familyMemberCount")) {
+        $("familyMemberCount").textContent = "0";
+    }
+  }
+  
     const details = $("familyDetails");
     const createJoin = $("familyCreateJoin");
 
