@@ -920,6 +920,12 @@ function getCPProgress(profile) {
    CP PARTNER VOICE TIME SYSTEM
 ========================================= */
 
+function findUserSocketInRoom(room, userId) {
+  return [...room.members].find(socketId => {
+    return online.get(socketId)?.id === userId;
+  }) || null;
+}
+
 function startCPVoiceSession(room, user) {
   if (!room || !user) return;
 
@@ -931,22 +937,81 @@ function startCPVoiceSession(room, user) {
 
   if (!partner || partner.cpPartnerId !== user.id) return;
 
-  const partnerSocket = [...room.members].find(socketId => {
-    const member = online.get(socketId);
-    return member?.id === partnerId;
-  });
+  const userSocket = findUserSocketInRoom(room, user.id);
+  const partnerSocket = findUserSocketInRoom(room, partnerId);
 
-  if (!partnerSocket) return;
+  if (!userSocket || !partnerSocket) return;
 
-  const sessionKey = `${room.id}:${user.id}:${partnerId}`;
+  const sortedIds = [user.id, partnerId].sort();
+  const sessionKey =
+    `${room.id}:${sortedIds[0]}:${sortedIds[1]}`;
 
   if (cpVoiceSessions.has(sessionKey)) return;
 
   const session = {
     roomId: room.id,
-    userIds: [user.id, partnerId],
-    startedAt: Date.now()
+    userIds: sortedIds,
+    startedAt: Date.now(),
+    timer: null
   };
+
+  session.timer = setTimeout(() => {
+    const currentRoom = rooms.get(session.roomId);
+
+    if (!currentRoom) {
+      cpVoiceSessions.delete(sessionKey);
+      return;
+    }
+
+    const currentA = db.profiles[session.userIds[0]];
+    const currentB = db.profiles[session.userIds[1]];
+
+    const stillTogether =
+      currentA &&
+      currentB &&
+      currentA.cpPartnerId === currentB.id &&
+      currentB.cpPartnerId === currentA.id &&
+      findUserSocketInRoom(currentRoom, currentA.id) &&
+      findUserSocketInRoom(currentRoom, currentB.id);
+
+    if (!stillTogether) {
+      cpVoiceSessions.delete(sessionKey);
+      return;
+    }
+
+    const result = completeCPDailyTask(
+      currentA,
+      currentB,
+      "voice_10_minutes",
+      CP_VOICE_TASK.coins,
+      CP_VOICE_TASK.xp
+    );
+
+    if (result.ok) {
+      for (const [socketId, onlineUser] of online.entries()) {
+        if (
+          onlineUser.id === currentA.id ||
+          onlineUser.id === currentB.id
+        ) {
+          const currentProfile = db.profiles[onlineUser.id];
+
+          if (currentProfile) {
+            onlineUser.coins =
+              Number(currentProfile.coins) || 0;
+
+            io.to(socketId).emit("profile-update", {
+              id: onlineUser.id,
+              coins: currentProfile.coins,
+              diamonds: currentProfile.diamonds
+            });
+          }
+        }
+      }
+    }
+
+    cpVoiceSessions.delete(sessionKey);
+
+  }, CP_VOICE_TASK.duration);
 
   cpVoiceSessions.set(sessionKey, session);
 }
@@ -957,10 +1022,11 @@ function stopCPVoiceSession(roomId, userId) {
       session.roomId === roomId &&
       session.userIds.includes(userId)
     ) {
+      clearTimeout(session.timer);
       cpVoiceSessions.delete(key);
     }
   }
-}
+     }
 
 function addCPExperience(profileA, profileB, amount) {
   ensureCPProfile(profileA);
