@@ -592,6 +592,15 @@ function getIndiaDate() {
 const WELCOME_REWARD_COINS = 10000000;
 const DAILY_REWARD_COINS = 1000000;
 
+// CP PARTNER VOICE TIME TRACKER
+const cpVoiceSessions = new Map();
+
+const CP_VOICE_TASK = {
+  duration: 10 * 60 * 1000,
+  coins: 15000,
+  xp: 3000
+};
+
 function reply(callback, data) {
   if (typeof callback === "function") {
     callback(data);
