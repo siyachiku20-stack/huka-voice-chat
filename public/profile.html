@@ -1376,63 +1376,169 @@ button {
   </div>
 </div>
     
-<!-- CP TASKS & GIFTS MENU -->
+<!-- CP SPACE MENU -->
 
-<div id="cpRewardsMenu" class="frame-card" style="margin-top:20px;">
-  <h3>💞 CP Space</h3>
-  <p>Select what you want to open.</p>
+<div id="cpRewardsMenu" class="frame-card"
+     style="margin-top:20px;">
 
-  <button
-    class="primary"
-    type="button"
+  <h3>💞 CP SPACE</h3>
+  <p>Choose your CP Space section.</p>
+
+  <button class="primary" type="button"
     style="width:100%;margin-top:10px;"
-    onclick="
-      document.getElementById('cpRewardsMenu').style.display='none';
-      document.getElementById('cpTasksPanel').style.display='block';
-      document.getElementById('cpGiftsPanel').style.display='none';
-    ">
-    💞 CP Tasks & Rewards
+    onclick="openCPSection('cpTasksPanel')">
+    💞 Commemoration
   </button>
 
-  <button
-    class="primary"
-    type="button"
-    style="width:100%;margin-top:12px;"
-    onclick="
-      document.getElementById('cpRewardsMenu').style.display='none';
-      document.getElementById('cpTasksPanel').style.display='none';
-      document.getElementById('cpGiftsPanel').style.display='block';
-    ">
-    🎁 Send Gift to CP Partner
+  <button class="primary" type="button"
+    style="width:100%;margin-top:10px;"
+    onclick="openCPSection('cpPrivilegePanel')">
+    💎 Level Privilege
   </button>
+
+  <button class="primary" type="button"
+    style="width:100%;margin-top:10px;"
+    onclick="openCPSection('cpRulesPanel')">
+    📜 CP Rules
+  </button>
+
+  <button class="primary" type="button"
+    style="width:100%;margin-top:10px;"
+    onclick="openCPSection('cpGiftsPanel')">
+    🎁 CP Gifts
+  </button>
+
 </div>
 
 
-<!-- CP DAILY TASKS & BONUS REWARDS -->
+<!-- COMMEMORATION / DAILY TASKS -->
 
-<div id="cpTasksPanel" style="display:none;margin-top:20px;">
+<div id="cpTasksPanel"
+     style="display:none;margin-top:20px;">
 
   <div class="frame-card">
-    <h3>💞 CP Daily Tasks & Rewards</h3>
+
+    <h3>💞 Commemoration</h3>
+
     <p>Complete tasks together and earn rewards!</p>
 
     <div id="cpDailyTasksList">
       Loading Daily Tasks...
     </div>
+
   </div>
 
-  <button
-    class="secondary"
-    type="button"
+  <button class="secondary" type="button"
     style="width:100%;margin-top:12px;"
-    onclick="
-      document.getElementById('cpTasksPanel').style.display='none';
-      document.getElementById('cpRewardsMenu').style.display='block';
-    ">
+    onclick="backToCPMenu()">
     ← Back
   </button>
+
 </div>
 
+
+<!-- LEVEL PRIVILEGE -->
+
+<div id="cpPrivilegePanel"
+     style="display:none;margin-top:20px;">
+
+  <div class="frame-card">
+
+    <h3>💎 CP Level Privilege</h3>
+
+    <p>
+      Increase your CP Level together to unlock special privileges.
+    </p>
+
+    <div class="info-row">
+      <span>Level 1</span>
+      <strong>💗 CP Beginner</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 2</span>
+      <strong>💕 Couple Badge</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 3</span>
+      <strong>🌸 Special Profile Frame</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 5</span>
+      <strong>💞 Special CP Title</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 10</span>
+      <strong>👑 Royal Couple Badge</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 15</span>
+      <strong>✨ Exclusive CP Frame</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 20</span>
+      <strong>💎 Diamond Couple Title</strong>
+    </div>
+
+    <div class="info-row">
+      <span>Level 30</span>
+      <strong>🏆 Legendary Couple Badge</strong>
+    </div>
+
+    <p style="font-size:12px;color:#aaa;margin-top:15px;">
+      Note: These are privilege previews. Actual unlocks
+      and rewards need separate server-side implementation.
+    </p>
+
+  </div>
+
+  <button class="secondary" type="button"
+    style="width:100%;margin-top:12px;"
+    onclick="backToCPMenu()">
+    ← Back
+  </button>
+
+</div>
+
+
+<!-- CP RULES -->
+
+<div id="cpRulesPanel"
+     style="display:none;margin-top:20px;">
+
+  <div class="frame-card">
+
+    <h3>📜 CP Space Rules</h3>
+
+    <p>1. दोनों users की सहमति से CP Partner बनें।</p>
+
+    <p>2. एक user का एक ही CP Partner हो सकता है।</p>
+
+    <p>3. Daily Tasks का reward दिन में एक बार मिलेगा।</p>
+
+    <p>4. CP XP दोनों partners के लिए जोड़ा जाएगा।</p>
+
+    <p>5. गलत तरीके से rewards लेने की कोशिश न करें।</p>
+
+    <p>6. Unpair करने पर CP relationship समाप्त हो जाएगा।</p>
+
+    <p>7. दूसरे users के साथ सम्मान से व्यवहार करें।</p>
+
+  </div>
+
+  <button class="secondary" type="button"
+    style="width:100%;margin-top:12px;"
+    onclick="backToCPMenu()">
+    ← Back
+  </button>
+
+</div>
+    
 
 <!-- CP GIFTS -->
 
