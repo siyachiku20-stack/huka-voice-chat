@@ -3720,7 +3720,9 @@ socket.on("create-family", (data, callback) => {
 });
 
 
-/* JOIN FAMILY */
+/* =========================================
+   JOIN FAMILY
+========================================= */
 
 socket.on("join-family", (data, callback) => {
   const p = getProfile(socket);
@@ -3763,7 +3765,7 @@ socket.on("join-family", (data, callback) => {
     });
   }
 
-  if (family.members.includes(u.id)) {
+  if (family.members.some(id => String(id) === String(u.id))) {
     return reply(callback, {
       ok: false,
       message: "Already a family member"
@@ -3786,7 +3788,9 @@ socket.on("join-family", (data, callback) => {
 });
 
 
-/* PROMOTE MEMBER TO ADMIN - OWNER ONLY */
+/* =========================================
+   PROMOTE MEMBER TO ADMIN - OWNER ONLY
+========================================= */
 
 socket.on("family-promote-admin", (data, callback) => {
   const p = getProfile(socket);
@@ -3801,14 +3805,14 @@ socket.on("family-promote-admin", (data, callback) => {
 
   const family = db.families[p.familyId];
 
-  if (!family || family.ownerId !== u.id) {
+  if (!family || String(family.ownerId) !== String(u.id)) {
     return reply(callback, {
       ok: false,
       message: "Only Owner can manage Admins"
     });
   }
 
-  const memberId = String(data?.memberId);
+  const memberId = String(data?.memberId || "");
 
   if (!family.members.some(id => String(id) === memberId)) {
     return reply(callback, {
@@ -3826,9 +3830,14 @@ socket.on("family-promote-admin", (data, callback) => {
     });
   }
 
-  if (!family.admins.some(id => String(id) === memberId)) {
-    family.admins.push(memberId);
+  if (family.admins.some(id => String(id) === memberId)) {
+    return reply(callback, {
+      ok: false,
+      message: "This member is already an Admin"
+    });
   }
+
+  family.admins.push(memberId);
 
   saveDB();
 
@@ -3839,7 +3848,7 @@ socket.on("family-promote-admin", (data, callback) => {
 
   familyBroadcast(family);
 });
-
+   
 
 /* REMOVE ADMIN - OWNER ONLY */
 
