@@ -3471,44 +3471,516 @@ socket.on("send-cp-gift", (data, callback) => {
     reply(callback, { ok: true, medals });
   });
 
-  socket.on("get-family", callback => {
-    const p = getProfile(socket);
-    if (!p) return reply(callback, { ok: false });
-    const family = p.familyId ? db.families[p.familyId] : null;
-    reply(callback, { ok: true, family: family ? { id: family.id, name: family.name, code: family.code, members: family.members.length } : null });
+/* =========================================
+   HUKA FAMILY SYSTEM
+   Owner + Admin + Members + Family Chat
+========================================= */
+
+function getFamilyMemberInfo(memberId, family) {
+  const profile = db.profiles[String(memberId)] || {};
+
+  return {
+    id: memberId,
+    name: profile.username || profile.name || "Huka User",
+    avatar: profile.avatar || profile.dp || "",
+    role: memberId === family.ownerId
+      ? "Owner"
+      : (family.admins || []).includes(memberId)
+        ? "Admin"
+        : "Member"
+  };
+}
+
+function getFamilyData(family) {
+  if (!family) return null;
+
+  family.members ||= [];
+  family.admins ||= [];
+  family.chat ||= [];
+
+  return {
+    id: family.id,
+    name: family.name,
+    code: family.code,
+    ownerId: family.ownerId,
+    members: family.members.map(id =>
+      getFamilyMemberInfo(id, family)
+    ),
+    memberCount: family.members.length,
+    admins: family.admins,
+    createdAt: family.createdAt
+  };
+}
+
+function familyBroadcast(family) {
+  if (!family) return;
+
+  io.to("family_" + family.id).emit(
+    "family:updated",
+    getFamilyData(family)
+  );
+}
+
+/* GET FAMILY */
+
+socket.on("get-family", callback => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const family = p.familyId
+    ? db.families[p.familyId]
+    : null;
+
+  if (!family) {
+    return reply(callback, {
+      ok: true,
+      family: null
+    });
+  }
+
+  family.members ||= [];
+  family.admins ||= [];
+  family.chat ||= [];
+
+  socket.join("family_" + family.id);
+
+  reply(callback, {
+    ok: true,
+    family: getFamilyData(family),
+    chat: family.chat.slice(-50)
+  });
+});
+
+
+/* CREATE FAMILY */
+
+socket.on("create-family", (data, callback) => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  if (p.familyId && db.families[p.familyId]) {
+    return reply(callback, {
+      ok: false,
+      message: "Leave your current family first"
+    });
+  }
+
+  const name = clean(data?.name, 30);
+
+  if (name.length < 3) {
+    return reply(callback, {
+      ok: false,
+      message: "Family name must be at least 3 characters"
+    });
+  }
+
+  const id = "F" + Date.now() +
+    Math.random().toString(36).slice(2, 6).toUpperCase();
+
+  let code;
+
+  do {
+    code = Math.random()
+      .toString(36)
+      .slice(2, 8)
+      .toUpperCase();
+  } while (
+    Object.values(db.families).some(f => f.code === code)
+  );
+
+  const family = {
+    id,
+    name,
+    code,
+    ownerId: u.id,
+    admins: [],
+    members: [u.id],
+    chat: [],
+    createdAt: Date.now()
+  };
+
+  db.families[id] = family;
+  p.familyId = id;
+
+  socket.join("family_" + id);
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    family: getFamilyData(family)
   });
 
-  socket.on("create-family", (data, callback) => {
-    const p = getProfile(socket); const u = getUser(socket);
-    if (!p || !u) return reply(callback, { ok: false, message: "Register first" });
-    if (p.familyId && db.families[p.familyId]) return reply(callback, { ok: false, message: "Leave your current family first" });
-    const name = clean(data?.name, 30);
-    if (name.length < 3) return reply(callback, { ok: false, message: "Family name must be at least 3 characters" });
-    const id = `F${Date.now().toString().slice(-8)}`;
-    const code = Math.random().toString(36).slice(2, 8).toUpperCase();
-    db.families[id] = { id, name, code, ownerId: u.id, members: [u.id], createdAt: Date.now() };
-    p.familyId = id; saveDB();
-    reply(callback, { ok: true, family: { id, name, code, members: 1 } });
+  familyBroadcast(family);
+});
+
+
+/* JOIN FAMILY */
+
+socket.on("join-family", (data, callback) => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  if (p.familyId && db.families[p.familyId]) {
+    return reply(callback, {
+      ok: false,
+      message: "You are already in a family"
+    });
+  }
+
+  const code = clean(data?.code, 12).toUpperCase();
+
+  const family = Object.values(db.families)
+    .find(f => f.code === code);
+
+  if (!family) {
+    return reply(callback, {
+      ok: false,
+      message: "Family code not found"
+    });
+  }
+
+  family.members ||= [];
+  family.admins ||= [];
+  family.chat ||= [];
+
+  if (family.members.length >= 50) {
+    return reply(callback, {
+      ok: false,
+      message: "Family is full"
+    });
+  }
+
+  if (family.members.includes(u.id)) {
+    return reply(callback, {
+      ok: false,
+      message: "Already a family member"
+    });
+  }
+
+  family.members.push(u.id);
+  p.familyId = family.id;
+
+  socket.join("family_" + family.id);
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    family: getFamilyData(family)
   });
 
-  socket.on("join-family", (data, callback) => {
-    const p = getProfile(socket); const code = clean(data?.code, 12).toUpperCase();
-    if (!p) return reply(callback, { ok: false, message: "Register first" });
-    if (p.familyId && db.families[p.familyId]) return reply(callback, { ok: false, message: "You are already in a family" });
-    const family = Object.values(db.families).find(f => f.code === code);
-    if (!family) return reply(callback, { ok: false, message: "Family code not found" });
-    if (family.members.length >= 50) return reply(callback, { ok: false, message: "Family is full" });
-    family.members.push(getUser(socket).id); p.familyId = family.id; saveDB();
-    reply(callback, { ok: true, family: { id: family.id, name: family.name, code: family.code, members: family.members.length } });
+  familyBroadcast(family);
+});
+
+
+/* PROMOTE MEMBER TO ADMIN - OWNER ONLY */
+
+socket.on("family-promote-admin", (data, callback) => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u || !p.familyId) {
+    return reply(callback, {
+      ok: false,
+      message: "Family not found"
+    });
+  }
+
+  const family = db.families[p.familyId];
+
+  if (!family || family.ownerId !== u.id) {
+    return reply(callback, {
+      ok: false,
+      message: "Only Owner can manage Admins"
+    });
+  }
+
+  const memberId = String(data?.memberId);
+
+  if (!family.members.some(id => String(id) === memberId)) {
+    return reply(callback, {
+      ok: false,
+      message: "Member not found"
+    });
+  }
+
+  family.admins ||= [];
+
+  if (String(family.ownerId) === memberId) {
+    return reply(callback, {
+      ok: false,
+      message: "Owner is already the highest role"
+    });
+  }
+
+  if (!family.admins.some(id => String(id) === memberId)) {
+    family.admins.push(memberId);
+  }
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    message: "Member promoted to Admin"
   });
 
-  socket.on("leave-family", callback => {
-    const p = getProfile(socket); const u = getUser(socket);
-    if (!p || !u || !p.familyId) return reply(callback, { ok: false, message: "You are not in a family" });
-    const f = db.families[p.familyId];
-    if (f) { f.members = f.members.filter(id => id !== u.id); if (!f.members.length) delete db.families[f.id]; else if (f.ownerId === u.id) f.ownerId = f.members[0]; }
-    p.familyId = ""; saveDB(); reply(callback, { ok: true });
+  familyBroadcast(family);
+});
+
+
+/* REMOVE ADMIN - OWNER ONLY */
+
+socket.on("family-remove-admin", (data, callback) => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u || !p.familyId) {
+    return reply(callback, {
+      ok: false,
+      message: "Family not found"
+    });
+  }
+
+  const family = db.families[p.familyId];
+
+  if (!family || family.ownerId !== u.id) {
+    return reply(callback, {
+      ok: false,
+      message: "Only Owner can remove Admins"
+    });
+  }
+
+  const memberId = String(data?.memberId);
+
+  family.admins = (family.admins || [])
+    .filter(id => String(id) !== memberId);
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    message: "Admin removed"
   });
+
+  familyBroadcast(family);
+});
+
+
+/* REMOVE FAMILY MEMBER */
+
+socket.on("family-remove-member", (data, callback) => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u || !p.familyId) {
+    return reply(callback, {
+      ok: false,
+      message: "Family not found"
+    });
+  }
+
+  const family = db.families[p.familyId];
+
+  if (!family) {
+    return reply(callback, {
+      ok: false,
+      message: "Family not found"
+    });
+  }
+
+  const memberId = String(data?.memberId);
+  const isOwner = String(family.ownerId) === String(u.id);
+  const isAdmin = (family.admins || [])
+    .some(id => String(id) === String(u.id));
+
+  if (!isOwner && !isAdmin) {
+    return reply(callback, {
+      ok: false,
+      message: "Only Owner or Admin can remove members"
+    });
+  }
+
+  if (memberId === String(family.ownerId)) {
+    return reply(callback, {
+      ok: false,
+      message: "Owner cannot be removed"
+    });
+  }
+
+  const targetIsAdmin = (family.admins || [])
+    .some(id => String(id) === memberId);
+
+  if (targetIsAdmin && !isOwner) {
+    return reply(callback, {
+      ok: false,
+      message: "Only Owner can remove an Admin"
+    });
+  }
+
+  if (!family.members.some(id => String(id) === memberId)) {
+    return reply(callback, {
+      ok: false,
+      message: "Member not found"
+    });
+  }
+
+  family.members = family.members
+    .filter(id => String(id) !== memberId);
+
+  family.admins = (family.admins || [])
+    .filter(id => String(id) !== memberId);
+
+  Object.values(db.profiles).forEach(profile => {
+    if (String(profile.id) === memberId) {
+      profile.familyId = "";
+    }
+  });
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    message: "Member removed"
+  });
+
+  familyBroadcast(family);
+});
+
+
+/* FAMILY CHAT */
+
+socket.on("family-chat", (data, callback) => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u || !p.familyId) {
+    return reply(callback, {
+      ok: false,
+      message: "Join a family first"
+    });
+  }
+
+  const family = db.families[p.familyId];
+
+  if (!family || !family.members.includes(u.id)) {
+    return reply(callback, {
+      ok: false,
+      message: "Family not found"
+    });
+  }
+
+  const message = clean(data?.message, 300);
+
+  if (!message) {
+    return reply(callback, {
+      ok: false,
+      message: "Write a message first"
+    });
+  }
+
+  family.chat ||= [];
+
+  const chatMessage = {
+    id: "FC" + Date.now(),
+    userId: u.id,
+    username: p.username || p.name || "Huka User",
+    message,
+    time: Date.now()
+  };
+
+  family.chat.push(chatMessage);
+
+  family.chat = family.chat.slice(-100);
+
+  saveDB();
+
+  io.to("family_" + family.id).emit(
+    "family:chat",
+    chatMessage
+  );
+
+  reply(callback, {
+    ok: true
+  });
+});
+
+
+/* LEAVE FAMILY */
+
+socket.on("leave-family", callback => {
+  const p = getProfile(socket);
+  const u = getUser(socket);
+
+  if (!p || !u || !p.familyId) {
+    return reply(callback, {
+      ok: false,
+      message: "You are not in a family"
+    });
+  }
+
+  const family = db.families[p.familyId];
+
+  if (family) {
+    family.members ||= [];
+    family.admins ||= [];
+
+    family.members = family.members
+      .filter(id => String(id) !== String(u.id));
+
+    family.admins = family.admins
+      .filter(id => String(id) !== String(u.id));
+
+    if (String(family.ownerId) === String(u.id)) {
+      const nextOwner =
+        family.admins[0] || family.members[0];
+
+      if (nextOwner) {
+        family.ownerId = nextOwner;
+        family.admins = family.admins
+          .filter(id => String(id) !== String(nextOwner));
+      }
+    }
+
+    socket.leave("family_" + family.id);
+
+    if (family.members.length === 0) {
+      delete db.families[family.id];
+    } else {
+      familyBroadcast(family);
+    }
+  }
+
+  p.familyId = "";
+
+  saveDB();
+
+  reply(callback, {
+    ok: true,
+    message: "You left the family"
+  });
+});
 
   socket.on("redeem-cdkey", (data, callback) => {
     const p = getProfile(socket); const u = getUser(socket);
