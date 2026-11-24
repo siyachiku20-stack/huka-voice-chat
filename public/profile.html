@@ -1834,6 +1834,32 @@ socket.on("family:chat", (message) => {
     renderFamilyChat(familyChatMessages);
 });
   
+/* FAMILY REMOVED EVENT */
+
+socket.on("family:removed", (data) => {
+    currentFamily = null;
+    familyChatMessages = [];
+
+    if ($("familyManagementInfo")) {
+        $("familyManagementInfo").innerHTML = "";
+    }
+
+    if ($("familyChatMessages")) {
+        $("familyChatMessages").textContent =
+            data?.message || "You are no longer in this family.";
+    }
+
+    if ($("familyDetails")) {
+        $("familyDetails").style.display = "none";
+    }
+
+    if ($("familyCreateJoin")) {
+        $("familyCreateJoin").style.display = "block";
+    }
+
+    showToast(data?.message || "You have been removed from the family.");
+});
+  
 /* ---------- COMMON FUNCTIONS ---------- */
 
 function showToast(message) {
