@@ -3610,7 +3610,9 @@ function familyBroadcast(family) {
   );
 }
 
-/* GET FAMILY */
+/* =========================================
+   GET FAMILY
+========================================= */
 
 socket.on("get-family", callback => {
   const p = getProfile(socket);
