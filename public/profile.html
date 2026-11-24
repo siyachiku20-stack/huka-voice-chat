@@ -3233,7 +3233,12 @@ let currentCPData = null;
 
 async function openCPSpace() {
     showModal("cpModal");
-
+  
+    // OPEN CP MENU BY DEFAULT
+    document.getElementById("cpRewardsMenu").style.display = "block";
+    document.getElementById("cpTasksPanel").style.display = "none";
+    document.getElementById("cpGiftsPanel").style.display = "none";
+  
     if ($("cpPartnerName")) {
         $("cpPartnerName").textContent = "Loading...";
     }
