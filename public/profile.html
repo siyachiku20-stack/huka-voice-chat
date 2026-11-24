@@ -3435,49 +3435,123 @@ async function loadCPSpace() {
 function renderCPSpace(data) {
     if (!data) return;
 
+    const self = data.self || {};
     const partner = data.partner;
     const progress = data.progress || {};
 
-    if (partner) {
-        $("cpPartnerName").textContent =
-            partner.name || "CP Partner";
+    // MY PROFILE
+    const selfName = $("cpSelfName");
+    const selfAvatar = $("cpSelfAvatar");
 
-        $("cpPartnerInfo").textContent =
-            "ID: " + (partner.id || "Unknown") +
-            " | Level: " + (partner.level || progress.level || 1);
-
-        $("cpUnpairButton").style.display = "block";
-    } else {
-        $("cpPartnerName").textContent = "No CP Partner";
-
-        $("cpPartnerInfo").textContent =
-            "Abhi aapka koi CP Partner nahi hai.";
-
-        $("cpUnpairButton").style.display = "none";
+    if (selfName) {
+        selfName.textContent = self.name || "Huka User";
     }
 
+    if (selfAvatar) {
+        if (self.avatar) {
+            selfAvatar.src = self.avatar;
+            selfAvatar.style.display = "block";
+        } else {
+            selfAvatar.removeAttribute("src");
+            selfAvatar.style.display = "block";
+        }
+    }
+
+    // CP PARTNER PROFILE
+    const partnerName = $("cpPartnerName");
+    const partnerInfo = $("cpPartnerInfo");
+    const partnerAvatar = $("cpPartnerAvatar");
+    const addButton = $("cpAddButton");
+
+    if (partner) {
+        if (partnerName) {
+            partnerName.textContent =
+                partner.name || "CP Partner";
+        }
+
+        if (partnerInfo) {
+            partnerInfo.textContent =
+                "ID: " + (partner.id || "Unknown");
+        }
+
+        if (partnerAvatar) {
+            partnerAvatar.style.display = "block";
+
+            if (partner.avatar) {
+                partnerAvatar.src = partner.avatar;
+            } else {
+                partnerAvatar.removeAttribute("src");
+            }
+        }
+
+        if (addButton) {
+            addButton.style.display = "none";
+        }
+
+        if ($("cpUnpairButton")) {
+            $("cpUnpairButton").style.display = "block";
+        }
+
+    } else {
+        if (partnerName) {
+            partnerName.textContent = "No CP Partner";
+        }
+
+        if (partnerInfo) {
+            partnerInfo.textContent = "Find your CP Partner";
+        }
+
+        if (partnerAvatar) {
+            partnerAvatar.style.display = "none";
+            partnerAvatar.removeAttribute("src");
+        }
+
+        if (addButton) {
+            addButton.style.display = "block";
+        }
+
+        if ($("cpUnpairButton")) {
+            $("cpUnpairButton").style.display = "none";
+        }
+    }
+
+    // CP LEVEL
     const level = Number(progress.level || 1);
     const totalXP = Number(progress.totalXP || 0);
     const currentXP = Number(progress.currentXP || 0);
+
     const requiredXP = Math.max(
         1,
         Number(progress.requiredXP || 100)
     );
 
-    $("cpLevel").textContent = level;
-    $("cpTotalXP").textContent =
-        totalXP.toLocaleString("en-IN");
+    if ($("cpLevel")) {
+        $("cpLevel").textContent = level;
+    }
 
-    $("cpXPText").textContent =
-        currentXP + " / " + requiredXP + " XP";
+    if ($("cpTotalXP")) {
+        $("cpTotalXP").textContent =
+            totalXP.toLocaleString("en-IN") + " XP";
+    }
+
+    if ($("cpXPText")) {
+        $("cpXPText").textContent =
+            currentXP.toLocaleString("en-IN") +
+            " / " +
+            requiredXP.toLocaleString("en-IN") +
+            " XP";
+    }
 
     const percentage = Math.min(
         100,
         Math.max(0, (currentXP / requiredXP) * 100)
     );
 
-    $("cpXPBar").style.width = percentage + "%";
+    if ($("cpXPBar")) {
+        $("cpXPBar").style.width = percentage + "%";
+    }
 
+    // REQUESTS
     renderCPRequests(
         data.incomingRequests || [],
         data.outgoingRequests || []
@@ -3486,6 +3560,8 @@ function renderCPSpace(data) {
     // ANNIVERSARY AND MEMORIES
     renderCPAnniversary(partner);
     renderCPMemories(partner?.memories || []);
+
+    // DAILY TASKS AND BONUS
     renderCPDailyTasks(data);
 }
 
