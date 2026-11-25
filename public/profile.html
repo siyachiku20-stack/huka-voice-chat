@@ -4898,7 +4898,12 @@ function openPage(pageName) {
         openCPSpace();
         return;
     }
-
+  
+    if (pageName === "Dress") {
+        openDress();
+        return;
+    }
+  
     let message = "";
 
     if (pageName === "Level") {
