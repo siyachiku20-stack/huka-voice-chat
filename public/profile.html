@@ -4915,9 +4915,96 @@ function openPage(pageName) {
     showModal("infoModal");
 }
 
+/* ---------- HUKA DRESS SYSTEM ---------- */
+
+let currentDressCategory = "frames";
+
+const dressCollections = {
+    frames: [
+        { name: "Free Purple Frame", icon: "💜", price: 0 },
+        { name: "Pink Heart Frame", icon: "💗", price: 100 },
+        { name: "Golden Frame", icon: "👑", price: 300 },
+        { name: "Diamond Frame", icon: "💎", price: 500 }
+    ],
+    entry: [
+        { name: "Free Entry", icon: "🚪", price: 0 },
+        { name: "Heart Entry", icon: "💞", price: 150 },
+        { name: "Star Entry", icon: "⭐", price: 300 },
+        { name: "Royal Entry", icon: "👑", price: 500 }
+    ],
+    name: [
+        { name: "Normal Name", icon: "✨", price: 0 },
+        { name: "Pink Name", icon: "💗", price: 100 },
+        { name: "Rainbow Name", icon: "🌈", price: 300 }
+    ],
+    id: [
+        { name: "Normal ID", icon: "🆔", price: 0 },
+        { name: "Golden ID", icon: "🌟", price: 200 },
+        { name: "Diamond ID", icon: "💎", price: 400 }
+    ],
+    room: [
+        { name: "Purple Room DP", icon: "💜", price: 0 },
+        { name: "Love Room DP", icon: "💗", price: 150 },
+        { name: "Royal Room DP", icon: "👑", price: 400 }
+    ]
+};
+
 function openDress() {
-    openPage("Dress");
+    showModal("dressModal");
+    showDressCategory("frames");
 }
+
+function showDressCategory(category) {
+    currentDressCategory = category;
+
+    const box = $("dressItems");
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    (dressCollections[category] || []).forEach((item, index) => {
+        const card = document.createElement("div");
+
+        card.style.cssText = `
+            background:#39204d;
+            border:1px solid #a65bd5;
+            border-radius:14px;
+            padding:14px 8px;
+            text-align:center;
+        `;
+
+        const icon = document.createElement("div");
+        icon.textContent = item.icon;
+        icon.style.fontSize = "35px";
+
+        const name = document.createElement("b");
+        name.textContent = item.name;
+
+        const price = document.createElement("p");
+        price.textContent = item.price === 0
+            ? "FREE"
+            : "💰 " + item.price + " Coins";
+
+        const button = document.createElement("button");
+        button.textContent = item.price === 0 ? "Use" : "Buy";
+
+        button.onclick = () => useDressItem(category, index);
+
+        card.append(icon, name, price, button);
+        box.appendChild(card);
+    });
+}
+
+async function useDressItem(category, index) {
+    const item = dressCollections[category]?.[index];
+    if (!item) return;
+
+    showToast(
+        item.price === 0
+            ? item.name + " selected"
+            : "Purchase system ko Wallet se connect karna abhi baaki hai."
+    );
+  }
 
 /* ---------- CD KEY ---------- */
 
