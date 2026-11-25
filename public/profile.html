@@ -633,6 +633,35 @@ button {
     transform: translateX(-50%);
   }
 }
+  
+   #avatarFrame {
+       position: relative;
+       overflow: visible !important;
+       padding: 0;
+       background: transparent;
+  }
+
+  #profileAvatar {
+      position: absolute;
+      width: 68%;
+      height: 68%;
+      left: 16%;
+      top: 16%;
+      border-radius: 50%;
+      object-fit: cover;
+      z-index: 1;
+  }
+
+   .svip-profile-frame {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       left: 0;
+       top: 0;
+       object-fit: contain;
+       z-index: 2;
+       pointer-events: none;
+   }
 </style>
 </head>
 
@@ -647,10 +676,18 @@ button {
   <div class="profile-top">
 
     <div class="avatar-box" id="avatarFrame">
-      <img id="profileAvatar"
-           src="https://placehold.co/200x200/e6eaff/6655aa?text=H"
-           alt="Profile picture">
-    </div>
+
+        <img id="profileAvatar"
+             src="https://placehold.co/200x200/e6eaff/6655aa?text=H"
+             alt="Profile picture">
+
+        <img id="profileSVIPFrame"
+             class="svip-profile-frame"
+             src=""
+             alt="SVIP Frame"
+             style="display:none;">
+
+     </div>
 
     <div class="profile-details">
       <h1 id="profileName">Huka User</h1>
