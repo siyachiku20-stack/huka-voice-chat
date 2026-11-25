@@ -1747,7 +1747,38 @@ button {
       onclick="closeModal('feedbackModal')">Close</button>
   </div>
 </div>
+  
+<!-- HUKA DRESS MODAL -->
 
+<div class="modal" id="dressModal">
+  <div class="modal-box" style="max-width:480px">
+
+    <h2>👕 Huka Dress Collection</h2>
+    <p style="color:#d9b9ef;font-size:13px">
+      Apni Profile ko stylish banayein 💜
+    </p>
+
+    <div class="dress-tabs">
+      <button onclick="showDressCategory('frames')">🖼️ Frames</button>
+      <button onclick="showDressCategory('entry')">🚪 Entry</button>
+      <button onclick="showDressCategory('name')">✨ Name</button>
+      <button onclick="showDressCategory('id')">🌈 ID</button>
+      <button onclick="showDressCategory('room')">💜 Room DP</button>
+    </div>
+
+    <div id="dressItems"
+      style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px">
+    </div>
+
+    <button class="primary"
+      style="width:100%;margin-top:15px"
+      onclick="closeModal('dressModal')">
+      Close
+    </button>
+
+  </div>
+</div>
+  
 <!-- GENERAL INFO MODAL -->
 
 <div class="modal" id="infoModal">
