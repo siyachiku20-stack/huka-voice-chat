@@ -1029,27 +1029,49 @@ button {
   </div>
 </div>    
   
-<!-- SVIP MODAL -->
-
+<!-- HUKA SVIP STORE -->
 <div class="modal" id="svipModal">
-  <div class="modal-box">
-    <h2>♛ SVIP Membership</h2>
-    <div id="svipStatus" class="info-row">Loading...</div>
+  <div class="modal-box svip-store-box">
 
-    <div class="frame-card">
-      <h3>SVIP 7 Days</h3>
-      <p>500,000 Coins</p>
-      <button class="primary" onclick="buySVIP('svip7')">Buy 7 Days</button>
+    <div class="svip-store-header">
+      <div>
+        <span class="svip-small-title">HUKA PREMIUM CLUB</span>
+        <h2>👑 SVIP MEMBERSHIP</h2>
+        <p>Unlock your royal identity 💜</p>
+      </div>
+      <div class="svip-big-diamond">💎</div>
     </div>
 
-    <div class="frame-card" style="margin-top:10px">
-      <h3>SVIP 30 Days</h3>
-      <p>1,500,000 Coins</p>
-      <button class="primary" onclick="buySVIP('svip30')">Buy 30 Days</button>
+    <div class="svip-balance">
+      <span>🪙 Your Coins</span>
+      <strong id="svipCoins">Loading...</strong>
     </div>
 
-    <button class="secondary" style="width:100%;margin-top:15px"
-      onclick="closeModal('svipModal')">Close</button>
+    <div id="svipStatus" class="svip-active-status">
+      Loading SVIP details...
+    </div>
+
+    <div class="svip-benefits">
+      <div>👑 Royal Badge</div>
+      <div>✨ Special Name</div>
+      <div>💜 Premium Frame</div>
+      <div>🌟 Entry Effects</div>
+      <div>🎁 SVIP Gifts</div>
+      <div>🎙️ Mic Effects</div>
+    </div>
+
+    <h3 class="svip-level-heading">Choose Your SVIP Level</h3>
+    <p class="svip-duration-note">Every membership is valid for 30 days.</p>
+
+    <div id="svipPlans" class="svip-plans-grid">
+      Loading SVIP plans...
+    </div>
+
+    <button class="secondary svip-close-btn"
+      onclick="closeModal('svipModal')">
+      Close
+    </button>
+
   </div>
 </div>
 
