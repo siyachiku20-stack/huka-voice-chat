@@ -2419,48 +2419,130 @@ async function loadWalletHistory() {
     });
 }
 
-/* ---------- SVIP ---------- */
+/* ---------- SVIP LEVEL 1-11 ---------- */
+
+const SVIP_LEVEL_STYLES = [
+  { icon: "💜", name: "Purple Glow" },
+  { icon: "💗", name: "Pink Heart" },
+  { icon: "💎", name: "Blue Diamond" },
+  { icon: "💚", name: "Emerald Royal" },
+  { icon: "👑", name: "Golden Crown" },
+  { icon: "🪽", name: "Royal Wings" },
+  { icon: "💠", name: "Diamond Luxury" },
+  { icon: "🔥", name: "Flame King" },
+  { icon: "❄️", name: "Crystal Ice" },
+  { icon: "🌟", name: "Supreme Gold" },
+  { icon: "🌌", name: "Ultimate Galaxy" }
+];
+
+function formatSVIPCoins(value) {
+  return (Number(value) || 0).toLocaleString("en-IN");
+}
 
 async function openSVIP() {
-    showModal("svipModal");
+  showModal("svipModal");
 
-    const result = await emitRequest("get-svip", {
-        userId: getUserId()
-    });
+  const plansBox = $("svipPlans");
+  const statusBox = $("svipStatus");
+  const coinsBox = $("svipCoins");
 
-    if (!result || result.ok === false) {
-        showToast(result.message || "SVIP details load nahi hue.");
-        return;
+  if (plansBox) plansBox.textContent = "Loading SVIP plans...";
+  if (statusBox) statusBox.textContent = "Loading...";
+  if (coinsBox) coinsBox.textContent = "Loading...";
+
+  const result = await emitRequest("get-svip", {
+    userId: getUserId()
+  });
+
+  if (!result || result.ok === false) {
+    if (plansBox) plansBox.textContent = "SVIP plans load nahi hue.";
+    showToast(result?.message || "SVIP details load nahi hue.");
+    return;
+  }
+
+  const svip = result.svip || result;
+  const plans = svip.plans || result.plans || [];
+
+  if (coinsBox) {
+    coinsBox.textContent = formatSVIPCoins(svip.coins);
+  }
+
+  if (statusBox) {
+    if (svip.active) {
+      const expiry = svip.until
+        ? new Date(svip.until).toLocaleString("en-IN")
+        : "Active";
+
+      statusBox.innerHTML =
+        `👑 SVIP ${Number(svip.level) || 1} ACTIVE<br>` +
+        `<small>Valid Until: ${expiry}</small>`;
+    } else {
+      statusBox.textContent = "💜 SVIP Not Active — Choose Your Level";
     }
+  }
 
-    const svip = result.svip || result;
+  if (!plansBox) return;
 
-    if ($("svipStatus")) {
-        $("svipStatus").textContent =
-            svip.active
-                ? "SVIP Active"
-                : "SVIP Not Active";
-    }
+  plansBox.innerHTML = "";
+
+  plans.forEach(plan => {
+    const level = Number(plan.level);
+    const style = SVIP_LEVEL_STYLES[level - 1] || {
+      icon: "👑",
+      name: "Royal"
+    };
+
+    const card = document.createElement("div");
+    card.className = `svip-level-card svip-level-${level}`;
+
+    const title = document.createElement("h3");
+    title.textContent = `${style.icon} SVIP ${level}`;
+
+    const styleName = document.createElement("p");
+    styleName.className = "svip-style-name";
+    styleName.textContent = style.name;
+
+    const price = document.createElement("strong");
+    price.className = "svip-price";
+    price.textContent = `${formatSVIPCoins(plan.price)} Coins`;
+
+    const duration = document.createElement("span");
+    duration.className = "svip-days";
+    duration.textContent = "30 Days Membership";
+
+    const button = document.createElement("button");
+    button.className = "primary svip-buy-btn";
+    button.textContent = "Buy Now";
+    button.type = "button";
+    button.onclick = () => buySVIP(plan.id);
+
+    card.append(title, styleName, price, duration, button);
+    plansBox.appendChild(card);
+  });
+
+  if (!plans.length) {
+    plansBox.textContent = "No SVIP plans available.";
+  }
 }
 
 async function buySVIP(planId) {
-    const result = await emitRequest("buy-svip", {
-        userId: getUserId(),
-        planId: planId
-    });
+  const result = await emitRequest("buy-svip", {
+    userId: getUserId(),
+    planId: planId
+  });
 
-    if (isSuccess(result)) {
-        showToast(result.message || "SVIP purchase successful!");
+  if (isSuccess(result)) {
+    showToast(result.message || "SVIP purchase successful!");
 
-        if (result.profile) {
-            profile = result.profile;
-            renderProfile();
-        }
-
-        await openSVIP();
-    } else {
-        showToast(result.message || "SVIP purchase nahi hua.");
+    if (result.profile) {
+      profile = result.profile;
+      renderProfile();
     }
+
+    await openSVIP();
+  } else {
+    showToast(result?.message || "SVIP purchase nahi hua.");
+  }
 }
 
 /* ---------- MEDALS ---------- */
