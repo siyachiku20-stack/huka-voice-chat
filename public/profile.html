@@ -653,15 +653,26 @@ button {
   }
 
    .svip-profile-frame {
-       position: absolute;
-       width: 100%;
-       height: 100%;
-       left: 0;
-       top: 0;
-       object-fit: contain;
-       z-index: 2;
-       pointer-events: none;
-   }
+    position: absolute;
+    width: 112%;
+    height: 112%;
+    left: -6%;
+    top: -6%;
+    object-fit: contain;
+    z-index: 2;
+    pointer-events: none;
+    transform-origin: center center;
+    animation: svipFrameMove 3s ease-in-out infinite;
+}
+
+@keyframes svipFrameMove {
+    0%, 100% {
+        transform: rotate(-2deg) scale(1);
+    }
+    50% {
+        transform: rotate(2deg) scale(1.02);
+    }
+}
 </style>
 </head>
 
