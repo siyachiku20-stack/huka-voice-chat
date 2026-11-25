@@ -661,16 +661,22 @@ button {
     object-fit: contain;
     z-index: 2;
     pointer-events: none;
-    transform-origin: center center;
-    animation: svipFrameMove 3s ease-in-out infinite;
+    animation: none;
 }
 
-@keyframes svipFrameMove {
+/* SVIP Frame Glow */
+.svip-profile-frame {
+    filter: drop-shadow(0 0 3px #dcaaff);
+    animation: svipGlow 2s ease-in-out infinite;
+}
+
+@keyframes svipGlow {
     0%, 100% {
-        transform: rotate(-2deg) scale(1);
+        filter: drop-shadow(0 0 3px #dcaaff);
     }
     50% {
-        transform: rotate(2deg) scale(1.02);
+        filter: drop-shadow(0 0 13px #ffdb75)
+                drop-shadow(0 0 18px #d85cff);
     }
 }
 </style>
