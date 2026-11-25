@@ -3525,29 +3525,115 @@ socket.on("send-cp-gift", (data, callback) => {
     reply(callback, { ok: true, coins: Number(profile.coins) || 0, diamonds: Number(profile.diamonds) || 0, history: profile.walletHistory || [] });
   });
 
-  socket.on("get-svip", callback => {
-    const profile = getProfile(socket);
-    if (!profile) return reply(callback, { ok: false, message: "Register first" });
-    reply(callback, { ok: true, active: Number(profile.svipUntil) > Date.now(), until: Number(profile.svipUntil) || 0, coins: Number(profile.coins) || 0, plans: [{ id: "svip7", name: "SVIP 7 Days", days: 7, price: 500000 }, { id: "svip30", name: "SVIP 30 Days", days: 30, price: 1500000 }] });
+const SVIP_PLANS = [
+  { id: "svip1", level: 1, price: 1000000 },
+  { id: "svip2", level: 2, price: 2500000 },
+  { id: "svip3", level: 3, price: 5000000 },
+  { id: "svip4", level: 4, price: 10000000 },
+  { id: "svip5", level: 5, price: 20000000 },
+  { id: "svip6", level: 6, price: 30500000 },
+  { id: "svip7", level: 7, price: 50000000 },
+  { id: "svip8", level: 8, price: 70500000 },
+  { id: "svip9", level: 9, price: 100000000 },
+  { id: "svip10", level: 10, price: 150000000 },
+  { id: "svip11", level: 11, price: 250000000 }
+];
+
+// GET SVIP
+socket.on("get-svip", callback => {
+  const profile = getProfile(socket);
+
+  if (!profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const active = Number(profile.svipUntil) > Date.now();
+
+  reply(callback, {
+    ok: true,
+    active,
+    level: active ? Number(profile.svipLevel) || 1 : 0,
+    until: Number(profile.svipUntil) || 0,
+    coins: Number(profile.coins) || 0,
+    plans: SVIP_PLANS.map(plan => ({
+      ...plan,
+      days: 30,
+      name: `SVIP ${plan.level}`
+    }))
+  });
+});
+
+// BUY SVIP
+socket.on("buy-svip", (data, callback) => {
+  const profile = getProfile(socket);
+  const user = getUser(socket);
+
+  if (!profile || !user) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const plan = SVIP_PLANS.find(
+    item => item.id === clean(data?.planId, 20)
+  );
+
+  if (!plan) {
+    return reply(callback, {
+      ok: false,
+      message: "Invalid SVIP plan"
+    });
+  }
+
+  profile.coins = Number(profile.coins) || 0;
+
+  if (profile.coins < plan.price) {
+    return reply(callback, {
+      ok: false,
+      message: "Not enough Coins"
+    });
+  }
+
+  profile.coins -= plan.price;
+
+  const start = Math.max(
+    Date.now(),
+    Number(profile.svipUntil) || 0
+  );
+
+  profile.svipUntil = start + 30 * 86400000;
+  profile.svipLevel = plan.level;
+
+  addWalletHistory(
+    profile,
+    "purchase",
+    -plan.price,
+    `Bought SVIP ${plan.level} - 30 Days`
+  );
+
+  user.coins = profile.coins;
+
+  saveDB();
+
+  socket.emit("profile-update", {
+    id: user.id,
+    coins: profile.coins,
+    svipUntil: profile.svipUntil,
+    svipLevel: profile.svipLevel
   });
 
-  socket.on("buy-svip", (data, callback) => {
-    const profile = getProfile(socket);
-    const user = getUser(socket);
-    if (!profile || !user) return reply(callback, { ok: false, message: "Register first" });
-    const plans = { svip7: { days: 7, price: 500000, name: "SVIP 7 Days" }, svip30: { days: 30, price: 1500000, name: "SVIP 30 Days" } };
-    const plan = plans[clean(data?.planId, 20)];
-    if (!plan) return reply(callback, { ok: false, message: "Invalid SVIP plan" });
-    if ((Number(profile.coins) || 0) < plan.price) return reply(callback, { ok: false, message: "Not enough virtual Coins" });
-    profile.coins -= plan.price;
-    const start = Math.max(Date.now(), Number(profile.svipUntil) || 0);
-    profile.svipUntil = start + plan.days * 86400000;
-    addWalletHistory(profile, "purchase", -plan.price, `Bought ${plan.name}`);
-    user.coins = profile.coins;
-    saveDB();
-    socket.emit("profile-update", { id: user.id, coins: profile.coins, svipUntil: profile.svipUntil });
-    reply(callback, { ok: true, coins: profile.coins, until: profile.svipUntil });
+  reply(callback, {
+    ok: true,
+    message: `SVIP ${plan.level} activated for 30 days!`,
+    coins: profile.coins,
+    level: profile.svipLevel,
+    until: profile.svipUntil
   });
+});
 
   socket.on("get-medals", callback => {
     const p = getProfile(socket);
