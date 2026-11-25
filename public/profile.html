@@ -4915,43 +4915,17 @@ function openPage(pageName) {
     showModal("infoModal");
 }
 
-/* ---------- HUKA DRESS SYSTEM ---------- */
+/* ---------- HUKA DRESS SYSTEM - BAG CONNECTED ---------- */
 
-let currentDressCategory = "frames";
+let currentDressCategory = "frame";
 
-const dressCollections = {
-    frames: [
-        { name: "Free Purple Frame", icon: "💜", price: 0 },
-        { name: "Pink Heart Frame", icon: "💗", price: 100 },
-        { name: "Golden Frame", icon: "👑", price: 300 },
-        { name: "Diamond Frame", icon: "💎", price: 500 }
-    ],
-    entry: [
-        { name: "Free Entry", icon: "🚪", price: 0 },
-        { name: "Heart Entry", icon: "💞", price: 150 },
-        { name: "Star Entry", icon: "⭐", price: 300 },
-        { name: "Royal Entry", icon: "👑", price: 500 }
-    ],
-    name: [
-        { name: "Normal Name", icon: "✨", price: 0 },
-        { name: "Pink Name", icon: "💗", price: 100 },
-        { name: "Rainbow Name", icon: "🌈", price: 300 }
-    ],
-    id: [
-        { name: "Normal ID", icon: "🆔", price: 0 },
-        { name: "Golden ID", icon: "🌟", price: 200 },
-        { name: "Diamond ID", icon: "💎", price: 400 }
-    ],
-    room: [
-        { name: "Purple Room DP", icon: "💜", price: 0 },
-        { name: "Love Room DP", icon: "💗", price: 150 },
-        { name: "Royal Room DP", icon: "👑", price: 400 }
-    ]
-};
-
-function openDress() {
+async function openDress() {
     showModal("dressModal");
-    showDressCategory("frames");
+
+    await loadProfile();
+    await loadBagItems();
+
+    showDressCategory("frame");
 }
 
 function showDressCategory(category) {
@@ -4962,7 +4936,17 @@ function showDressCategory(category) {
 
     box.innerHTML = "";
 
-    (dressCollections[category] || []).forEach((item, index) => {
+    const items = bagItems.filter(item =>
+        item.category === category
+    );
+
+    if (!items.length) {
+        box.innerHTML =
+            '<p style="grid-column:1/-1;text-align:center;color:#e8c8ff;">Is category mein abhi koi item available nahi hai.</p>';
+        return;
+    }
+
+    items.forEach(item => {
         const card = document.createElement("div");
 
         card.style.cssText = `
@@ -4974,36 +4958,51 @@ function showDressCategory(category) {
         `;
 
         const icon = document.createElement("div");
-        icon.textContent = item.icon;
+        icon.textContent =
+            item.icon || BAG_CATEGORY_ICONS[item.category] || "🎁";
         icon.style.fontSize = "35px";
 
         const name = document.createElement("b");
-        name.textContent = item.name;
+        name.textContent = item.name || "Huka Item";
 
         const price = document.createElement("p");
-        price.textContent = item.price === 0
-            ? "FREE"
-            : "💰 " + item.price + " Coins";
+        price.textContent =
+            Number(item.price || 0) === 0
+                ? "FREE"
+                : "💰 " +
+                  Number(item.price).toLocaleString("en-IN") +
+                  " Coins";
 
         const button = document.createElement("button");
-        button.textContent = item.price === 0 ? "Use" : "Buy";
 
-        button.onclick = () => useDressItem(category, index);
+        const owned = isBagItemOwned(item);
+        const equipped = isBagItemEquipped(item);
+
+        if (equipped) {
+            button.textContent = "Unequip";
+            button.onclick = async () => {
+                await unequipBagItem(item.id);
+                showDressCategory(currentDressCategory);
+            };
+
+        } else if (owned) {
+            button.textContent = "Equip";
+            button.onclick = async () => {
+                await equipBagItem(item.id);
+                showDressCategory(currentDressCategory);
+            };
+
+        } else {
+            button.textContent = "Buy";
+            button.onclick = async () => {
+                await buyBagItem(item.id);
+                showDressCategory(currentDressCategory);
+            };
+        }
 
         card.append(icon, name, price, button);
         box.appendChild(card);
     });
-}
-
-async function useDressItem(category, index) {
-    const item = dressCollections[category]?.[index];
-    if (!item) return;
-
-    showToast(
-        item.price === 0
-            ? item.name + " selected"
-            : "Purchase system ko Wallet se connect karna abhi baaki hai."
-    );
   }
 
 /* ---------- CD KEY ---------- */
