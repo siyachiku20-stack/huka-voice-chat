@@ -660,6 +660,12 @@ button {
       <div class="level-badge">
         💎 Lv.<span id="profileLevel">1</span>
       </div>
+      
+      <div id="profileSVIPBadge" class="profile-svip-badge" style="display:none;">
+        👑 SVIP <span id="profileSVIPLevel">1</span>
+        <small id="profileSVIPExpiry"></small>
+      </div>
+      
       <div class="level-progress">
         <div class="level-progress-info">
           <span>⭐ Level XP</span>
@@ -5742,6 +5748,27 @@ if (socket.connected) {
   .svip-plans-grid {
     grid-template-columns: 1fr;
   }
+}
+  
+/* HUKA PROFILE SVIP BADGE */
+.profile-svip-badge {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  padding: 7px 13px;
+  border-radius: 12px;
+  background: linear-gradient(100deg,#542080,#c12b91,#e0a52d);
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  box-shadow: 0 0 12px #c45bda;
+}
+
+.profile-svip-badge small {
+  font-size: 9px;
+  color: #fff0c9;
+  font-weight: normal;
 }
   
 </style>
