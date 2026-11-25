@@ -4959,9 +4959,10 @@ function openPage(pageName) {
     showModal("infoModal");
 }
 
-/* ---------- HUKA DRESS SYSTEM - BAG CONNECTED ---------- */
+/* ---------- HUKA DRESS SYSTEM - FULL BAG DESIGN ---------- */
 
-let currentDressCategory = "frame";
+let currentDressCategory = "all";
+let currentDressView = "store";
 
 async function openDress() {
     showModal("dressModal");
@@ -4969,45 +4970,100 @@ async function openDress() {
     await loadProfile();
     await loadBagItems();
 
-    showDressCategory("frame");
+    const coins = $("dressCoins");
+    if (coins) {
+        coins.textContent = Number(
+            profile?.coins || 0
+        ).toLocaleString("en-IN");
+    }
+
+    switchDressView("store");
+    selectDressCategory("all");
 }
 
-function showDressCategory(category) {
+function switchDressView(view) {
+    currentDressView = view;
+
+    $("dressStoreTab").className =
+        view === "store" ? "primary" : "secondary";
+
+    $("dressOwnedTab").className =
+        view === "owned" ? "primary" : "secondary";
+
+    renderDressItems();
+}
+
+function selectDressCategory(category, button) {
     currentDressCategory = category;
 
-    const box = $("dressItems");
-    if (!box) return;
+    document.querySelectorAll(
+        "#dressModal .bag-category"
+    ).forEach(item => {
+        item.classList.remove("active");
+    });
 
-    box.innerHTML = "";
+    if (button) {
+        button.classList.add("active");
+    } else {
+        const firstButton = document.querySelector(
+            '#dressModal .bag-category'
+        );
 
-    const items = bagItems.filter(item =>
-        item.category === category
-    );
+        if (firstButton) {
+            firstButton.classList.add("active");
+        }
+    }
+
+    renderDressItems();
+}
+
+function renderDressItems() {
+    const container = $("dressItems");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const items = bagItems.filter(item => {
+        if (
+            currentDressCategory !== "all" &&
+            item.category !== currentDressCategory
+        ) {
+            return false;
+        }
+
+        if (
+            currentDressView === "owned" &&
+            !isBagItemOwned(item)
+        ) {
+            return false;
+        }
+
+        return true;
+    });
 
     if (!items.length) {
-        box.innerHTML =
-            '<p style="grid-column:1/-1;text-align:center;color:#e8c8ff;">Is category mein abhi koi item available nahi hai.</p>';
+        container.innerHTML =
+            '<p class="bag-empty">Is category mein koi item nahi hai.</p>';
         return;
     }
 
     items.forEach(item => {
         const card = document.createElement("div");
-
-        card.style.cssText = `
-            background:#39204d;
-            border:1px solid #a65bd5;
-            border-radius:14px;
-            padding:14px 8px;
-            text-align:center;
-        `;
+        card.className = "bag-item-card";
 
         const icon = document.createElement("div");
+        icon.className = "bag-item-icon";
         icon.textContent =
             item.icon || BAG_CATEGORY_ICONS[item.category] || "🎁";
-        icon.style.fontSize = "35px";
 
-        const name = document.createElement("b");
-        name.textContent = item.name || "Huka Item";
+        const title = document.createElement("h4");
+        title.textContent = item.name || "Huka Item";
+
+        const category = document.createElement("p");
+        category.textContent =
+            BAG_CATEGORY_NAMES[item.category] ||
+            item.category ||
+            "Item";
 
         const price = document.createElement("p");
         price.textContent =
@@ -5017,37 +5073,68 @@ function showDressCategory(category) {
                   Number(item.price).toLocaleString("en-IN") +
                   " Coins";
 
-        const button = document.createElement("button");
+        card.append(icon, title, category, price);
 
         const owned = isBagItemOwned(item);
         const equipped = isBagItemEquipped(item);
 
+        const button = document.createElement("button");
+
         if (equipped) {
+            button.className = "secondary";
             button.textContent = "Unequip";
+
             button.onclick = async () => {
                 await unequipBagItem(item.id);
-                showDressCategory(currentDressCategory);
+                refreshDressItems();
             };
 
         } else if (owned) {
+            button.className = "primary";
             button.textContent = "Equip";
+
             button.onclick = async () => {
                 await equipBagItem(item.id);
-                showDressCategory(currentDressCategory);
+                refreshDressItems();
             };
 
         } else {
+            button.className = "primary";
             button.textContent = "Buy";
+
             button.onclick = async () => {
                 await buyBagItem(item.id);
-                showDressCategory(currentDressCategory);
+                refreshDressItems();
             };
         }
 
-        card.append(icon, name, price, button);
-        box.appendChild(card);
+        card.appendChild(button);
+        container.appendChild(card);
     });
-  }
+
+    const coins = $("dressCoins");
+
+    if (coins) {
+        coins.textContent = Number(
+            profile?.coins || 0
+        ).toLocaleString("en-IN");
+    }
+}
+
+async function refreshDressItems() {
+    await loadProfile();
+    await loadBagItems();
+
+    const coins = $("dressCoins");
+
+    if (coins) {
+        coins.textContent = Number(
+            profile?.coins || 0
+        ).toLocaleString("en-IN");
+    }
+
+    renderDressItems();
+}
 
 /* ---------- CD KEY ---------- */
 
