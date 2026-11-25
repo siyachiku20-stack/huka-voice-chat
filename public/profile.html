@@ -2116,7 +2116,67 @@ async function loadProfile() {
     await loadFrames();
   }
 }
+  
+/* ---------- PROFILE SVIP STATUS ---------- */
 
+function updateProfileSVIP(svip) {
+    const badge = $("profileSVIPBadge");
+    const levelText = $("profileSVIPLevel");
+    const expiryText = $("profileSVIPExpiry");
+
+    if (!badge) return;
+
+    const active = Boolean(
+        svip &&
+        svip.active &&
+        Number(svip.until) > Date.now()
+    );
+
+    if (!active) {
+        badge.style.display = "none";
+
+        if (profile) {
+            profile.svipLevel = 0;
+            profile.svipUntil = 0;
+        }
+
+        return;
+    }
+
+    const level = Number(svip.level) || 1;
+    const expiry = Number(svip.until);
+
+    if (profile) {
+        profile.svipLevel = level;
+        profile.svipUntil = expiry;
+    }
+
+    if (levelText) {
+        levelText.textContent = level;
+    }
+
+    if (expiryText) {
+        expiryText.textContent =
+            "Valid Until: " +
+            new Date(expiry).toLocaleDateString("en-IN");
+    }
+
+    badge.style.display = "inline-flex";
+}
+
+async function loadSVIPProfileStatus() {
+    const result = await emitRequest("get-svip", {
+        userId: getUserId()
+    });
+
+    if (!result || result.ok === false) {
+        updateProfileSVIP(null);
+        return;
+    }
+
+    updateProfileSVIP(result.svip || result);
+}
+  
 /* ---------- DISPLAY PROFILE ---------- */
 
 function renderProfile() {
