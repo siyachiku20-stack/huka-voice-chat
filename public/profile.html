@@ -2135,8 +2135,9 @@ function updateProfileSVIP(svip) {
 
     if (!active) {
         badge.style.display = "none";
-
-        if (profile) {
+        applySVIPProfileFrame();
+      
+      if (profile) {
             profile.svipLevel = 0;
             profile.svipUntil = 0;
         }
@@ -2163,6 +2164,7 @@ function updateProfileSVIP(svip) {
     }
 
     badge.style.display = "inline-flex";
+    applySVIPProfileFrame();
 }
 
 async function loadSVIPProfileStatus() {
@@ -2177,6 +2179,30 @@ async function loadSVIPProfileStatus() {
 
     updateProfileSVIP(result.svip || result);
 }
+  
+function applySVIPProfileFrame() {
+    const frame = $("profileSVIPFrame");
+
+    if (!frame) return;
+
+    const level = Number(profile?.svipLevel || 0);
+    const expiry = Number(profile?.svipUntil || 0);
+
+    if (level < 1 || level > 11 || expiry <= Date.now()) {
+        frame.style.display = "none";
+        frame.removeAttribute("src");
+        return;
+    }
+
+    const frameNumber = String(level).padStart(2, "0");
+
+    frame.src = `/assets/svip_${frameNumber}.png`;
+    frame.style.display = "block";
+
+    frame.onerror = function () {
+        frame.style.display = "none";
+    };
+  }
   
 /* ---------- DISPLAY PROFILE ---------- */
 
