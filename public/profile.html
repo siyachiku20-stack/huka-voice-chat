@@ -1751,26 +1751,65 @@ button {
 <!-- HUKA DRESS MODAL -->
 
 <div class="modal" id="dressModal">
-  <div class="modal-box" style="max-width:480px">
+  <div class="modal-box bag-modal-box">
 
-    <h2>👕 Huka Dress Collection</h2>
-    <p style="color:#d9b9ef;font-size:13px">
-      Apni Profile ko stylish banayein 💜
-    </p>
+    <h2>👗 Huka Dress Store & My Dress</h2>
 
-    <div class="dress-tabs">
-      <button onclick="showDressCategory('frame')">🖼️ Frames</button>
-      <button onclick="showDressCategory('entryEffect')">🚪 Entry</button>
-      <button onclick="showDressCategory('rgbName')">🌈 Colorful Name</button>
-      <button onclick="showDressCategory('nameDecoration')">👑 Name Style</button>
-      <button onclick="showDressCategory('profileCard')">🪪 Profile Card</button>
+    <div class="bag-wallet">
+      💰 Your Coins: <strong id="dressCoins">0</strong>
     </div>
 
-    <div id="dressItems"
-      style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px">
+    <div class="bag-main-tabs">
+      <button class="primary" id="dressStoreTab"
+        onclick="switchDressView('store')">
+        🛍️ Store
+      </button>
+
+      <button class="secondary" id="dressOwnedTab"
+        onclick="switchDressView('owned')">
+        👗 My Dress
+      </button>
     </div>
 
-    <button class="primary"
+    <div class="bag-category-list">
+
+      <button class="bag-category active"
+        onclick="selectDressCategory('all',this)">All</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('frame',this)">🖼️ Frames</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('vehicle',this)">🚗 Vehicles</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('chatBubble',this)">💬 Chat Bubbles</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('profileCard',this)">🪪 Profile Cards</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('rgbName',this)">🌈 RGB Names</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('entryEffect',this)">✨ Entry Effects</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('micEffect',this)">🎤 Mic Effects</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('nameDecoration',this)">👑 Name Decorations</button>
+
+      <button class="bag-category"
+        onclick="selectDressCategory('specialEffect',this)">💎 Special Effects</button>
+
+    </div>
+
+    <div id="dressItems" class="bag-items-grid">
+      <p>Loading items...</p>
+    </div>
+
+    <button class="secondary"
       style="width:100%;margin-top:15px"
       onclick="closeModal('dressModal')">
       Close
