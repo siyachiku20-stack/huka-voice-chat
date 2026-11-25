@@ -442,3 +442,47 @@ a {
         font-size: 14px;
     }
 }
+
+/* ---------- HUKA DRESS DESIGN ---------- */
+
+.dress-tabs {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding: 12px 0;
+}
+
+.dress-tabs button {
+    flex-shrink: 0;
+    padding: 10px 13px;
+    border: 1px solid #b45be5;
+    border-radius: 12px;
+    background: #39204d;
+    color: white;
+    font-size: 12px;
+}
+
+.dress-tabs button:active {
+    background: #a832c7;
+}
+
+#dressItems {
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+#dressItems button {
+    width: 100%;
+    padding: 9px;
+    margin-top: 8px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #a832c7, #ed55a8);
+    color: white;
+    font-weight: bold;
+}
+
+#dressItems p {
+    color: #ffd2f1;
+    font-size: 12px;
+}
