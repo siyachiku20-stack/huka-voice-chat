@@ -1164,3 +1164,101 @@ button {
     0 0 20px rgba(255,207,100,0.2),
     inset 0 0 15px rgba(255,255,255,0.12);
 }
+
+/* ==================================
+   HUKA SVIP PREMIUM GIFT EFFECT
+================================== */
+
+.svip-gift-effect {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 5, 35, 0.65);
+  animation: giftFade 3.5s ease forwards;
+  pointer-events: none;
+}
+
+.svip-gift-card {
+  width: 270px;
+  max-width: 85%;
+  padding: 25px 18px;
+  text-align: center;
+  border-radius: 25px;
+  color: white;
+  background: linear-gradient(
+    135deg,
+    #32105d,
+    #a52caa,
+    #e34a9d
+  );
+  border: 2px solid #ffe18a;
+  box-shadow:
+    0 0 20px #c94cff,
+    0 0 40px rgba(255, 205, 100, 0.45);
+  animation: giftZoom 0.65s ease;
+}
+
+.svip-gift-crown {
+  font-size: 48px;
+}
+
+.svip-gift-title {
+  margin-top: 5px;
+  font-size: 19px;
+  font-weight: 900;
+  color: #ffe18a;
+}
+
+.svip-gift-sender {
+  margin-top: 9px;
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.svip-gift-icon {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.15);
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.svip-gift-receiver {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #ffe8f8;
+}
+
+@keyframes giftZoom {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes giftFade {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* SVIP 11 Premium */
+.svip-gift-11 .svip-gift-card {
+  background: linear-gradient(
+    135deg,
+    #180b3c,
+    #8132bd,
+    #e34aa8,
+    #bd872d
+  );
+  box-shadow:
+    0 0 25px #e34aff,
+    0 0 45px #ffd875;
+}
