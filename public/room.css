@@ -1319,3 +1319,30 @@ button {
   color: #fff1a8 !important;
   text-shadow: 0 0 8px #ffd700, 0 0 18px #e879f9;
 }
+
+/* HUKA PREMIUM SVIP ID */
+
+.member-id {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #c4b5fd;
+  white-space: nowrap;
+}
+
+.svip-id-1 { color: #d8b4fe; }
+.svip-id-2 { color: #ff9de2; }
+.svip-id-3 { color: #67e8f9; }
+.svip-id-4 { color: #fde68a; }
+.svip-id-5 { color: #a5f3fc; }
+.svip-id-6 { color: #c4b5fd; }
+.svip-id-7 { color: #f9a8d4; }
+.svip-id-8 { color: #86efac; }
+.svip-id-9 { color: #fcd34d; }
+.svip-id-10 { color: #c4b5fd; }
+
+.svip-id-11 {
+  color: #fff1a8;
+  text-shadow: 0 0 8px #ffd700, 0 0 15px #e879f9;
+}
