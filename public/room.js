@@ -520,39 +520,49 @@ function renderMembers() {
       avatarFrame.appendChild(svipFrame);
     }
 
-    const activeSVIP =
-      svipLevel >= 1 &&
-      svipLevel <= 11 &&
-      svipUntil > Date.now();
+const activeSVIP =
+  svipLevel >= 1 &&
+  svipLevel <= 11 &&
+  svipUntil > Date.now();
 
-    const name = document.createElement("span");
+const name = document.createElement("span");
 
-    name.className = "member-name";
+name.className = "member-name";
 
-    if (activeSVIP) {
-      name.classList.add(`svip-name-${svipLevel}`);
-    }
+if (activeSVIP) {
+  name.classList.add(`svip-name-${svipLevel}`);
+}
 
-    name.textContent =
-      (member.isOwner ? "👑 " : "") +
-      (member.isAdmin ? "🛡️ " : "") +
-      member.name;
+name.textContent =
+  (member.isOwner ? "👑 " : "") +
+  (member.isAdmin ? "🛡️ " : "") +
+  member.name;
+
+// PREMIUM USER ID
+const userIdText = document.createElement("span");
+
+userIdText.className = "member-id";
+userIdText.textContent = `ID: ${member.id}`;
+
+if (activeSVIP) {
+  userIdText.classList.add(`svip-id-${svipLevel}`);
+}
 
 // SVIP BADGE
+row.appendChild(avatarFrame);
+row.appendChild(name);
+row.appendChild(userIdText);
+
 if (activeSVIP) {
   const badge = document.createElement("span");
 
   badge.className = "room-svip-badge";
   badge.textContent = ` 👑 SVIP ${svipLevel}`;
 
-  row.appendChild(avatarFrame);
-  row.appendChild(name);
   row.appendChild(badge);
-} else {
-  row.appendChild(avatarFrame);
-  row.appendChild(name);
 }
 
+// MIC STATUS
 const status = document.createElement("span");
 
 status.textContent =
