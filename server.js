@@ -3638,7 +3638,13 @@ socket.on("buy-svip", (data, callback) => {
     svipUntil: profile.svipUntil,
     svipLevel: profile.svipLevel
   });
+   
+  const currentRoom = getRoom(socket);
 
+  if (currentRoom) {
+    updateRoom(currentRoom);
+  }
+   
   reply(callback, {
     ok: true,
     message: `SVIP ${plan.level} activated for 30 days!`,
