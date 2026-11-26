@@ -3721,7 +3721,7 @@ socket.on("get-svip-daily-reward", (data, callback) => {
 });
 
 // CLAIM DAILY REWARD
-socket.on("claim-svip-daily-reward", (callback) => {
+socket.on("claim-svip-daily-reward", (data, callback) => {
   const profile = getProfile(socket);
   const user = getUser(socket);
 
