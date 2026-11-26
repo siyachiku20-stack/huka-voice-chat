@@ -683,14 +683,52 @@ function appendGiftMessage(event) {
 
   if (!box) return;
 
+  const member = currentMembers.find(
+    item => String(item.id) === String(event.fromId)
+  );
+
+  const level = Number(member?.svipLevel || 0);
+  const expiry = Number(member?.svipUntil || 0);
+
+  const activeSVIP =
+    level >= 1 &&
+    level <= 11 &&
+    expiry > Date.now();
+
   const row = document.createElement("div");
 
-  row.className = "chat-message gift-message";
+  row.className = activeSVIP
+    ? `chat-message gift-message svip-chat svip-chat-${level}`
+    : "chat-message gift-message";
 
-  row.textContent =
-    `🎁 ${event.from} sent ${event.gift} to ${event.to} (${event.cost} Coins)`;
+  const title = document.createElement("div");
+
+  title.className = "message-name";
+
+  title.textContent =
+    `🎁 ${event.from || "User"}`;
+
+  if (activeSVIP) {
+    const badge = document.createElement("span");
+
+    badge.className = "chat-svip-badge";
+    badge.textContent = ` 👑 SVIP ${level}`;
+
+    title.appendChild(badge);
+  }
+
+  const details = document.createElement("div");
+
+  details.className = "message-text";
+
+  details.textContent =
+    `${event.gift} sent to ${event.to} • ${event.cost} Coins`;
+
+  row.appendChild(title);
+  row.appendChild(details);
 
   box.appendChild(row);
+
   box.scrollTop = box.scrollHeight;
 }
 
