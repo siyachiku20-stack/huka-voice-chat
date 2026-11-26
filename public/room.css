@@ -1346,3 +1346,21 @@ button {
   color: #fff1a8;
   text-shadow: 0 0 8px #ffd700, 0 0 15px #e879f9;
 }
+
+/* HUKA ROOM PREMIUM USER ID */
+
+.member-id {
+    display: inline-block;
+    margin-left: 7px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #d8b4fe;
+    white-space: nowrap;
+}
+
+.member-id[class*="svip-id-"] {
+    color: transparent !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
