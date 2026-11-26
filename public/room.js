@@ -620,15 +620,37 @@ function appendChatMessage(message) {
 
   const row = document.createElement("div");
 
-  row.className = "chat-message";
+  const member = currentMembers.find(
+    item => String(item.id) === String(message.userId)
+  );
+
+  const svipLevel = Number(member?.svipLevel || 0);
+  const svipUntil = Number(member?.svipUntil || 0);
+
+  const activeSVIP =
+    svipLevel >= 1 &&
+    svipLevel <= 11 &&
+    svipUntil > Date.now();
+
+  row.className = activeSVIP
+    ? `chat-message svip-chat svip-chat-${svipLevel}`
+    : "chat-message";
 
   const name = document.createElement("span");
 
   name.className = "message-name";
   name.textContent = message.name || "Huka User";
 
+  if (activeSVIP) {
+    const badge = document.createElement("span");
+    badge.className = "chat-svip-badge";
+    badge.textContent = ` SVIP ${svipLevel}`;
+    name.appendChild(badge);
+  }
+
   const text = document.createElement("span");
 
+  text.className = "message-text";
   text.textContent = message.text || "";
 
   const time = document.createElement("small");
