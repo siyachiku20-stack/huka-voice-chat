@@ -1752,6 +1752,35 @@ socket.on("voice-peer-left", data => {
 });
 
 /* ==========================================
+   SVIP SPECIAL ROOM ENTRY EFFECT
+========================================== */
+
+function showSVIPEntryEffect(member) {
+  const effect = document.createElement("div");
+
+  effect.className = "svip-entry-effect";
+
+  const level = Number(member.svipLevel || 1);
+  const name = String(member.name || "SVIP User")
+    .replace(/[<>&"]/g, "");
+
+  effect.innerHTML = `
+    <div class="svip-entry-card">
+      <div class="svip-entry-crown">👑</div>
+      <div class="svip-entry-title">SPECIAL ENTRY</div>
+      <div class="svip-entry-name">${name}</div>
+      <div class="svip-entry-level">💎 SVIP ${level}</div>
+    </div>
+  `;
+
+  document.body.appendChild(effect);
+
+  setTimeout(() => {
+    effect.remove();
+  }, 3500);
+  }
+
+/* ==========================================
    CLEANUP
 ========================================== */
 
