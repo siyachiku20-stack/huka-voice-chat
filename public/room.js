@@ -534,29 +534,27 @@ function renderMembers() {
       (member.isAdmin ? "🛡️ " : "") +
       member.name;
 
-    // SVIP BADGE
-    if (activeSVIP) {
-      const badge = document.createElement("span");
+// SVIP BADGE
+if (activeSVIP) {
+  const badge = document.createElement("span");
 
-      badge.className = "room-svip-badge";
-      badge.textContent = ` 👑 SVIP ${svipLevel}`;
+  badge.className = "room-svip-badge";
+  badge.textContent = ` 👑 SVIP ${svipLevel}`;
 
-      row.appendChild(avatarFrame);
-      row.appendChild(name);
-      row.appendChild(badge);
-    } else {
-      row.appendChild(avatarFrame);
-      row.appendChild(name);
-    }
+  row.appendChild(avatarFrame);
+  row.appendChild(name);
+  row.appendChild(badge);
+} else {
+  row.appendChild(avatarFrame);
+  row.appendChild(name);
+}
 
-    const status = document.createElement("span");
+const status = document.createElement("span");
 
-    status.textContent =
-      member.micOn === false ? "🔇" : "🎙️";
+status.textContent =
+  member.micOn === false ? "🔇" : "🎙️";
 
-    row.appendChild(avatarFrame);
-    row.appendChild(name);
-    row.appendChild(status);
+row.appendChild(status);
 
     list.appendChild(row);
   });
