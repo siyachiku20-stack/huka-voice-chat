@@ -2315,8 +2315,34 @@ function renderProfile() {
     const country = profile.country || "India";
     const gender = profile.gender || "Not selected";
 
-    if ($("profileName")) $("profileName").textContent = name;
-   
+   // PROFILE NAME WITH SVIP STYLE
+   if ($("profileName")) {
+       const nameElement = $("profileName");
+
+       nameElement.textContent = name;
+
+       nameElement.classList.remove(
+           "svip-name-1",
+           "svip-name-2",
+           "svip-name-3",
+           "svip-name-4",
+           "svip-name-5",
+           "svip-name-6",
+           "svip-name-7",
+           "svip-name-8",
+           "svip-name-9",
+           "svip-name-10",
+           "svip-name-11"
+       );
+ 
+       const level = Number(profile.svipLevel || 0);
+       const expiry = Number(profile.svipUntil || 0);
+
+       if (level >= 1 && level <= 11 && expiry > Date.now()) {
+           nameElement.classList.add(`svip-name-${level}`);
+       }
+    }
+  
   // PROFILE ID WITH SVIP STYLE
   if ($("profileId")) {
       const idElement = $("profileId");
