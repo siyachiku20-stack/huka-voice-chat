@@ -494,10 +494,34 @@ function renderMembers() {
       avatarInner.textContent = "👤";
     }
 
-    avatarFrame.appendChild(avatarInner);
+      avatarFrame.appendChild(avatarInner);
+
+    // SVIP PROFILE FRAME
+    const svipLevel = Number(member.svipLevel || 0);
+    const svipUntil = Number(member.svipUntil || 0);
+
+    if (
+      svipLevel >= 1 &&
+      svipLevel <= 11 &&
+      svipUntil > Date.now()
+    ) {
+      const svipFrame = document.createElement("img");
+
+      svipFrame.src =
+        `/assets/svip_${String(svipLevel).padStart(2, "0")}.png`;
+
+      svipFrame.alt = `SVIP ${svipLevel} Frame`;
+      svipFrame.className = "member-svip-frame";
+
+      svipFrame.onerror = () => {
+        svipFrame.remove();
+      };
+
+      avatarFrame.appendChild(svipFrame);
+    }
 
     const name = document.createElement("span");
-
+     
     name.className = "member-name";
 
     name.textContent =
