@@ -3668,7 +3668,121 @@ socket.on("buy-svip", (data, callback) => {
     until: profile.svipUntil
   });
 });
+   
+// =====================================
+// HUKA SVIP DAILY REWARDS
+// =====================================
 
+const SVIP_DAILY_REWARDS = {
+  1: 10000,
+  2: 25000,
+  3: 50000,
+  4: 100000,
+  5: 200000,
+  6: 300000,
+  7: 500000,
+  8: 750000,
+  9: 1000000,
+  10: 1500000,
+  11: 2500000
+};
+
+// GET DAILY REWARD STATUS
+socket.on("get-svip-daily-reward", (callback) => {
+  const profile = getProfile(socket);
+
+  if (!profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const level = Number(profile.svipLevel || 0);
+  const expiry = Number(profile.svipUntil || 0);
+
+  if (level < 1 || level > 11 || expiry <= Date.now()) {
+    return reply(callback, {
+      ok: false,
+      message: "Active SVIP required"
+    });
+  }
+
+  const lastClaim = Number(profile.svipDailyLastClaim || 0);
+  const nextClaim = lastClaim + 86400000;
+
+  reply(callback, {
+    ok: true,
+    level,
+    reward: SVIP_DAILY_REWARDS[level],
+    claimed: lastClaim > 0 && Date.now() < nextClaim,
+    nextClaim
+  });
+});
+
+// CLAIM DAILY REWARD
+socket.on("claim-svip-daily-reward", (callback) => {
+  const profile = getProfile(socket);
+  const user = getUser(socket);
+
+  if (!profile || !user) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
+    });
+  }
+
+  const level = Number(profile.svipLevel || 0);
+  const expiry = Number(profile.svipUntil || 0);
+
+  if (level < 1 || level > 11 || expiry <= Date.now()) {
+    return reply(callback, {
+      ok: false,
+      message: "Active SVIP required"
+    });
+  }
+
+  const now = Date.now();
+  const lastClaim = Number(profile.svipDailyLastClaim || 0);
+
+  if (lastClaim > 0 && now - lastClaim < 86400000) {
+    return reply(callback, {
+      ok: false,
+      message: "Daily reward already claimed"
+    });
+  }
+
+  const reward = SVIP_DAILY_REWARDS[level];
+
+  profile.coins = (Number(profile.coins) || 0) + reward;
+  profile.svipDailyLastClaim = now;
+
+  user.coins = profile.coins;
+
+  addWalletHistory(
+    profile,
+    "reward",
+    reward,
+    `SVIP ${level} Daily Reward`
+  );
+
+  saveDB();
+
+  socket.emit("profile-update", {
+    id: user.id,
+    coins: profile.coins
+  });
+
+  reply(callback, {
+    ok: true,
+    message: `${reward} Coins received!`,
+    reward,
+    coins: profile.coins,
+    level,
+    nextClaim: now + 86400000
+  });
+});
+   
   socket.on("get-medals", callback => {
     const p = getProfile(socket);
     if (!p) return reply(callback, { ok: false });
