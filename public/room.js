@@ -369,11 +369,26 @@ function renderSeats() {
      
     const name = document.createElement("b");
 
-    name.textContent = seat
-      ? seat.name
-      : i === 0
-        ? "Host Seat"
-        : `No.${i + 1}`;
+name.className = "member-name";
+
+name.textContent = seat
+  ? seat.name
+  : i === 0
+    ? "Host Seat"
+    : `No.${i + 1}`;
+
+// SEAT SVIP STYLISH NAME
+const seatSvipLevel = Number(member?.svipLevel || 0);
+const seatSvipUntil = Number(member?.svipUntil || 0);
+
+const seatActiveSVIP =
+  seatSvipLevel >= 1 &&
+  seatSvipLevel <= 11 &&
+  seatSvipUntil > Date.now();
+
+if (seatActiveSVIP) {
+  name.classList.add(`svip-name-${seatSvipLevel}`);
+}
 
     const status = document.createElement("small");
 
