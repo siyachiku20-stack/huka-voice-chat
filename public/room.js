@@ -524,9 +524,6 @@ function renderMembers() {
      
     name.className = "member-name";
 
-    const svipLevel = Number(member.svipLevel || 0);
-    const svipUntil = Number(member.svipUntil || 0);
-
     const activeSVIP =
       svipLevel >= 1 &&
       svipLevel <= 11 &&
