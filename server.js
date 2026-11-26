@@ -3688,7 +3688,7 @@ const SVIP_DAILY_REWARDS = {
 };
 
 // GET DAILY REWARD STATUS
-socket.on("get-svip-daily-reward", (callback) => {
+socket.on("get-svip-daily-reward", (data, callback) => {
   const profile = getProfile(socket);
 
   if (!profile) {
