@@ -1601,6 +1601,12 @@ socket.on("members-update", data => {
   renderSeats();
 });
 
+socket.on("svip-entry", member => {
+  if (!member) return;
+
+  showSVIPEntryEffect(member);
+});
+
 socket.on("seats-update", seats => {
   currentSeats = seats || [];
 
