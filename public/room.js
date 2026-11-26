@@ -520,14 +520,18 @@ function renderMembers() {
       avatarFrame.appendChild(svipFrame);
     }
 
-    const name = document.createElement("span");
-     
-    name.className = "member-name";
-
     const activeSVIP =
       svipLevel >= 1 &&
       svipLevel <= 11 &&
       svipUntil > Date.now();
+
+    const name = document.createElement("span");
+
+    name.className = "member-name";
+
+    if (activeSVIP) {
+      name.classList.add(`svip-name-${svipLevel}`);
+    }
 
     name.textContent =
       (member.isOwner ? "👑 " : "") +
