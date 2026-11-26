@@ -1755,9 +1755,7 @@ function showSVIPEntryEffect(member) {
   effect.innerHTML = `
     <div class="svip-entry-card">
       <div class="svip-entry-crown">👑</div>
-      <div class="svip-entry-title">SPECIAL ENTRY</div>
-      <div class="svip-entry-name">${name}</div>
-      <div class="svip-entry-level">💎 SVIP ${level}</div>
+      <div class="svip-entry-level">💎 SVIP ${level} ${name}</div>
     </div>
   `;
 
