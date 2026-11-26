@@ -5978,21 +5978,60 @@ if (socket.connected) {
     }
 }
   
-/* HUKA SVIP PREMIUM PROFILE ID */
+/* HUKA PREMIUM SVIP ID COLORS */
 
-.svip-id-1 { color: #d8b4fe !important; text-shadow: 0 0 7px #a855f7; }
-.svip-id-2 { color: #ff9de2 !important; text-shadow: 0 0 8px #ec4899; }
-.svip-id-3 { color: #67e8f9 !important; text-shadow: 0 0 8px #06b6d4; }
-.svip-id-4 { color: #fde68a !important; text-shadow: 0 0 8px #f59e0b; }
-.svip-id-5 { color: #a5f3fc !important; text-shadow: 0 0 10px #22d3ee; }
-.svip-id-6 { color: #c4b5fd !important; text-shadow: 0 0 10px #8b5cf6; }
-.svip-id-7 { color: #f9a8d4 !important; text-shadow: 0 0 12px #db2777; }
-.svip-id-8 { color: #86efac !important; text-shadow: 0 0 12px #22c55e; }
-.svip-id-9 { color: #fcd34d !important; text-shadow: 0 0 13px #f59e0b; }
-.svip-id-10 { color: #c4b5fd !important; text-shadow: 0 0 14px #a855f7; }
+.svip-id-1 {
+    background: linear-gradient(90deg,#c084fc,#ec4899);
+}
+
+.svip-id-2 {
+    background: linear-gradient(90deg,#ff69b4,#ffd700);
+}
+
+.svip-id-3 {
+    background: linear-gradient(90deg,#00e5ff,#4169e1);
+}
+
+.svip-id-4 {
+    background: linear-gradient(90deg,#fff0a6,#d69e00);
+}
+
+.svip-id-5 {
+    background: linear-gradient(90deg,#ff4dff,#00e5ff,#ffe066);
+}
+
+.svip-id-6 {
+    background: linear-gradient(90deg,#a78bfa,#ec4899,#60a5fa);
+}
+
+.svip-id-7 {
+    background: linear-gradient(90deg,#ff69b4,#ff1493,#ffd700);
+}
+
+.svip-id-8 {
+    background: linear-gradient(90deg,#00ffae,#00bfff,#a78bfa);
+}
+
+.svip-id-9 {
+    background: linear-gradient(90deg,#ffd700,#ff8c00,#fff2a6);
+}
+
+.svip-id-10 {
+    background: linear-gradient(90deg,#a855f7,#ec4899,#ffd700,#00e5ff);
+}
+
 .svip-id-11 {
-    color: #fff1a8 !important;
-    text-shadow: 0 0 8px #ffd700, 0 0 18px #e879f9;
+    background: linear-gradient(90deg,#fff2a6,#ffd700,#ff4dff,#00e5ff);
+}
+
+#profileId[class*="svip-id-"] {
+    display: inline-block;
+    color: transparent !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 8px rgba(220,120,255,.45);
 }  
   
 </style>
