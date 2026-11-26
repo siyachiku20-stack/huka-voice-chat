@@ -929,6 +929,18 @@ function updateGiftRanking(ranking) {
 function showGiftNotification(event) {
   const box = $("giftNotification");
 
+  const member = currentMembers.find(
+    item => String(item.id) === String(event.fromId)
+  );
+
+  const level = Number(member?.svipLevel || 0);
+  const expiry = Number(member?.svipUntil || 0);
+
+  const activeSVIP =
+    level >= 1 &&
+    level <= 11 &&
+    expiry > Date.now();
+
   $("giftNotificationText").textContent =
     `🎁 ${event.from} sent ${event.gift} to ${event.to} × ${event.cost}`;
 
@@ -941,6 +953,48 @@ function showGiftNotification(event) {
   }, 5000);
 
   appendGiftMessage(event);
+
+  if (activeSVIP) {
+    showSVIPGiftEffect(event, level);
+  }
+}
+
+function showSVIPGiftEffect(event, level) {
+  const effect = document.createElement("div");
+
+  effect.className = `svip-gift-effect svip-gift-${level}`;
+
+  const card = document.createElement("div");
+  card.className = "svip-gift-card";
+
+  const crown = document.createElement("div");
+  crown.className = "svip-gift-crown";
+  crown.textContent = "👑";
+
+  const title = document.createElement("div");
+  title.className = "svip-gift-title";
+  title.textContent = `SVIP ${level}`;
+
+  const sender = document.createElement("div");
+  sender.className = "svip-gift-sender";
+  sender.textContent = event.from || "Huka User";
+
+  const gift = document.createElement("div");
+  gift.className = "svip-gift-icon";
+  gift.textContent = "🎁 " + (event.gift || "Gift");
+
+  const receiver = document.createElement("div");
+  receiver.className = "svip-gift-receiver";
+  receiver.textContent = `Sent to ${event.to || "Everyone"}`;
+
+  card.append(crown, title, sender, gift, receiver);
+  effect.appendChild(card);
+
+  document.body.appendChild(effect);
+
+  setTimeout(() => {
+    effect.remove();
+  }, 3500);
 }
 
 /* ==========================================
