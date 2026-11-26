@@ -1353,6 +1353,11 @@ function getMembers(room) {
     const user = online.get(socketId);
     if (!user) return null;
 
+    const profile = db.profiles[user.id] || {};
+
+    const svipUntil = Number(profile.svipUntil) || 0;
+    const svipActive = svipUntil > Date.now();
+
     const seatIndex = room.seats.findIndex(
       seat => seat && seat.socketId === socketId
     );
@@ -1363,8 +1368,16 @@ function getMembers(room) {
       name: user.name,
       avatar: user.avatar || "",
       level: user.level || 1,
+
       frame: user.frame || "frame_free",
       frameData: getFrameDesign(user.frame || "frame_free"),
+
+      svipLevel: svipActive
+        ? Number(profile.svipLevel) || 1
+        : 0,
+
+      svipUntil: svipUntil,
+
       socketId,
       seat: seatIndex === -1 ? null : seatIndex + 1,
       micOn: room.micStates.get(socketId) !== false,
