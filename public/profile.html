@@ -2179,8 +2179,6 @@ function updateProfileSVIP(svip) {
     const levelText = $("profileSVIPLevel");
     const expiryText = $("profileSVIPExpiry");
 
-    if (!badge) return;
-
     const active = Boolean(
         svip &&
         svip.active &&
@@ -2188,14 +2186,15 @@ function updateProfileSVIP(svip) {
     );
 
     if (!active) {
-        badge.style.display = "none";
-        applySVIPProfileFrame();
-      
-      if (profile) {
+        if (badge) badge.style.display = "none";
+
+        if (profile) {
             profile.svipLevel = 0;
             profile.svipUntil = 0;
         }
 
+        applySVIPProfileIdStyle();
+        applySVIPProfileFrame();
         return;
     }
 
@@ -2217,7 +2216,9 @@ function updateProfileSVIP(svip) {
             new Date(expiry).toLocaleDateString("en-IN");
     }
 
-    badge.style.display = "inline-flex";
+    if (badge) badge.style.display = "inline-flex";
+
+    applySVIPProfileIdStyle();
     applySVIPProfileFrame();
 }
 
