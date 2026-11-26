@@ -1595,26 +1595,6 @@ socket.on("connect_error", error => {
 socket.on("members-update", data => {
   const newMembers = data.members || [];
 
-  newMembers.forEach(member => {
-  const alreadyExists = currentMembers.some(
-    oldMember =>
-      String(oldMember.userId || oldMember.id) ===
-      String(member.userId || member.id)
-  );
-
-    const svipLevel = Number(member.svipLevel || 0);
-    const svipUntil = Number(member.svipUntil || 0);
-
-    if (
-      !alreadyExists &&
-      svipLevel >= 1 &&
-      svipLevel <= 11 &&
-      svipUntil > Date.now()
-    ) {
-      showSVIPEntryEffect(member);
-    }
-  });
-
   currentMembers = newMembers;
 
   renderMembers();
