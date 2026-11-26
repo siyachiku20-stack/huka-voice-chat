@@ -947,3 +947,67 @@ button {
     box-shadow: 0 0 8px rgba(220, 80, 255, 0.7);
     white-space: nowrap;
 }
+
+/* SVIP SPECIAL ENTRY ANIMATION */
+
+.svip-entry-effect {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 5, 40, 0.55);
+  animation: svipEntryFade 3.5s ease forwards;
+  pointer-events: none;
+}
+
+.svip-entry-card {
+  min-width: 230px;
+  padding: 24px;
+  text-align: center;
+  border-radius: 22px;
+  color: white;
+  background: linear-gradient(135deg, #5717b8, #e52b9b, #8d43ed);
+  border: 2px solid #ffe18a;
+  box-shadow: 0 0 25px #e64bff;
+  animation: svipEntryZoom 0.7s ease;
+}
+
+.svip-entry-crown {
+  font-size: 42px;
+}
+
+.svip-entry-title {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.svip-entry-name {
+  margin-top: 10px;
+  font-size: 23px;
+  font-weight: bold;
+}
+
+.svip-entry-level {
+  margin-top: 8px;
+  color: #fff1a8;
+  font-weight: bold;
+}
+
+@keyframes svipEntryZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes svipEntryFade {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
