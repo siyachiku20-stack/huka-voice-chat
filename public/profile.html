@@ -5907,6 +5907,28 @@ if (socket.connected) {
   box-shadow: 0 0 12px #c45bda;
   }
   
+/* HUKA SVIP 1 PREMIUM GLOW */
+
+#profileSVIPFrame[src*="svip_01.png"] {
+    animation: svip1Glow 2s ease-in-out infinite;
+    transform: none !important;
+}
+
+@keyframes svip1Glow {
+    0%, 100% {
+        filter:
+            drop-shadow(0 0 3px #d9a5ff)
+            drop-shadow(0 0 5px #a34cff);
+    }
+
+    50% {
+        filter:
+            drop-shadow(0 0 8px #ffe88a)
+            drop-shadow(0 0 15px #ffb52e)
+            drop-shadow(0 0 20px #d84dff);
+    }
+}
+  
 </style>
 
 </body>
