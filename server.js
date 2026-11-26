@@ -2514,7 +2514,22 @@ socket.on("unequip-bag-item", (data, callback) => {
     });
 
     updateRoom(room);
-    saveDB();
+
+// SVIP SPECIAL ROOM ENTRY
+const joinedMember = getMembers(room).find(
+  member => String(member.id) === String(user.id)
+);
+
+if (
+  joinedMember &&
+  joinedMember.svipLevel >= 1 &&
+  joinedMember.svipLevel <= 11 &&
+  joinedMember.svipUntil > Date.now()
+) {
+  io.to(roomId).emit("svip-entry", joinedMember);
+}
+
+saveDB();
   });
 
   socket.on("leave-room", (data, callback) => {
