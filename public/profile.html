@@ -979,7 +979,32 @@ button {
       onclick="loadWalletHistory()">
       📜 Wallet History
     </button>
+    
+<!-- SVIP DAILY REWARD -->
+<div id="svipDailyRewardBox"
+     style="margin-top:18px;padding:15px;border-radius:15px;
+     background:linear-gradient(135deg,#35105f,#a52caa,#e34a9d);
+     color:white;text-align:center;">
 
+  <h3>👑 SVIP Daily Reward</h3>
+
+  <div id="svipDailyRewardInfo">
+    Loading Reward...
+  </div>
+
+  <button id="claimSVIPRewardBtn"
+          class="primary"
+          style="width:100%;margin-top:12px;"
+          onclick="claimSVIPDailyReward()">
+    🎁 Claim Daily Coins
+  </button>
+
+  <div id="svipDailyRewardTimer"
+       style="font-size:12px;margin-top:10px;">
+  </div>
+
+</div>
+    
     <div id="walletHistory"
       style="font-size:12px;margin-top:12px"></div>
 
