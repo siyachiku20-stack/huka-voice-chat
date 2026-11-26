@@ -910,3 +910,16 @@ button {
   pointer-events: none !important;
   transform: none !important;
 }
+
+.room-svip-badge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 3px 7px;
+  border-radius: 12px;
+  color: #fff2b0;
+  background: linear-gradient(135deg, #8b36e8, #e34aa8, #f4a52e);
+  border: 1px solid #ffd77a;
+  font-size: 10px;
+  font-weight: bold;
+  white-space: nowrap;
+}
