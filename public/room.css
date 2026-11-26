@@ -866,3 +866,20 @@ button {
 .member-avatar-frame {
   animation: hukaFrameGlow 2s ease-in-out infinite;
 }
+
+/* SVIP frame on room seat avatar */
+.seat-avatar {
+  position: relative;
+  overflow: visible !important;
+}
+
+.room-svip-frame {
+  position: absolute;
+  width: 125%;
+  height: 125%;
+  left: -12.5%;
+  top: -12.5%;
+  object-fit: contain;
+  z-index: 5;
+  pointer-events: none;
+}
