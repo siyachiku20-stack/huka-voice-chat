@@ -1031,50 +1031,136 @@ button {
   padding: 0 !important;
 }
 
-/* HUKA SVIP SPECIAL CHAT BUBBLES */
+/* =====================================
+   HUKA PREMIUM SVIP CHAT BUBBLES
+===================================== */
 
 .svip-chat {
-  padding: 9px 12px;
-  margin: 7px 0;
-  border-radius: 13px;
-  border: 1px solid;
+  position: relative;
+  display: block;
+  padding: 11px 14px;
+  margin: 9px 3px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.35);
+  overflow: hidden;
+  box-shadow:
+    0 3px 12px rgba(0,0,0,0.25),
+    inset 0 0 12px rgba(255,255,255,0.08);
 }
 
+/* Light shine */
+.svip-chat::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    110deg,
+    transparent,
+    rgba(255,255,255,0.22),
+    transparent
+  );
+  animation: svipChatShine 4s infinite;
+  pointer-events: none;
+}
+
+@keyframes svipChatShine {
+  0% { left: -100%; }
+  35%, 100% { left: 150%; }
+}
+
+/* Username */
 .svip-chat .message-name {
+  display: inline-block;
+  font-size: 13px;
   font-weight: 900;
+  letter-spacing: 0.3px;
+  color: #fff4c9;
+  text-shadow: 0 1px 5px rgba(0,0,0,0.5);
 }
 
+/* Message text */
 .svip-chat .message-text {
   display: block;
-  margin-top: 5px;
+  margin-top: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
-.chat-svip-badge {
-  display: inline-block;
-  margin-left: 5px;
-  padding: 2px 6px;
-  border-radius: 8px;
+/* Time */
+.svip-chat small {
+  display: block;
+  margin-top: 5px;
+  text-align: right;
+  color: rgba(255,255,255,0.7);
   font-size: 10px;
-  font-weight: bold;
 }
 
-/* SVIP 1-11 individual themes */
+/* SVIP Badge */
+.chat-svip-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff7ce;
+  background: linear-gradient(135deg,#8b35e8,#e34aa8,#d99b32);
+  border: 1px solid #ffe18a;
+  box-shadow: 0 0 8px rgba(255,210,100,0.45);
+  vertical-align: middle;
+}
 
-.svip-chat-1 { background: linear-gradient(120deg,#33205c,#6240a0); border-color:#b99aff; }
-.svip-chat-2 { background: linear-gradient(120deg,#3b174d,#963d9e); border-color:#e69bff; }
-.svip-chat-3 { background: linear-gradient(120deg,#172b58,#386fc0); border-color:#8ccaff; }
-.svip-chat-4 { background: linear-gradient(120deg,#4b2630,#a94d68); border-color:#ff9eb9; }
-.svip-chat-5 { background: linear-gradient(120deg,#4b3513,#a77b24); border-color:#ffdc75; }
-.svip-chat-6 { background: linear-gradient(120deg,#153f42,#278b83); border-color:#8affeb; }
-.svip-chat-7 { background: linear-gradient(120deg,#402052,#a34bc2); border-color:#e8a0ff; }
-.svip-chat-8 { background: linear-gradient(120deg,#26334e,#647bb4); border-color:#c1d5ff; }
-.svip-chat-9 { background: linear-gradient(120deg,#4b183d,#bd438e); border-color:#ff9cdb; }
-.svip-chat-10 { background: linear-gradient(120deg,#3c2a13,#c18a32); border-color:#ffe5a0; }
-.svip-chat-11 { background: linear-gradient(120deg,#241344,#8d39bd,#c34b9b); border-color:#ffe18a; }
-
-.svip-chat .chat-svip-badge {
-  color: #fff4b5;
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,225,138,0.7);
+/* SVIP LEVEL DESIGNS */
+.svip-chat-1 {
+  background: linear-gradient(120deg,#28164d,#6843a5);
+  border-color:#c5a4ff;
+}
+.svip-chat-2 {
+  background: linear-gradient(120deg,#45134f,#a344a7);
+  border-color:#f0a5ff;
+}
+.svip-chat-3 {
+  background: linear-gradient(120deg,#142d61,#397acb);
+  border-color:#9bd5ff;
+}
+.svip-chat-4 {
+  background: linear-gradient(120deg,#4b1d35,#b64f78);
+  border-color:#ffb0cc;
+}
+.svip-chat-5 {
+  background: linear-gradient(120deg,#49300d,#a77b22);
+  border-color:#ffe18a;
+}
+.svip-chat-6 {
+  background: linear-gradient(120deg,#104344,#238d83);
+  border-color:#9affed;
+}
+.svip-chat-7 {
+  background: linear-gradient(120deg,#38134f,#a34ac2);
+  border-color:#e8aaff;
+}
+.svip-chat-8 {
+  background: linear-gradient(120deg,#1d3152,#657fc0);
+  border-color:#c6dcff;
+}
+.svip-chat-9 {
+  background: linear-gradient(120deg,#501238,#c34491);
+  border-color:#ffb4e0;
+}
+.svip-chat-10 {
+  background: linear-gradient(120deg,#49300b,#c18b31);
+  border-color:#ffe8a6;
+}
+.svip-chat-11 {
+  background: linear-gradient(120deg,#21103f,#8132bd,#d044a0);
+  border: 1px solid #ffe18a;
+  box-shadow:
+    0 0 12px rgba(214,119,255,0.45),
+    0 0 20px rgba(255,207,100,0.2),
+    inset 0 0 15px rgba(255,255,255,0.12);
 }
