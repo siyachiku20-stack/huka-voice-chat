@@ -2271,7 +2271,35 @@ function renderProfile() {
     const gender = profile.gender || "Not selected";
 
     if ($("profileName")) $("profileName").textContent = name;
-    if ($("profileId")) $("profileId").textContent = userId;
+   
+  // PROFILE ID WITH SVIP STYLE
+  if ($("profileId")) {
+      const idElement = $("profileId");
+
+      idElement.textContent = userId;
+
+      idElement.classList.remove(
+          "svip-id-1",
+          "svip-id-2",
+          "svip-id-3",
+          "svip-id-4",
+          "svip-id-5",
+          "svip-id-6",
+          "svip-id-7",
+          "svip-id-8",
+          "svip-id-9",
+          "svip-id-10",
+          "svip-id-11"
+      );
+
+      const level = Number(profile.svipLevel || 0);
+      const expiry = Number(profile.svipUntil || 0);
+
+      if (level >= 1 && level <= 11 && expiry > Date.now()) {
+          idElement.classList.add(`svip-id-${level}`);
+      }
+  }
+  
     if ($("profileBio")) $("profileBio").textContent = bio || "Add your bio";
 
     if ($("profileCountry")) $("profileCountry").textContent = country;
