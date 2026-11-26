@@ -1030,3 +1030,51 @@ button {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* HUKA SVIP SPECIAL CHAT BUBBLES */
+
+.svip-chat {
+  padding: 9px 12px;
+  margin: 7px 0;
+  border-radius: 13px;
+  border: 1px solid;
+}
+
+.svip-chat .message-name {
+  font-weight: 900;
+}
+
+.svip-chat .message-text {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.chat-svip-badge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SVIP 1-11 individual themes */
+
+.svip-chat-1 { background: linear-gradient(120deg,#33205c,#6240a0); border-color:#b99aff; }
+.svip-chat-2 { background: linear-gradient(120deg,#3b174d,#963d9e); border-color:#e69bff; }
+.svip-chat-3 { background: linear-gradient(120deg,#172b58,#386fc0); border-color:#8ccaff; }
+.svip-chat-4 { background: linear-gradient(120deg,#4b2630,#a94d68); border-color:#ff9eb9; }
+.svip-chat-5 { background: linear-gradient(120deg,#4b3513,#a77b24); border-color:#ffdc75; }
+.svip-chat-6 { background: linear-gradient(120deg,#153f42,#278b83); border-color:#8affeb; }
+.svip-chat-7 { background: linear-gradient(120deg,#402052,#a34bc2); border-color:#e8a0ff; }
+.svip-chat-8 { background: linear-gradient(120deg,#26334e,#647bb4); border-color:#c1d5ff; }
+.svip-chat-9 { background: linear-gradient(120deg,#4b183d,#bd438e); border-color:#ff9cdb; }
+.svip-chat-10 { background: linear-gradient(120deg,#3c2a13,#c18a32); border-color:#ffe5a0; }
+.svip-chat-11 { background: linear-gradient(120deg,#241344,#8d39bd,#c34b9b); border-color:#ffe18a; }
+
+.svip-chat .chat-svip-badge {
+  color: #fff4b5;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,225,138,0.7);
+}
