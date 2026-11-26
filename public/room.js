@@ -524,10 +524,33 @@ function renderMembers() {
      
     name.className = "member-name";
 
+    const svipLevel = Number(member.svipLevel || 0);
+    const svipUntil = Number(member.svipUntil || 0);
+
+    const activeSVIP =
+      svipLevel >= 1 &&
+      svipLevel <= 11 &&
+      svipUntil > Date.now();
+
     name.textContent =
       (member.isOwner ? "👑 " : "") +
       (member.isAdmin ? "🛡️ " : "") +
       member.name;
+
+    // SVIP BADGE
+    if (activeSVIP) {
+      const badge = document.createElement("span");
+
+      badge.className = "room-svip-badge";
+      badge.textContent = ` 👑 SVIP ${svipLevel}`;
+
+      row.appendChild(avatarFrame);
+      row.appendChild(name);
+      row.appendChild(badge);
+    } else {
+      row.appendChild(avatarFrame);
+      row.appendChild(name);
+    }
 
     const status = document.createElement("span");
 
