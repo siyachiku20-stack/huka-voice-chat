@@ -923,3 +923,27 @@ button {
   font-weight: bold;
   white-space: nowrap;
 }
+
+/* HUKA PREMIUM SVIP BADGE */
+.room-svip-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px 9px;
+    margin-left: 6px;
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    background: linear-gradient(
+        120deg,
+        #6425d8,
+        #e43baf,
+        #ffb52e
+    );
+    border: 1px solid #ffe49b;
+    box-shadow: 0 0 8px rgba(220, 80, 255, 0.7);
+    white-space: nowrap;
+}
