@@ -2689,7 +2689,78 @@ async function loadWalletHistory() {
         container.appendChild(row);
     });
 }
+  
+/* ---------- SVIP DAILY REWARD ---------- */
 
+async function loadSVIPDailyReward() {
+    const info = $("svipDailyRewardInfo");
+    const button = $("claimSVIPRewardBtn");
+    const timer = $("svipDailyRewardTimer");
+
+    const result = await emitRequest(
+        "get-svip-daily-reward",
+        {}
+    );
+
+    if (!result || !result.ok) {
+        info.textContent = result?.message || "Active SVIP required";
+        button.disabled = true;
+        timer.textContent = "";
+        return;
+    }
+
+    info.textContent =
+        `SVIP ${result.level} • ${Number(result.reward).toLocaleString("en-IN")} Coins`;
+
+    if (result.claimed) {
+        button.disabled = true;
+        button.textContent = "✅ Already Claimed";
+
+        const remaining = Math.max(0, result.nextClaim - Date.now());
+        const hours = Math.floor(remaining / 3600000);
+        const minutes = Math.floor((remaining % 3600000) / 60000);
+
+        timer.textContent =
+            `Next reward in ${hours}h ${minutes}m`;
+    } else {
+        button.disabled = false;
+        button.textContent = "🎁 Claim Daily Coins";
+        timer.textContent = "Your daily reward is ready!";
+    }
+}
+
+async function claimSVIPDailyReward() {
+    const button = $("claimSVIPRewardBtn");
+
+    button.disabled = true;
+    button.textContent = "Please wait...";
+
+    const result = await emitRequest(
+        "claim-svip-daily-reward",
+        {}
+    );
+
+    if (!result || !result.ok) {
+        alert(result?.message || "Reward claim failed");
+        await loadSVIPDailyReward();
+        return;
+    }
+
+    alert(
+        `Congratulations! 🎉\n${Number(result.reward).toLocaleString("en-IN")} Coins received!`
+    );
+
+    if (profile) {
+        profile.coins = result.coins;
+    }
+
+    if ($("walletCoins")) {
+        $("walletCoins").textContent = Number(result.coins);
+    }
+
+    await loadSVIPDailyReward();
+  }
+  
 /* ---------- SVIP LEVEL 1-11 ---------- */
 
 const SVIP_LEVEL_STYLES = [
