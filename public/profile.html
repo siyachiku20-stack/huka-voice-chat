@@ -2327,34 +2327,7 @@ function applySVIPProfileFrame() {
         frame.style.display = "none";
     };
   }
-  
-/* HUKA SVIP PREMIUM MEDAL */
 
-function applySVIPPremiumMedal() {
-    const box = $("profileSVIPMedalBox");
-    const medal = $("profileSVIPMedal");
-
-    if (!box || !medal) return;
-
-    const level = Number(profile?.svipLevel || 0);
-    const expiry = Number(profile?.svipUntil || 0);
-
-    if (level < 1 || level > 11 || expiry <= Date.now()) {
-        box.style.display = "none";
-        medal.removeAttribute("src");
-        return;
-    }
-
-    const number = String(level).padStart(2, "0");
-
-    medal.src = `/assets/medal_svip_${number}.png`;
-    box.style.display = "block";
-
-    medal.onerror = function() {
-        box.style.display = "none";
-    };
-}
-  
 /* ---------- DISPLAY PROFILE ---------- */
 
 function renderProfile() {
