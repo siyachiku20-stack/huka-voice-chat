@@ -1935,3 +1935,126 @@ window.addEventListener("beforeunload", () => {
 
   closeAllPeers();
 });
+
+/* ==========================================
+   HUKA HALF-SCREEN MEMBER PROFILE
+========================================== */
+
+function isMemberSVIPActive(member) {
+  const level = Number(member?.svipLevel || 0);
+  const until = Number(member?.svipUntil || 0);
+
+  return level >= 1 && level <= 11 && until > Date.now();
+}
+
+function setProfileText(id, value, fallback = "Not set") {
+  const element = $(id);
+  if (!element) return;
+
+  const text = value === undefined || value === null || value === ""
+    ? fallback
+    : String(value);
+
+  element.textContent = text;
+}
+
+function openMemberProfile(member) {
+  if (!member) return;
+
+  const overlay = $("memberProfileOverlay");
+  const avatar = $("memberProfileAvatar");
+  const avatarWrap = $("memberProfileAvatarWrap");
+  const badge = $("memberProfileBadge");
+
+  if (!overlay || !avatar || !avatarWrap) {
+    toast("Profile popup HTML nahi mila.");
+    return;
+  }
+
+  const level = Number(member.svipLevel || 0);
+  const activeSVIP = isMemberSVIPActive(member);
+
+  // Profile DP
+  avatar.src = member.avatar || "";
+  avatar.onerror = () => {
+    avatar.removeAttribute("src");
+    avatar.alt = "👤";
+  };
+
+  // SVIP animated border
+  avatarWrap.className = "member-profile-avatar-wrap";
+
+  if (activeSVIP) {
+    avatarWrap.classList.add(`svip-glow-${level}`);
+  }
+
+  // Name and ID
+  setProfileText("memberProfileName", member.name, "Huka User");
+  setProfileText("memberProfileId", `ID: ${member.id || "—"}`, "ID: —");
+
+  // SVIP badge
+  if (badge) {
+    if (activeSVIP) {
+      badge.textContent = `👑 SVIP ${level}`;
+      badge.classList.remove("hidden");
+    } else {
+      badge.classList.add("hidden");
+    }
+  }
+
+  // Profile details
+  setProfileText("memberProfileBio", member.bio, "No bio added");
+  setProfileText("memberProfileCountry", member.country);
+  setProfileText("memberProfileGender", member.gender);
+  setProfileText("memberProfileAge", member.age);
+
+  setProfileText(
+    "memberProfileFollowers",
+    member.followers ?? member.followerCount ?? 0,
+    "0"
+  );
+
+  setProfileText(
+    "memberProfileFollowing",
+    member.following ?? member.followingCount ?? 0,
+    "0"
+  );
+
+  setProfileText(
+    "memberProfileVisitors",
+    member.visitors ?? member.visitorCount ?? 0,
+    "0"
+  );
+
+  overlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeMemberProfile() {
+  const overlay = $("memberProfileOverlay");
+
+  if (overlay) {
+    overlay.classList.add("hidden");
+  }
+
+  document.body.style.overflow = "";
+}
+
+// HTML ke Close button ke liye global function
+window.closeMemberProfile = closeMemberProfile;
+
+// Popup ke bahar tap karne par close
+document.addEventListener("click", event => {
+  const overlay = $("memberProfileOverlay");
+
+  if (overlay && event.target === overlay) {
+    closeMemberProfile();
+  }
+});
+
+// Escape key se close
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeMemberProfile();
+  }
+});
