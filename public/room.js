@@ -418,8 +418,17 @@ async function handleSeatClick(index) {
   const seat = currentSeats[index];
 
   if (seat && seat.socketId !== socket.id) {
-    toast("This seat is already occupied.");
-    return;
+  const member = currentMembers.find(
+    item => item.socketId === seat.socketId
+  );
+
+  if (member) {
+    openMemberProfile(member);
+  } else {
+    toast("Member profile not available.");
+  }
+
+  return;
   }
 
   if (seat && seat.socketId === socket.id) {
