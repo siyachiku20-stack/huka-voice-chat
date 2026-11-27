@@ -1903,7 +1903,6 @@ socket.on("follow-user", (data, callback) => {
     ok: true,
     following: !alreadyFollowing,
     followersCount,
-    followingCount
     followingCount: targetFollowingCount
   });
 
