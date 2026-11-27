@@ -1539,3 +1539,61 @@ button {
 .svip-vehicle-9  { --vehicle-glow: #ff8c00; }
 .svip-vehicle-10 { --vehicle-glow: #a855f7; }
 .svip-vehicle-11 { --vehicle-glow: #fff2a6; }
+
+/* HUKA SVIP REALISTIC VEHICLE ENTRY */
+
+.svip-vehicle-track {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  height: 190px;
+  overflow: hidden;
+  z-index: 100000;
+  pointer-events: none;
+}
+
+.svip-vehicle {
+  position: absolute;
+  left: -350px;
+  bottom: 0;
+  width: 340px;
+  text-align: center;
+  animation: hukaRealVehicleRide 4s ease-in-out forwards;
+  filter: drop-shadow(0 0 15px #c084fc);
+}
+
+.svip-vehicle-image {
+  display: block;
+  width: 100%;
+  height: 155px;
+  object-fit: contain;
+}
+
+.svip-vehicle-label {
+  display: inline-block;
+  padding: 5px 15px;
+  color: white;
+  font-weight: bold;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #6425d8, #e43baf);
+  border: 1px solid gold;
+}
+
+@keyframes hukaRealVehicleRide {
+  0% {
+    transform: translateX(0) scale(.7);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(20vw) scale(1);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 400px));
+    opacity: 0;
+  }
+}
