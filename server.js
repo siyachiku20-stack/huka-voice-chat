@@ -1748,6 +1748,27 @@ socket.on("get-level-progress", callback => {
     }
 
     const result = { ...profile };
+    
+// FOLLOWERS AND FOLLOWING COUNTS
+const targetProfileId = String(profile.id || targetId || user.id);
+
+result.following ||= [];
+
+result.followingCount = result.following.length;
+
+result.followersCount = Object.values(db.profiles).filter(p =>
+  Array.isArray(p.following) &&
+  p.following.map(String).includes(targetProfileId)
+).length;
+
+const viewerProfile = db.profiles[user.id];
+
+result.isFollowing = Boolean(
+  viewerProfile &&
+  Array.isArray(viewerProfile.following) &&
+  viewerProfile.following.map(String).includes(targetProfileId)
+);
+     
     result.levelProgress = getLevelProgress(profile);
    
     result.levelRewards = Array.from({ length: 100 }, (_, index) => {
