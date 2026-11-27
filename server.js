@@ -1850,44 +1850,75 @@ result.isFollowing = Boolean(
     socket.emit("profile-update", profile);
   });
 
-  /* =======================================
-     FOLLOW
-  ======================================= */
+/* =======================================
+   FOLLOW / UNFOLLOW SYSTEM
+======================================= */
 
-  socket.on("follow-user", (data, callback) => {
-    const user = getUser(socket);
-    const targetId = clean(data?.userId, 20);
+socket.on("follow-user", (data, callback) => {
+  const user = getUser(socket);
+  const targetId = clean(data?.userId, 20);
 
-    if (!user || !db.profiles[targetId] || targetId === user.id) {
-      return reply(callback, {
-        ok: false,
-        message: "Invalid user"
-      });
-    }
-
-    const profile = db.profiles[user.id];
-    profile.following ||= [];
-
-    if (profile.following.includes(targetId)) {
-      profile.following = profile.following.filter(id => id !== targetId);
-
-      saveDB();
-
-      return reply(callback, {
-        ok: true,
-        following: false
-      });
-    }
-
-    profile.following.push(targetId);
-
-    saveDB();
-
-    reply(callback, {
-      ok: true,
-      following: true
+  if (!user || !db.profiles[targetId] || targetId === user.id) {
+    return reply(callback, {
+      ok: false,
+      message: "Invalid user"
     });
+  }
+
+  const profile = db.profiles[user.id];
+  const targetProfile = db.profiles[targetId];
+
+  profile.following ||= [];
+  targetProfile.following ||= [];
+
+  const alreadyFollowing = profile.following
+    .map(String)
+    .includes(String(targetId));
+
+  if (alreadyFollowing) {
+    profile.following = profile.following.filter(
+      id => String(id) !== String(targetId)
+    );
+  } else {
+    profile.following.push(String(targetId));
+  }
+
+  saveDB();
+
+  const followingCount = profile.following.length;
+
+  const followersCount = Object.values(db.profiles).filter(p =>
+    Array.isArray(p.following) &&
+    p.following.map(String).includes(String(targetId))
+  ).length;
+
+  const targetFollowingCount = targetProfile.following.length;
+
+  const myFollowersCount = Object.values(db.profiles).filter(p =>
+    Array.isArray(p.following) &&
+    p.following.map(String).includes(String(user.id))
+  ).length;
+
+  reply(callback, {
+    ok: true,
+    following: !alreadyFollowing,
+    followersCount,
+    followingCount
   });
+
+  // LIVE PROFILE UPDATE
+  io.emit("profile-follow-update", {
+    profileId: String(targetId),
+    followersCount,
+    followingCount: targetFollowingCount
+  });
+
+  io.emit("profile-follow-update", {
+    profileId: String(user.id),
+    followersCount: myFollowersCount,
+    followingCount
+  });
+});
 
   /* =======================================
      FRAMES / BAG
