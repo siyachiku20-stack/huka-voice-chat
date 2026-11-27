@@ -2498,6 +2498,12 @@ function renderProfile() {
     }
 
     if ($("visitorsCount")) {
+        $("visitorsCount").style.cursor = "pointer";
+
+        $("visitorsCount").onclick = function() {
+            openVisitors();
+    };
+      
         $("visitorsCount").textContent = profile.visitorsCount || 0;
     }
 
