@@ -1466,3 +1466,76 @@ button {
   font-weight: 900 !important;
   text-shadow: 0 0 8px rgba(220,120,255,.4);
 }
+
+/* =====================================
+   HUKA SVIP 1-11 VEHICLE ENTRY
+===================================== */
+
+.svip-vehicle-track {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 13%;
+  height: 110px;
+  overflow: hidden;
+  z-index: 100000;
+  pointer-events: none;
+}
+
+.svip-vehicle {
+  position: absolute;
+  left: -180px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  font-size: 62px;
+  animation: hukaSvipVehicleRide 3.2s ease-in-out forwards;
+  filter: drop-shadow(0 0 12px var(--vehicle-glow));
+}
+
+.svip-vehicle-label {
+  font-size: 11px;
+  font-weight: 900;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 15px;
+  background: linear-gradient(90deg, #6425d8, #e43baf);
+  border: 1px solid #ffe18a;
+}
+
+@keyframes hukaSvipVehicleRide {
+  0% {
+    transform: translateX(0) scale(0.7);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateX(15vw) scale(1);
+  }
+
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(calc(100vw + 220px)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 11 Different Vehicle Glow Designs */
+
+.svip-vehicle-1  { --vehicle-glow: #c084fc; }
+.svip-vehicle-2  { --vehicle-glow: #ff69b4; }
+.svip-vehicle-3  { --vehicle-glow: #00e5ff; }
+.svip-vehicle-4  { --vehicle-glow: #ffd700; }
+.svip-vehicle-5  { --vehicle-glow: #ff4dff; }
+.svip-vehicle-6  { --vehicle-glow: #60a5fa; }
+.svip-vehicle-7  { --vehicle-glow: #ff1493; }
+.svip-vehicle-8  { --vehicle-glow: #00ffae; }
+.svip-vehicle-9  { --vehicle-glow: #ff8c00; }
+.svip-vehicle-10 { --vehicle-glow: #a855f7; }
+.svip-vehicle-11 { --vehicle-glow: #fff2a6; }
