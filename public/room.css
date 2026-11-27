@@ -1610,3 +1610,240 @@ button {
 .svip-entry-effect {
   animation-duration: 5.2s !important;
 }
+
+/* =========================================
+   HUKA HALF-SCREEN MEMBER PROFILE
+========================================= */
+
+.member-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 15, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.member-profile-panel {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  height: min(65vh, 560px);
+  overflow-y: auto;
+  padding: 22px 18px 35px;
+  border-radius: 25px 25px 0 0;
+  background:
+    radial-gradient(circle at 50% 0%, #56318d, transparent 45%),
+    linear-gradient(160deg, #10265a, #170d36 75%);
+  border: 1px solid rgba(204, 142, 255, 0.65);
+  box-shadow: 0 -8px 35px rgba(165, 75, 255, 0.4);
+  animation: hukaProfileSlide 0.35s ease-out;
+}
+
+@keyframes hukaProfileSlide {
+  from {
+    transform: translateY(100%);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.member-profile-close {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  width: 35px;
+  height: 35px;
+  border: 1px solid #a66cff;
+  border-radius: 50%;
+  background: #32165c;
+  color: white;
+  font-size: 22px;
+}
+
+.member-profile-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 12px;
+}
+
+.member-profile-avatar-wrap {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  padding: 5px;
+  border-radius: 50%;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #42cfff, #a855f7, #ed4cae);
+  box-shadow: 0 0 18px #a855f7;
+  animation: hukaProfileGlow 2s ease-in-out infinite;
+}
+
+.member-profile-avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #160d35;
+}
+
+@keyframes hukaProfileGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px #a855f7;
+  }
+  50% {
+    box-shadow: 0 0 28px #ed4cae, 0 0 40px #42cfff;
+  }
+}
+
+/* SVIP 1–11 profile border colors */
+
+.member-profile-avatar-wrap.svip-glow-1 {
+  background: linear-gradient(135deg, #c084fc, #ec4899);
+}
+.member-profile-avatar-wrap.svip-glow-2 {
+  background: linear-gradient(135deg, #ff69b4, #ffd700);
+}
+.member-profile-avatar-wrap.svip-glow-3 {
+  background: linear-gradient(135deg, #00e5ff, #4169e1);
+}
+.member-profile-avatar-wrap.svip-glow-4 {
+  background: linear-gradient(135deg, #fff0a6, #d69e00);
+}
+.member-profile-avatar-wrap.svip-glow-5 {
+  background: linear-gradient(135deg, #ff4dff, #00e5ff, #ffe066);
+}
+.member-profile-avatar-wrap.svip-glow-6 {
+  background: linear-gradient(135deg, #a78bfa, #ec4899, #60a5fa);
+}
+.member-profile-avatar-wrap.svip-glow-7 {
+  background: linear-gradient(135deg, #ff69b4, #ff1493, #ffd700);
+}
+.member-profile-avatar-wrap.svip-glow-8 {
+  background: linear-gradient(135deg, #00ffae, #00bfff, #a78bfa);
+}
+.member-profile-avatar-wrap.svip-glow-9 {
+  background: linear-gradient(135deg, #ffd700, #ff8c00, #fff2a6);
+}
+.member-profile-avatar-wrap.svip-glow-10 {
+  background: linear-gradient(135deg, #a855f7, #ec4899, #ffd700, #00e5ff);
+}
+.member-profile-avatar-wrap.svip-glow-11 {
+  background: linear-gradient(135deg, #fff2a6, #ffd700, #ff4dff, #00e5ff);
+  box-shadow: 0 0 20px #ffd700, 0 0 35px #e879f9;
+}
+
+.member-profile-name {
+  margin: 5px 0;
+  font-size: 21px;
+  font-weight: 900;
+  color: white;
+}
+
+.member-profile-id {
+  color: #d8b4fe;
+  font-size: 13px;
+  font-weight: bold;
+  margin: 4px 0 10px;
+}
+
+.member-profile-badge {
+  display: inline-block;
+  padding: 6px 15px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #6425d8, #e43baf, #d99b32);
+  border: 1px solid #ffe18a;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.member-profile-bio {
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(190,140,255,0.3);
+  color: #e8dcff;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.member-profile-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.member-profile-detail {
+  padding: 12px 5px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgba(111, 72, 170, 0.2);
+  border: 1px solid rgba(180, 130, 255, 0.3);
+}
+
+.member-profile-detail small {
+  display: block;
+  color: #c8b4ed;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.member-profile-detail b {
+  display: block;
+  color: white;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.member-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.member-profile-stat {
+  padding: 12px 5px;
+  text-align: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #302064, #54246d);
+  border: 1px solid rgba(221, 137, 255, 0.35);
+}
+
+.member-profile-stat b {
+  display: block;
+  font-size: 16px;
+  color: #ffe0ff;
+}
+
+.member-profile-stat small {
+  display: block;
+  margin-top: 4px;
+  color: #d7c2f5;
+  font-size: 10px;
+}
+
+@media (max-width: 380px) {
+  .member-profile-panel {
+    height: 70vh;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .member-profile-avatar-wrap {
+    width: 95px;
+    height: 95px;
+  }
+}
