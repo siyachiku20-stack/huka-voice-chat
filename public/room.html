@@ -328,6 +328,89 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="room.js"></script>
+  
+<!-- HUKA HALF-SCREEN MEMBER PROFILE -->
+<div id="memberProfileOverlay" class="member-profile-overlay hidden">
 
+  <div class="member-profile-panel">
+
+    <button
+      type="button"
+      class="member-profile-close"
+      onclick="closeMemberProfile()"
+    >×</button>
+
+    <div class="member-profile-top">
+
+      <div id="memberProfileAvatarWrap"
+           class="member-profile-avatar-wrap">
+
+        <img
+          id="memberProfileAvatar"
+          src=""
+          alt="Profile Photo"
+        >
+
+      </div>
+
+      <div id="memberProfileName" class="member-profile-name">
+        User
+      </div>
+
+      <div id="memberProfileId" class="member-profile-id">
+        ID: —
+      </div>
+
+      <div id="memberProfileBadge" class="member-profile-badge hidden">
+        SVIP
+      </div>
+
+    </div>
+
+    <div id="memberProfileBio" class="member-profile-bio">
+      No bio added
+    </div>
+
+    <div class="member-profile-details">
+
+      <div class="member-profile-detail">
+        <small>Country</small>
+        <b id="memberProfileCountry">Not set</b>
+      </div>
+
+      <div class="member-profile-detail">
+        <small>Gender</small>
+        <b id="memberProfileGender">Not set</b>
+      </div>
+
+      <div class="member-profile-detail">
+        <small>Age</small>
+        <b id="memberProfileAge">Not set</b>
+      </div>
+
+    </div>
+
+    <div class="member-profile-stats">
+
+      <div class="member-profile-stat">
+        <b id="memberProfileFollowers">0</b>
+        <small>Followers</small>
+      </div>
+
+      <div class="member-profile-stat">
+        <b id="memberProfileFollowing">0</b>
+        <small>Following</small>
+      </div>
+
+      <div class="member-profile-stat">
+        <b id="memberProfileVisitors">0</b>
+        <small>Visitors</small>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+  
 </body>
 </html>
