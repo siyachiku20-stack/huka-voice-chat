@@ -1921,7 +1921,7 @@ function showSVIPEntryEffect(member) {
 
   document.body.appendChild(effect);
 
-  setTimeout(() => effect.remove(), 5200);
+  setTimeout(() => effect.remove(), 4500);
 }
 
 /* ==========================================
