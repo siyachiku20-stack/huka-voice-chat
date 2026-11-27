@@ -2888,49 +2888,86 @@ async function buySVIP(planId) {
   }
 }
 
-/* ---------- MEDALS ---------- */
+/* ---------- MEDALS + SVIP PREMIUM MEDAL ---------- */
 
 async function openMedals() {
-    showModal("medalModal");
+showModal("medalModal");
 
-    const container = $("medalList");
-    if (container) container.textContent = "Loading medals...";
+  const container = $("medalList");
+  if (container) container.textContent = "Loading medals...";
 
-    const result = await emitRequest("get-medals", {
-        userId: getUserId()
-    });
+  const result = await emitRequest("get-medals", {
+      userId: getUserId()
+  });
 
-    if (!result || result.ok === false) {
-        if (container) {
-            container.textContent = result.message || "Medals load nahi hue.";
-        }
-        return;
-    }
+  if (!container) return;
 
-    const medals = result.medals || [];
+  container.innerHTML = "";
 
-    if (!container) return;
+  // SVIP PREMIUM MEDAL
+  const svipLevel = Number(profile?.svipLevel || 0);
+  const svipUntil = Number(profile?.svipUntil || 0);
 
-    container.innerHTML = "";
+  if (
+      svipLevel >= 1 &&
+      svipLevel <= 11 &&
+      svipUntil > Date.now()
+  ) {
+      const medalCard = document.createElement("div");
+      medalCard.className = "medal-item svip-premium-medal";
 
-    if (!medals.length) {
-        container.textContent = "Abhi koi medal nahi mila.";
-        return;
-    }
+      const medalImage = document.createElement("img");
+      medalImage.src =
+          `/assets/medal_svip_${String(svipLevel).padStart(2, "0")}.png`;
+      medalImage.alt = `SVIP ${svipLevel} Premium Medal`;
+      medalImage.style.cssText =
+          "width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 8px;";
 
-    medals.forEach((medal) => {
-        const item = document.createElement("div");
-        item.className = "medal-item";
+      medalImage.onerror = () => {
+          medalImage.style.display = "none";
+      };
 
-        const icon = document.createElement("span");
-        icon.textContent = medal.icon || "🏅";
+      const medalTitle = document.createElement("div");
+      medalTitle.textContent = `👑 SVIP ${svipLevel} Premium Medal`;
+      medalTitle.style.cssText =
+          "font-weight:bold;text-align:center;color:#a34bd4;";
 
-        const title = document.createElement("span");
-        title.textContent = medal.name || medal.title || "Medal";
+      medalCard.style.cssText =
+          "padding:14px;margin-bottom:12px;text-align:center;border-radius:15px;background:linear-gradient(135deg,#fff0fa,#eee2ff);border:1px solid #d9a5ff;";
 
-        item.append(icon, title);
-        container.appendChild(item);
-    });
+      medalCard.append(medalImage, medalTitle);
+      container.appendChild(medalCard);
+  }
+
+  // OLD MEDALS — KEEP EXISTING SYSTEM
+  if (!result || result.ok === false) {
+      const error = document.createElement("p");
+      error.textContent =
+          result?.message || "Medals load nahi hue.";
+      container.appendChild(error);
+      return;
+  }
+
+  const medals = result.medals || [];
+
+  if (!medals.length && !container.children.length) {
+      container.textContent = "Abhi koi medal nahi mila.";
+      return;
+  }
+
+  medals.forEach((medal) => {
+      const item = document.createElement("div");
+      item.className = "medal-item";
+
+      const icon = document.createElement("span");
+      icon.textContent = medal.icon || "🏅";
+
+      const title = document.createElement("span");
+      title.textContent = medal.name || medal.title || "Medal";
+
+      item.append(icon, title);
+      container.appendChild(item);
+  });
 }
   
 async function openLevel() {
