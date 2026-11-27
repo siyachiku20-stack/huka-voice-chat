@@ -593,7 +593,14 @@ status.textContent =
   member.micOn === false ? "🔇" : "🎙️";
 
 row.appendChild(status);
+     
+// MEMBER PROFILE OPEN ON TAP
+row.style.cursor = "pointer";
 
+row.addEventListener("click", () => {
+  openMemberProfile(member);
+});
+     
     list.appendChild(row);
   });
 
