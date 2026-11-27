@@ -1723,82 +1723,126 @@ socket.on("get-level-progress", callback => {
   });
 });
    
- /* =======================================
+/* =======================================
      PROFILE
-  ======================================= */
+======================================= */
 
-  socket.on("get-profile", (data, callback) => {
-    const user = getUser(socket);
+socket.on("get-profile", (data, callback) => {
+  const user = getUser(socket);
 
-    if (!user) {
-      return reply(callback, {
-        ok: false,
-        message: "Register first"
-      });
-    }
-
-    const targetId = clean(data?.userId, 20);
-    const profile = db.profiles[targetId || user.id];
-
-    if (!profile) {
-      return reply(callback, {
-        ok: false,
-        message: "Profile not found"
-      });
-    }
-
-    const result = { ...profile };
-    
-// FOLLOWERS AND FOLLOWING COUNTS
-const targetProfileId = String(profile.id || targetId || user.id);
-
-result.following ||= [];
-
-result.followingCount = result.following.length;
-
-result.followersCount = Object.values(db.profiles).filter(p =>
-  Array.isArray(p.following) &&
-  p.following.map(String).includes(targetProfileId)
-).length;
-
-const viewerProfile = db.profiles[user.id];
-
-result.isFollowing = Boolean(
-  viewerProfile &&
-  Array.isArray(viewerProfile.following) &&
-  viewerProfile.following.map(String).includes(targetProfileId)
-);
-     
-    result.levelProgress = getLevelProgress(profile);
-   
-    result.levelRewards = Array.from({ length: 100 }, (_, index) => {
-      const level = index + 1;
-
-      const claimed =
-        Array.isArray(profile.claimedLevelRewards) &&
-        profile.claimedLevelRewards.includes(level);
-
-      return {
-        level,
-        coins: level < 2 ? 0 : level * 50000,
-        name: level === 1
-          ? "Starter Badge"
-          : LEVEL_SPECIAL_REWARDS[level - 2],
-        owned: level === 1 || claimed
-       };
-     }); 
-     
-    // Do not expose private information.
-    delete result.taskProgress;
-    delete result.walletHistory;
-    delete result.feedback;
-    delete result.redeemedKeys;
-
-    reply(callback, {
-      ok: true,
-      profile: result
+  if (!user) {
+    return reply(callback, {
+      ok: false,
+      message: "Register first"
     });
+  }
+
+  const targetId = clean(data?.userId, 20);
+  const profile = db.profiles[targetId || user.id];
+
+  if (!profile) {
+    return reply(callback, {
+      ok: false,
+      message: "Profile not found"
+    });
+  }
+
+  // =====================================
+  // VISITORS TRACKING SYSTEM
+  // =====================================
+
+  profile.visitors ||= [];
+
+  const targetProfileId = String(profile.id || targetId || user.id);
+  const viewerProfile = db.profiles[user.id];
+
+  // Apni profile dekhne par visit count nahi badhega
+  if (String(user.id) !== targetProfileId && viewerProfile) {
+
+    let visitor = profile.visitors.find(v =>
+      String(v.userId) === String(user.id)
+    );
+
+    if (visitor) {
+      // Purane visitor ka count badhao
+      visitor.count = Number(visitor.count || 0) + 1;
+      visitor.lastSeenAt = Date.now();
+    } else {
+      // Naya visitor add karo
+      visitor = {
+        userId: String(user.id),
+        name: viewerProfile.name || user.name || "User",
+        avatar: viewerProfile.avatar || user.avatar || "",
+        count: 1,
+        lastSeenAt: Date.now()
+      };
+
+      profile.visitors.push(visitor);
+    }
+
+    // Visitor ka latest naam aur DP update karo
+    visitor.name = viewerProfile.name || user.name || "User";
+    visitor.avatar = viewerProfile.avatar || user.avatar || "";
+    
+    saveDB();
+  }
+
+  const result = { ...profile };
+
+  // FOLLOWERS AND FOLLOWING COUNTS
+  result.following ||= [];
+
+  result.followingCount = result.following.length;
+
+  result.followersCount = Object.values(db.profiles).filter(p =>
+    Array.isArray(p.following) &&
+    p.following.map(String).includes(targetProfileId)
+  ).length;
+
+  result.isFollowing = Boolean(
+    viewerProfile &&
+    Array.isArray(viewerProfile.following) &&
+    viewerProfile.following.map(String).includes(targetProfileId)
+  );
+
+  // VISITORS COUNT AND LIST
+  result.visitorsCount = profile.visitors.length;
+
+  // Visitors ki list sirf apni profile ke owner ko milegi
+  result.visitors = String(user.id) === targetProfileId
+    ? profile.visitors
+    : [];
+
+  result.levelProgress = getLevelProgress(profile);
+
+  result.levelRewards = Array.from({ length: 100 }, (_, index) => {
+    const level = index + 1;
+
+    const claimed =
+      Array.isArray(profile.claimedLevelRewards) &&
+      profile.claimedLevelRewards.includes(level);
+
+    return {
+      level,
+      coins: level < 2 ? 0 : level * 50000,
+      name: level === 1
+        ? "Starter Badge"
+        : LEVEL_SPECIAL_REWARDS[level - 2],
+      owned: level === 1 || claimed
+    };
   });
+
+  // Do not expose private information.
+  delete result.taskProgress;
+  delete result.walletHistory;
+  delete result.feedback;
+  delete result.redeemedKeys;
+
+  reply(callback, {
+    ok: true,
+    profile: result
+  });
+});
 
   socket.on("profile-update", (data, callback) => {
     const user = getUser(socket);
