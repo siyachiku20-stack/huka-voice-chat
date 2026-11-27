@@ -1954,7 +1954,12 @@ window.addEventListener("beforeunload", () => {
 
 /* ==========================================
    HUKA HALF-SCREEN MEMBER PROFILE
+   FOLLOW / UNFOLLOW + LIVE COUNTS
 ========================================== */
+
+let activeMemberProfileId = "";
+let activeMemberProfileFollowing = false;
+let memberProfileRequestToken = 0;
 
 function isMemberSVIPActive(member) {
   const level = Number(member?.svipLevel || 0);
@@ -1965,16 +1970,168 @@ function isMemberSVIPActive(member) {
 
 function setProfileText(id, value, fallback = "Not set") {
   const element = $(id);
+
   if (!element) return;
 
-  const text = value === undefined || value === null || value === ""
-    ? fallback
-    : String(value);
+  const text =
+    value === undefined || value === null || value === ""
+      ? fallback
+      : String(value);
 
   element.textContent = text;
 }
 
-function openMemberProfile(member) {
+/* ==========================================
+   FOLLOW BUTTON
+========================================== */
+
+function ensureMemberFollowButton() {
+  const panel = document.querySelector(
+    ".member-profile-panel"
+  );
+
+  if (!panel) return null;
+
+  let actions = $("memberProfileFollowActions");
+
+  if (!actions) {
+    actions = document.createElement("div");
+
+    actions.id = "memberProfileFollowActions";
+
+    actions.style.display = "flex";
+    actions.style.justifyContent = "center";
+    actions.style.width = "100%";
+    actions.style.marginTop = "20px";
+
+    const button = document.createElement("button");
+
+    button.id = "memberProfileFollowButton";
+    button.type = "button";
+
+    button.style.width = "85%";
+    button.style.maxWidth = "280px";
+    button.style.padding = "13px 20px";
+    button.style.border = "none";
+    button.style.borderRadius = "25px";
+    button.style.background =
+      "linear-gradient(135deg,#9333ea,#ec4899)";
+    button.style.color = "#fff";
+    button.style.fontSize = "15px";
+    button.style.fontWeight = "bold";
+    button.style.cursor = "pointer";
+
+    button.textContent = "Follow";
+
+    button.addEventListener("click", toggleMemberFollow);
+
+    actions.appendChild(button);
+
+    const stats = panel.querySelector(
+      ".member-profile-stats"
+    );
+
+    if (stats) {
+      stats.insertAdjacentElement("afterend", actions);
+    } else {
+      panel.appendChild(actions);
+    }
+  }
+
+  return $("memberProfileFollowButton");
+}
+
+function updateMemberFollowButton() {
+  const button = ensureMemberFollowButton();
+  const actions = $("memberProfileFollowActions");
+
+  if (!button || !actions) return;
+
+  // Apni profile par Follow button nahi dikhega.
+  if (
+    String(activeMemberProfileId) === String(userId)
+  ) {
+    actions.style.display = "none";
+    return;
+  }
+
+  actions.style.display = "flex";
+
+  button.disabled = false;
+
+  button.textContent = activeMemberProfileFollowing
+    ? "✓ Following"
+    : "＋ Follow";
+
+  button.style.background = activeMemberProfileFollowing
+    ? "linear-gradient(135deg,#64748b,#475569)"
+    : "linear-gradient(135deg,#9333ea,#ec4899)";
+}
+
+/* ==========================================
+   FOLLOW / UNFOLLOW ACTION
+========================================== */
+
+async function toggleMemberFollow() {
+  if (!activeMemberProfileId) return;
+
+  if (
+    String(activeMemberProfileId) === String(userId)
+  ) {
+    return;
+  }
+
+  const button = ensureMemberFollowButton();
+
+  if (!button || button.disabled) return;
+
+  button.disabled = true;
+  button.textContent = "Please wait...";
+
+  const result = await emitWithReply("follow-user", {
+    userId: activeMemberProfileId
+  });
+
+  if (!result.ok) {
+    button.disabled = false;
+
+    updateMemberFollowButton();
+
+    toast(result.message || result.error || "Follow failed.");
+
+    return;
+  }
+
+  activeMemberProfileFollowing = Boolean(
+    result.following
+  );
+
+  setProfileText(
+    "memberProfileFollowers",
+    result.followersCount ?? 0,
+    "0"
+  );
+
+  setProfileText(
+    "memberProfileFollowing",
+    result.followingCount ?? 0,
+    "0"
+  );
+
+  updateMemberFollowButton();
+
+  toast(
+    activeMemberProfileFollowing
+      ? "You are now following this user."
+      : "You unfollowed this user."
+  );
+}
+
+/* ==========================================
+   OPEN MEMBER PROFILE
+========================================== */
+
+async function openMemberProfile(member) {
   if (!member) return;
 
   const overlay = $("memberProfileOverlay");
@@ -1987,17 +2144,33 @@ function openMemberProfile(member) {
     return;
   }
 
+  const targetId = String(member.id || "");
+
+  if (!targetId) {
+    toast("Member ID missing.");
+    return;
+  }
+
+  activeMemberProfileId = targetId;
+
+  const requestToken = ++memberProfileRequestToken;
+
   const level = Number(member.svipLevel || 0);
   const activeSVIP = isMemberSVIPActive(member);
 
-  // Profile DP
-  avatar.src = member.avatar || "";
+  // Avatar
+  if (member.avatar) {
+    avatar.src = member.avatar;
+  } else {
+    avatar.removeAttribute("src");
+  }
+
   avatar.onerror = () => {
     avatar.removeAttribute("src");
     avatar.alt = "👤";
   };
 
-  // SVIP animated border
+  // SVIP border
   avatarWrap.className = "member-profile-avatar-wrap";
 
   if (activeSVIP) {
@@ -2005,8 +2178,17 @@ function openMemberProfile(member) {
   }
 
   // Name and ID
-  setProfileText("memberProfileName", member.name, "Huka User");
-  setProfileText("memberProfileId", `ID: ${member.id || "—"}`, "ID: —");
+  setProfileText(
+    "memberProfileName",
+    member.name,
+    "Huka User"
+  );
+
+  setProfileText(
+    "memberProfileId",
+    `ID: ${targetId}`,
+    "ID: —"
+  );
 
   // SVIP badge
   if (badge) {
@@ -2018,21 +2200,40 @@ function openMemberProfile(member) {
     }
   }
 
-  // Profile details
-  setProfileText("memberProfileBio", member.bio, "No bio added");
-  setProfileText("memberProfileCountry", member.country);
-  setProfileText("memberProfileGender", member.gender);
-  setProfileText("memberProfileAge", member.age);
+  // Initial member information
+  setProfileText(
+    "memberProfileBio",
+    member.bio,
+    "No bio added"
+  );
+
+  setProfileText(
+    "memberProfileCountry",
+    member.country
+  );
+
+  setProfileText(
+    "memberProfileGender",
+    member.gender
+  );
+
+  setProfileText(
+    "memberProfileAge",
+    member.age
+  );
 
   setProfileText(
     "memberProfileFollowers",
-    member.followers ?? member.followerCount ?? 0,
+    member.followersCount ?? 0,
     "0"
   );
 
   setProfileText(
     "memberProfileFollowing",
-    member.following ?? member.followingCount ?? 0,
+    member.followingCount ??
+      (Array.isArray(member.following)
+        ? member.following.length
+        : 0),
     "0"
   );
 
@@ -2044,7 +2245,108 @@ function openMemberProfile(member) {
 
   overlay.classList.remove("hidden");
   document.body.style.overflow = "hidden";
+
+  const followButton = ensureMemberFollowButton();
+
+  if (followButton) {
+    followButton.disabled = true;
+    followButton.textContent = "Loading...";
+  }
+
+  updateMemberFollowButton();
+
+  // Fetch latest saved profile from server.
+  const response = await emitWithReply("get-profile", {
+    userId: targetId
+  });
+
+  // Ignore an older request if another profile was opened.
+  if (
+    requestToken !== memberProfileRequestToken ||
+    activeMemberProfileId !== targetId
+  ) {
+    return;
+  }
+
+  if (!response.ok || !response.profile) {
+    updateMemberFollowButton();
+
+    toast(
+      response.message ||
+      response.error ||
+      "Profile load nahi hua."
+    );
+
+    return;
+  }
+
+  const profile = response.profile;
+
+  // Fresh profile information
+  setProfileText(
+    "memberProfileName",
+    profile.name || member.name,
+    "Huka User"
+  );
+
+  setProfileText(
+    "memberProfileId",
+    `ID: ${profile.id || targetId}`,
+    "ID: —"
+  );
+
+  setProfileText(
+    "memberProfileBio",
+    profile.bio,
+    "No bio added"
+  );
+
+  setProfileText(
+    "memberProfileCountry",
+    profile.country
+  );
+
+  setProfileText(
+    "memberProfileGender",
+    profile.gender
+  );
+
+  setProfileText(
+    "memberProfileAge",
+    profile.age
+  );
+
+  setProfileText(
+    "memberProfileFollowers",
+    profile.followersCount ?? 0,
+    "0"
+  );
+
+  setProfileText(
+    "memberProfileFollowing",
+    profile.followingCount ??
+      (Array.isArray(profile.following)
+        ? profile.following.length
+        : 0),
+    "0"
+  );
+
+  setProfileText(
+    "memberProfileVisitors",
+    profile.visitors ?? profile.visitorCount ?? 0,
+    "0"
+  );
+
+  activeMemberProfileFollowing = Boolean(
+    profile.isFollowing
+  );
+
+  updateMemberFollowButton();
 }
+
+/* ==========================================
+   CLOSE PROFILE
+========================================== */
 
 function closeMemberProfile() {
   const overlay = $("memberProfileOverlay");
@@ -2053,13 +2355,49 @@ function closeMemberProfile() {
     overlay.classList.add("hidden");
   }
 
+  activeMemberProfileId = "";
+  memberProfileRequestToken++;
+
   document.body.style.overflow = "";
 }
 
-// HTML ke Close button ke liye global function
 window.closeMemberProfile = closeMemberProfile;
 
-// Popup ke bahar tap karne par close
+/* ==========================================
+   LIVE FOLLOW COUNT UPDATES
+========================================== */
+
+socket.on("profile-follow-update", data => {
+  if (!data || !data.userId) return;
+
+  if (
+    String(data.userId) !==
+    String(activeMemberProfileId)
+  ) {
+    return;
+  }
+
+  if (data.followersCount !== undefined) {
+    setProfileText(
+      "memberProfileFollowers",
+      data.followersCount,
+      "0"
+    );
+  }
+
+  if (data.followingCount !== undefined) {
+    setProfileText(
+      "memberProfileFollowing",
+      data.followingCount,
+      "0"
+    );
+  }
+});
+
+/* ==========================================
+   CLOSE POPUP EVENTS
+========================================== */
+
 document.addEventListener("click", event => {
   const overlay = $("memberProfileOverlay");
 
@@ -2068,7 +2406,6 @@ document.addEventListener("click", event => {
   }
 });
 
-// Escape key se close
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     closeMemberProfile();
