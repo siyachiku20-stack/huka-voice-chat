@@ -765,27 +765,31 @@ button {
 
   <div class="stats">
 
-    <div class="stat">
-      <strong id="followingCount">0</strong>
-      <span>Following</span>
-    </div>
-
-    <div class="stat">
-      <strong id="followersCount">0</strong>
-      <span>Followers</span>
-    </div>
-
-    <div class="stat">
-      <strong id="visitorsCount"
-              onclick="openVisitors()"
-              style="cursor:pointer;">0</strong>
-      <span>Visitors</span>
-    </div>
-
+  <div class="stat" onclick="openFollowing()">
+    <strong id="followingCount">0</strong>
+    <span>Following</span>
   </div>
 
-</section>
+  <div class="stat" onclick="openFollowers()">
+    <strong id="followersCount">0</strong>
+    <span>Followers</span>
+  </div>
 
+  <div class="stat" onclick="openVisitors()">
+    <strong id="visitorsCount">0</strong>
+    <span>Visitors</span>
+  </div>
+
+</div>
+
+<div id="profileListSection" style="display:none;">
+  <h2 id="profileListTitle">Visitors</h2>
+  <div id="profileListContent"></div>
+  <button onclick="closeProfileList()">Back to Profile</button>
+</div>
+
+</section>
+  
 <!-- SVIP -->
 
 <section class="svip-banner">
