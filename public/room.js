@@ -2368,10 +2368,10 @@ window.closeMemberProfile = closeMemberProfile;
 ========================================== */
 
 socket.on("profile-follow-update", data => {
-  if (!data || !data.userId) return;
+  if (!data || !data.profileId) return;
 
   if (
-    String(data.userId) !==
+    String(data.profileId) !==
     String(activeMemberProfileId)
   ) {
     return;
