@@ -6236,106 +6236,89 @@ if (socket.connected) {
 
 /* ---------- VISITORS LIST ---------- */
 
-async function openVisitors() {
-    const result = await emitRequest("get-profile", {
-        userId: getUserId()
+function openVisitors() {
+    const profileSection = document.querySelector(".profile-header")?.parentElement;
+    const stats = document.querySelector(".stats");
+    const listSection = document.getElementById("profileListSection");
+
+    if (!listSection) return;
+
+    document.querySelectorAll("body > *").forEach(el => {
+        if (el.contains(listSection) || el === listSection) return;
     });
 
-    if (!result || result.ok === false) {
-        alert("Visitors load nahi hue.");
-        return;
-    }
+    document.querySelectorAll("section").forEach(el => {
+        if (el !== listSection && !el.contains(listSection)) {
+            el.dataset.visitorHidden = el.style.display;
+            el.style.display = "none";
+        }
+    });
 
-    const visitors = result.profile?.visitors || [];
+    listSection.style.display = "block";
 
-    const modal = document.createElement("div");
-    modal.style.cssText = `
-        position:fixed;
-        inset:0;
-        background:#0009;
-        z-index:99999;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        padding:15px;
-    `;
+    const title = document.getElementById("profileListTitle");
+    const content = document.getElementById("profileListContent");
 
-    const box = document.createElement("div");
-    box.style.cssText = `
-        background:linear-gradient(135deg,#5410a0,#e7359b);
-        color:white;
-        width:100%;
-        max-width:400px;
-        max-height:80vh;
-        overflow:auto;
-        border-radius:20px;
-        padding:20px;
-    `;
+    title.textContent = "👀 My Visitors";
+    content.innerHTML = "Loading visitors...";
 
-    box.innerHTML = `
-        <h2>👀 My Visitors (${visitors.length})</h2>
-        <div id="visitorsList"></div>
-        <button id="closeVisitors"
-        style="padding:10px 25px;border:0;border-radius:20px;margin-top:15px;">
-        Close
-        </button>
-    `;
+    emitRequest("get-profile", {
+        userId: getUserId()
+    }).then(result => {
+        const visitors = result?.profile?.visitors || [];
+        content.innerHTML = "";
 
-    modal.appendChild(box);
-    document.body.appendChild(modal);
+        if (!visitors.length) {
+            content.textContent = "Abhi koi visitor nahi hai.";
+            return;
+        }
 
-    box.querySelector("#closeVisitors").onclick = () => modal.remove();
+        visitors.forEach(visitor => {
+            const ago = Date.now() - Number(visitor.lastSeenAt || Date.now());
+            const minutes = Math.floor(ago / 60000);
+            const hours = Math.floor(ago / 3600000);
+            const days = Math.floor(ago / 86400000);
 
-    const list = box.querySelector("#visitorsList");
+            let timeText = "Abhi";
+            if (days > 0) timeText = days + " day ago";
+            else if (hours > 0) timeText = hours + " hours ago";
+            else if (minutes > 0) timeText = minutes + " minutes ago";
 
-    if (!visitors.length) {
-        list.textContent = "Abhi koi visitor nahi hai.";
-        return;
-    }
+            const row = document.createElement("div");
+            row.className = "visitor-item";
+            row.style.cssText = "display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #ddd;";
 
-    visitors.forEach(visitor => {
-        const ago = Date.now() - Number(visitor.lastSeenAt || Date.now());
+            const img = document.createElement("img");
+            img.src = visitor.avatar || "https://placehold.co/50";
+            img.style.cssText = "width:50px;height:50px;border-radius:50%;object-fit:cover;";
 
-        const minutes = Math.floor(ago / 60000);
-        const hours = Math.floor(ago / 3600000);
-        const days = Math.floor(ago / 86400000);
+            const details = document.createElement("div");
+            const name = document.createElement("strong");
+            name.textContent = visitor.name || "User";
 
-        let timeText = "Abhi";
-        if (days > 0) timeText = days + " day ago";
-        else if (hours > 0) timeText = hours + " hours ago";
-        else if (minutes > 0) timeText = minutes + " minutes ago";
+            const id = document.createElement("p");
+            id.textContent = "Huka ID: " + visitor.userId;
 
-        const row = document.createElement("div");
-        row.style.cssText = `
-            display:flex;
-            align-items:center;
-            gap:12px;
-            padding:12px 0;
-            border-bottom:1px solid #ffffff55;
-        `;
+            const time = document.createElement("p");
+            time.textContent = timeText + " · " + (visitor.count || 1) + " visits";
 
-        const img = document.createElement("img");
-        img.src = visitor.avatar || "https://placehold.co/50";
-        img.style.cssText =
-            "width:50px;height:50px;border-radius:50%;object-fit:cover;";
-
-        const details = document.createElement("div");
-        const name = document.createElement("strong");
-        name.textContent = visitor.name || "User";
-
-        const id = document.createElement("p");
-        id.textContent = "Huka ID: " + visitor.userId;
-
-        const time = document.createElement("p");
-        time.textContent = timeText + " · " +
-            (visitor.count || 1) + " visits";
-
-        details.append(name, id, time);
-        row.append(img, details);
-        list.appendChild(row);
+            details.append(name, id, time);
+            row.append(img, details);
+            content.appendChild(row);
+        });
     });
 }
 
+function closeProfileList() {
+    const listSection = document.getElementById("profileListSection");
+    if (listSection) listSection.style.display = "none";
+
+    document.querySelectorAll("[data-visitor-hidden]").forEach(el => {
+        el.style.display = el.dataset.visitorHidden;
+        delete el.dataset.visitorHidden;
+    });
+}
+  
 </script>
   
 </body>
