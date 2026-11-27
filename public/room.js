@@ -1887,27 +1887,12 @@ socket.on("voice-peer-left", data => {
 function showSVIPEntryEffect(member) {
   if (!member) return;
 
-  const level = Math.max(
-    1,
-    Math.min(11, Number(member.svipLevel || 1))
-  );
+  const level = Math.max(1, Math.min(11, Number(member.svipLevel || 1)));
 
   const name = String(member.name || "SVIP User")
     .replace(/[<>&"]/g, "");
 
-  const vehicles = {
-    1: "🛵",
-    2: "🏍️",
-    3: "🚗",
-    4: "🚙",
-    5: "🏎️",
-    6: "🚕",
-    7: "🚓",
-    8: "🚐",
-    9: "🚘",
-    10: "🚀",
-    11: "🛸"
-  };
+  const vehicleNumber = String(level).padStart(2, "0");
 
   const effect = document.createElement("div");
   effect.className = "svip-entry-effect";
@@ -1922,20 +1907,22 @@ function showSVIPEntryEffect(member) {
 
     <div class="svip-vehicle-track">
       <div class="svip-vehicle svip-vehicle-${level}">
-        <span>${vehicles[level]}</span>
-        <span class="svip-vehicle-label">
+        <img
+          src="/assets/svip-vehicle-${vehicleNumber}.jpg"
+          class="svip-vehicle-image"
+          alt="SVIP ${level} Vehicle"
+        >
+        <div class="svip-vehicle-label">
           SVIP ${level} VEHICLE
-        </span>
+        </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(effect);
 
-  setTimeout(() => {
-    effect.remove();
-  }, 3500);
-         }
+  setTimeout(() => effect.remove(), 4500);
+}
 
 /* ==========================================
    CLEANUP
