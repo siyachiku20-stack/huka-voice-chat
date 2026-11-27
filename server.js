@@ -1904,6 +1904,7 @@ socket.on("follow-user", (data, callback) => {
     following: !alreadyFollowing,
     followersCount,
     followingCount
+    followingCount: targetFollowingCount
   });
 
   // LIVE PROFILE UPDATE
