@@ -5854,8 +5854,118 @@ function openSettingPage(type) {
     const content = $("settingSubContent");
     content.innerHTML = "";
 
+    if (type === "blocked") {
+        const loading = document.createElement("p");
+        loading.textContent = "Loading blocked users...";
+        loading.style.cssText = "padding:20px;text-align:center;color:#754080;";
+        content.appendChild(loading);
+
+        socket.emit("get-blocked-users", {}, response => {
+            content.innerHTML = "";
+
+            if (!response || !response.ok) {
+                content.textContent = "Could not load blocked users.";
+                return;
+            }
+
+            if (!response.users || response.users.length === 0) {
+                content.innerHTML = `
+                    <div style="padding:35px 20px;text-align:center;color:#754080;">
+                        <div style="font-size:45px;">🚫</div>
+                        <h3>No Blocked Users</h3>
+                        <p>Your blocked users will appear here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            response.users.forEach(user => {
+                const row = document.createElement("div");
+
+                row.style.cssText = `
+                    display:flex;
+                    align-items:center;
+                    gap:12px;
+                    padding:12px;
+                    margin:10px;
+                    background:#fff0fa;
+                    border-radius:14px;
+                    box-shadow:0 2px 8px #e8c5e8;
+                `;
+
+                const avatar = document.createElement("img");
+                avatar.src = user.avatar || "";
+                avatar.alt = "";
+                avatar.style.cssText = `
+                    width:50px;
+                    height:50px;
+                    border-radius:50%;
+                    object-fit:cover;
+                    background:#ead5f5;
+                `;
+
+                const details = document.createElement("div");
+                details.style.cssText = "flex:1;min-width:0;";
+
+                const name = document.createElement("div");
+                name.textContent = user.name;
+                name.style.cssText = "font-weight:bold;color:#74358b;";
+
+                const id = document.createElement("div");
+                id.textContent = "ID: " + user.userId;
+                id.style.cssText = "font-size:12px;color:#80658a;";
+
+                details.append(name, id);
+
+                const button = document.createElement("button");
+                button.textContent = "Unblock";
+                button.style.cssText = `
+                    border:0;
+                    border-radius:10px;
+                    padding:9px 12px;
+                    background:linear-gradient(135deg,#d946ef,#ec4899);
+                    color:white;
+                    font-weight:bold;
+                `;
+
+                button.onclick = () => {
+                    if (!confirm("Unblock this user?")) return;
+
+                    button.disabled = true;
+
+                    socket.emit("unblock-user", {
+                        userId: user.userId
+                    }, result => {
+                        if (result && result.ok) {
+                            row.remove();
+
+                            if (!content.querySelector(".blocked-user-row")) {
+                                if (content.children.length === 0) {
+                                    content.innerHTML = `
+                                        <div style="padding:35px 20px;text-align:center;color:#754080;">
+                                            <div style="font-size:45px;">💜</div>
+                                            <h3>No Blocked Users</h3>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        } else {
+                            button.disabled = false;
+                            alert("Could not unblock user.");
+                        }
+                    });
+                };
+
+                row.classList.add("blocked-user-row");
+                row.append(avatar, details, button);
+                content.appendChild(row);
+            });
+        });
+
+        return;
+    }
+
     const descriptions = {
-        blocked: "Your blocked users will appear here.",
         about: "Welcome to Huka Voice Chat 💜 Connect, play and make friends.",
         logout: "Logout will not delete your Huka account or your saved progress.",
         mobile: "Mobile number login setup will be added here.",
@@ -5866,7 +5976,6 @@ function openSettingPage(type) {
     const message = document.createElement("p");
     message.textContent = descriptions[type] || "";
     message.style.cssText = "padding:20px;color:#55445f;font-size:15px;";
-
     content.appendChild(message);
 
     if (type === "logout") {
