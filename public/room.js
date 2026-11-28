@@ -937,7 +937,7 @@ $("sendGiftButton").addEventListener("click", async () => {
   });
 
   if (!result.ok) {
-    toast(result.error || "Gift send nahi hua.");
+    toast(result.message || result.error || "Gift send nahi hua.");
     return;
   }
 
