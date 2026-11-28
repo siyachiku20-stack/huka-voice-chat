@@ -1794,10 +1794,22 @@ socket.on("get-profile", (data, callback) => {
 
   result.followingCount = result.following.length;
 
-  result.followersCount = Object.values(db.profiles).filter(p =>
+  const followersList = Object.values(db.profiles)
+  .filter(p =>
     Array.isArray(p.following) &&
     p.following.map(String).includes(targetProfileId)
-  ).length;
+  )
+  .map(p => ({
+    userId: String(p.id),
+    name: p.name || "User",
+    avatar: p.avatar || ""
+  }));
+
+result.followersCount = followersList.length;
+
+result.followers = String(user.id) === targetProfileId
+  ? followersList
+  : [];
 
   result.isFollowing = Boolean(
     viewerProfile &&
