@@ -1794,6 +1794,29 @@ socket.on("get-profile", (data, callback) => {
 
   result.followingCount = result.following.length;
 
+// FOLLOWING FULL USER DETAILS
+const followingList = result.following
+  .map(item => {
+    const followingId = String(
+      typeof item === "object"
+        ? item.userId || item.id
+        : item
+    );
+
+    const followingProfile = db.profiles[followingId];
+
+    if (!followingProfile) return null;
+
+    return {
+      userId: followingId,
+      name: followingProfile.name || "User",
+      avatar: followingProfile.avatar || ""
+    };
+  })
+  .filter(Boolean);
+
+result.following = followingList;
+   
   const followersList = Object.values(db.profiles)
   .filter(p =>
     Array.isArray(p.following) &&
