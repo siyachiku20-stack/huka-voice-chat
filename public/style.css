@@ -593,3 +593,21 @@ a {
     margin: 0;
     border-radius: 14px;
 }
+
+#settingsFullPage .huka-settings-list {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+}
+
+#settingsFullPage .huka-settings-list button {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 65px !important;
+    flex: 0 0 65px !important;
+    margin: 0 !important;
+    float: none !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+}
