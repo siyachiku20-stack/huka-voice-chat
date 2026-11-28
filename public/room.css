@@ -1847,3 +1847,349 @@ button {
     height: 95px;
   }
 }
+
+/* ==========================================
+   HUKA ROYAL GALAXY ROOM - NEW DESIGN
+   Purple + Pink + Royal Gold
+========================================== */
+
+:root {
+  --royal-purple: #35105f;
+  --royal-pink: #ed3fa9;
+  --royal-gold: #ffd66b;
+  --royal-glow: #b85cff;
+}
+
+/* ROYAL GALAXY BACKGROUND */
+
+html,
+body {
+  background:
+    radial-gradient(ellipse at 50% 25%, #57218b 0%, transparent 45%),
+    radial-gradient(circle at 10% 80%, #8c246f 0%, transparent 30%),
+    linear-gradient(160deg, #16052f, #08051c 65%, #240936) !important;
+}
+
+.room-app {
+  background:
+    radial-gradient(ellipse at 50% 10%, rgba(177, 75, 255, .28), transparent 45%),
+    radial-gradient(circle at 50% 55%, rgba(255, 70, 180, .10), transparent 45%),
+    linear-gradient(180deg, #240746, #100522 65%, #21082e) !important;
+  border-left: 1px solid rgba(255, 215, 120, .25);
+  border-right: 1px solid rgba(255, 215, 120, .25);
+}
+
+/* ROYAL HEADER */
+
+.room-header {
+  background: linear-gradient(
+    100deg,
+    #260743,
+    #64218b,
+    #a52c83,
+    #42105f
+  ) !important;
+  border-bottom: 1px solid var(--royal-gold) !important;
+  box-shadow: 0 4px 20px rgba(220, 75, 255, .35);
+}
+
+.room-logo {
+  background: linear-gradient(135deg, #ffcf65, #ed4cae, #7938d5) !important;
+  border: 2px solid #ffe9a6 !important;
+  box-shadow: 0 0 18px #e64cff !important;
+}
+
+.room-title-area h2 {
+  color: #fff1c2;
+  text-shadow: 0 0 10px #ed4cae;
+}
+
+.room-title-area small {
+  color: #f4caff;
+}
+
+.header-actions button {
+  color: #ffe6a0;
+}
+
+/* ROOM INFORMATION */
+
+.room-info {
+  background: rgba(73, 22, 103, .35);
+}
+
+.room-description {
+  color: #f4dfff;
+}
+
+.room-status {
+  color: #8dffc8;
+}
+
+/* GIFT NOTIFICATION */
+
+.gift-notification {
+  background: linear-gradient(100deg, #63218b, #b52a91, #7135bd) !important;
+  border: 1px solid #ffdf83 !important;
+  box-shadow: 0 0 18px rgba(255, 91, 204, .5) !important;
+}
+
+/* ROYAL SEATS */
+
+.vip-seats,
+.normal-seats {
+  background: transparent;
+}
+
+.seat-card {
+  position: relative;
+}
+
+.seat-avatar {
+  background: radial-gradient(circle, #7434a5, #210b3e) !important;
+  border: 2px solid #e8a9ff !important;
+  box-shadow:
+    0 0 8px #b64cff,
+    0 0 17px rgba(255, 76, 190, .45),
+    inset 0 0 12px rgba(255, 255, 255, .15) !important;
+}
+
+.seat-card.occupied .seat-avatar {
+  border: 3px solid #ffdc76 !important;
+  box-shadow:
+    0 0 10px #ffd76b,
+    0 0 22px #ed4cae !important;
+}
+
+.seat-card.host .seat-avatar {
+  border-color: #fff0a0 !important;
+  box-shadow: 0 0 20px #ffca45 !important;
+}
+
+.seat-card.vip .seat-avatar {
+  border-color: #d6a0ff !important;
+  box-shadow: 0 0 18px #a64cff !important;
+}
+
+.seat-card b {
+  color: #fff0d1;
+}
+
+.seat-card small {
+  color: #e5baff;
+}
+
+/* MEMBERS AND RANKING */
+
+.members-panel,
+.ranking-panel {
+  background: linear-gradient(
+    145deg,
+    rgba(77, 26, 112, .85),
+    rgba(28, 10, 55, .95)
+  ) !important;
+  border: 1px solid rgba(255, 211, 116, .55) !important;
+  box-shadow: 0 0 13px rgba(183, 76, 255, .2);
+}
+
+.members-panel h3,
+.ranking-panel h3 {
+  color: #ffdf91 !important;
+}
+
+.member-item,
+.ranking-item {
+  border-bottom: 1px solid rgba(255, 204, 120, .2);
+}
+
+/* CHAT BOX */
+
+.chat-section {
+  background: linear-gradient(
+    145deg,
+    rgba(47, 13, 76, .95),
+    rgba(23, 8, 43, .96)
+  ) !important;
+  border: 1px solid rgba(222, 146, 255, .45) !important;
+  box-shadow: 0 0 15px rgba(186, 69, 255, .18);
+}
+
+.chat-tab {
+  color: #e0c4f5;
+}
+
+.chat-tab.active {
+  color: #ffdc85 !important;
+  border-bottom-color: #ffcf62 !important;
+}
+
+.chat-message .message-name {
+  color: #ffb9ed !important;
+}
+
+.system-message {
+  color: #e8cfff;
+}
+
+.gift-message {
+  color: #ffdb78;
+}
+
+/* BOTTOM TOOLBAR */
+
+.bottom-toolbar {
+  background: linear-gradient(
+    90deg,
+    #200638,
+    #4b145f,
+    #751d72,
+    #28083e
+  ) !important;
+  border-top: 1px solid #ffcf70 !important;
+  box-shadow: 0 -5px 25px rgba(210, 65, 255, .35);
+}
+
+.bottom-toolbar > button {
+  color: #ffe4a1;
+}
+
+.bottom-toolbar > button:active {
+  background: #8136a9;
+}
+
+.message-box {
+  background: #2b1047 !important;
+  border: 1px solid #b65be0 !important;
+}
+
+.message-box input {
+  color: white;
+}
+
+.message-box button {
+  color: #ffb9ed;
+}
+
+.bottom-toolbar .gift-button {
+  background: linear-gradient(135deg, #8a32d2, #e83d9e, #e6a638) !important;
+  border: 1px solid #ffe69b !important;
+  box-shadow: 0 0 16px #e94bce !important;
+}
+
+/* POPUP PANELS */
+
+.popup-panel {
+  background: linear-gradient(145deg, #4a176f, #1d0838) !important;
+  border: 1px solid #e2a4ff !important;
+  box-shadow: 0 0 25px rgba(216, 75, 255, .5);
+}
+
+#emojiPanel button,
+.more-panel button {
+  background: linear-gradient(135deg, #65238e, #35104f) !important;
+  border: 1px solid #d18aff !important;
+  color: #fff1d1;
+}
+
+/* MODALS */
+
+.modal-box {
+  background: linear-gradient(
+    150deg,
+    #48136e,
+    #22083e,
+    #4a1558
+  ) !important;
+  border: 1px solid #ffda7b !important;
+  box-shadow: 0 0 30px rgba(220, 75, 255, .45);
+}
+
+.modal-header h3 {
+  color: #ffe2a0 !important;
+}
+
+.modal-box label {
+  color: #f0d6ff;
+}
+
+.modal-box input,
+.modal-box select {
+  background: #210b3b !important;
+  border: 1px solid #a65bcf !important;
+}
+
+.gift-grid button {
+  background: linear-gradient(145deg, #70279a, #35104f) !important;
+  border: 1px solid #e7adff !important;
+}
+
+.gift-grid button.selected {
+  border: 2px solid #ffdc78 !important;
+  box-shadow: 0 0 17px #ed4cae !important;
+}
+
+.primary-button {
+  background: linear-gradient(90deg, #8036d0, #e83c9d, #d99a35) !important;
+}
+
+.secondary-button {
+  background: #462064 !important;
+  border: 1px solid #c18aff !important;
+}
+
+/* MEMBER PROFILE */
+
+.member-profile-panel {
+  background:
+    radial-gradient(circle at 50% 0%, #8034a9, transparent 48%),
+    linear-gradient(160deg, #40115e, #19072e 75%) !important;
+  border: 1px solid #ffcf77 !important;
+  box-shadow: 0 -8px 35px rgba(216, 75, 255, .45);
+}
+
+.member-profile-avatar-wrap {
+  box-shadow: 0 0 18px #ed4cae !important;
+}
+
+.member-profile-name {
+  color: #ffe7b1;
+}
+
+.member-profile-id {
+  color: #e4b6ff;
+}
+
+.member-profile-bio,
+.member-profile-detail,
+.member-profile-stat {
+  background: rgba(122, 48, 151, .25) !important;
+  border-color: rgba(255, 205, 120, .3) !important;
+}
+
+/* TOAST */
+
+.toast {
+  background: linear-gradient(90deg, #542075, #a52b83) !important;
+  border: 1px solid #ffda83 !important;
+  box-shadow: 0 0 15px #c94cff;
+}
+
+/* SCROLLBAR */
+
+.chat-messages::-webkit-scrollbar-thumb,
+#membersList::-webkit-scrollbar-thumb,
+#giftRanking::-webkit-scrollbar-thumb {
+  background: linear-gradient(#e84aa9, #a64cff);
+}
+
+/* MOBILE TOUCH EFFECT */
+
+button {
+  transition: filter .2s ease, transform .2s ease;
+}
+
+button:active {
+  filter: brightness(1.25);
+}
+
+/* END ROYAL GALAXY DESIGN */
