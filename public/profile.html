@@ -1967,25 +1967,39 @@ button {
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
+<!-- HUKA FULL SCREEN SETTINGS -->
 
-<div class="modal" id="settingsModal">
-  <div class="modal-box">
-    <h2>⚙️ Settings</h2>
+<div id="settingsFullPage" style="display:none;">
+  <div class="huka-page-header">
+    <button onclick="closeSettings()" class="huka-back">‹</button>
+    <h2>Settings</h2>
+  </div>
 
-    <div class="info-row">
-      <span>Account ID</span>
-      <strong id="settingsId">-</strong>
-    </div>
+  <div class="huka-settings-list">
 
-    <button class="secondary" style="width:100%;margin-top:12px"
-      onclick="logout()">Log Out</button>
+    <button onclick="openSettingPage('blocked')">🚫 Blocked Users <span>›</span></button>
 
-    <button class="secondary" style="width:100%;margin-top:10px"
-      onclick="closeModal('settingsModal')">Close</button>
+    <button onclick="openSettingPage('about')">💜 About Huka Voice Chat <span>›</span></button>
+
+    <button onclick="openSettingPage('logout')">🚪 Logout <span>›</span></button>
+
+    <button onclick="openSettingPage('mobile')">📱 Mobile Number Login <span>›</span></button>
+
+    <button onclick="openSettingPage('google')">🔵 Google Login <span>›</span></button>
+
+    <button onclick="openSettingPage('backup')">🛡️ Permanent Account & Data Backup <span>›</span></button>
+
   </div>
 </div>
 
+<div id="settingSubPage" style="display:none;">
+  <div class="huka-page-header">
+    <button onclick="backToSettings()" class="huka-back">‹</button>
+    <h2 id="settingSubTitle">Settings</h2>
+  </div>
+  <div id="settingSubContent"></div>
+</div>
+  
 <div id="toast"></div>
 
 <script src="/socket.io/socket.io.js"></script>
