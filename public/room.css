@@ -2193,3 +2193,91 @@ button:active {
 }
 
 /* END ROYAL GALAXY DESIGN */
+
+/* ==================================
+   HUKA ROYAL LIVE GIFT ANIMATION
+================================== */
+
+.live-gift-animation {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(10, 3, 35, 0.30);
+}
+
+.live-gift-animation.hidden {
+  display: none !important;
+}
+
+.live-gift-card {
+  width: min(85%, 330px);
+  padding: 25px 18px;
+  text-align: center;
+  border: 2px solid #ffd76a;
+  border-radius: 25px;
+  background: linear-gradient(
+    145deg,
+    #30075e,
+    #8c176e,
+    #25094d
+  );
+  box-shadow:
+    0 0 20px #ff4fc8,
+    0 0 45px #a64dff,
+    inset 0 0 20px rgba(255, 215, 106, 0.25);
+  animation: hukaGiftPop 0.7s ease both;
+}
+
+.live-gift-sender {
+  color: #ffe7a0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.live-gift-icon {
+  margin: 18px 0;
+  font-size: 85px;
+  filter: drop-shadow(0 0 15px #ffb6ef);
+  animation: hukaGiftBounce 1s ease-in-out infinite;
+}
+
+.live-gift-name {
+  color: #fff0a8;
+  font-size: 25px;
+  font-weight: 900;
+  text-shadow: 0 0 12px #ff4fc8;
+}
+
+.live-gift-receiver {
+  margin-top: 12px;
+  color: white;
+  font-size: 16px;
+}
+
+@keyframes hukaGiftPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hukaGiftBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-12px) scale(1.12);
+  }
+}
