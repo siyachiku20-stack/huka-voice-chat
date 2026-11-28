@@ -1031,7 +1031,33 @@ function showLiveGiftAnimation(event) {
   };
 
   const giftName = event.giftName || event.gift || "Special Gift";
+ 
+  const card = container.querySelector(".live-gift-card");
 
+  if (card) {
+    card.classList.remove(
+      "rose-effect",
+      "heart-effect",
+      "crown-effect",
+      "diamond-effect",
+      "rocket-effect",
+      "castle-effect",
+      "galaxy-effect"
+    );
+
+    const effectName = {
+      Rose: "rose-effect",
+      Heart: "heart-effect",
+      Crown: "crown-effect",
+      Diamond: "diamond-effect",
+      Rocket: "rocket-effect",
+      Castle: "castle-effect",
+      Galaxy: "galaxy-effect"
+    };
+
+    card.classList.add(effectName[giftName] || "galaxy-effect");
+  }
+   
   sender.textContent =
     (event.senderName || event.from || "Someone") + " sent a gift";
 
