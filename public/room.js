@@ -1004,6 +1004,55 @@ function showGiftNotification(event) {
   }
 }
 
+/* ==================================
+   HUKA LIVE GIFT ANIMATION
+================================== */
+
+let liveGiftTimer = null;
+
+function showLiveGiftAnimation(event) {
+  const container = document.getElementById("liveGiftAnimation");
+
+  if (!container || !event) return;
+
+  const sender = document.getElementById("liveGiftSender");
+  const icon = document.getElementById("liveGiftIcon");
+  const name = document.getElementById("liveGiftName");
+  const receiver = document.getElementById("liveGiftReceiver");
+
+  const giftIcons = {
+    Rose: "🌹",
+    Heart: "💗",
+    Crown: "👑",
+    Diamond: "💎",
+    Rocket: "🚀",
+    Castle: "🏰",
+    Galaxy: "🌌"
+  };
+
+  const giftName = event.giftName || event.gift || "Special Gift";
+
+  sender.textContent =
+    (event.senderName || event.from || "Someone") + " sent a gift";
+
+  icon.textContent = giftIcons[giftName] || "🎁";
+
+  name.textContent = giftName;
+
+  receiver.textContent =
+    "To: " + (event.receiverName || event.to || "User");
+
+  container.classList.remove("hidden");
+
+  if (liveGiftTimer) {
+    clearTimeout(liveGiftTimer);
+  }
+
+  liveGiftTimer = setTimeout(() => {
+    container.classList.add("hidden");
+  }, 5000);
+}
+
 function showSVIPGiftEffect(event, level) {
   const effect = document.createElement("div");
 
