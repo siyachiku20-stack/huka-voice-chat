@@ -1795,7 +1795,11 @@ socket.on("emoji-event", data => {
 });
 
 socket.on("gift-event", event => {
+  // Purani gift notification
   showGiftNotification(event);
+
+  // Live gift animation
+  showLiveGiftAnimation(event);
 });
 
 socket.on("gift-ranking", ranking => {
