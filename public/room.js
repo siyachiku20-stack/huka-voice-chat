@@ -862,12 +862,20 @@ function showEmojiEvent(data) {
    GIFT SYSTEM
 ========================================== */
 
+let giftPrices = [];
+let selectedGift = "";
+
 function loadGifts() {
   socket.emit("get-gifts", response => {
 
-    if (!response || !response.ok) return;
+    if (!response || !response.ok) {
+      toast("Gifts load nahi hue.");
+      return;
+    }
 
-    giftPrices = response.gifts || {};
+    giftPrices = Array.isArray(response.gifts)
+      ? response.gifts
+      : [];
 
     renderGiftList();
   });
@@ -880,30 +888,21 @@ function renderGiftList() {
 
   box.innerHTML = "";
 
-  const giftEmojis = {
-    Rose: "🌹",
-    Heart: "💗",
-    Crown: "👑",
-    Diamond: "💎",
-    Rocket: "🚀",
-    Castle: "🏰",
-    Galaxy: "🌌"
-  };
+  giftPrices.forEach(gift => {
 
-  Object.entries(giftPrices).forEach(([name, price]) => {
     const button = document.createElement("button");
 
-    button.dataset.gift = name;
+    button.dataset.gift = gift.id;
 
     button.innerHTML = `
-      ${giftEmojis[name] || "🎁"}<br>
-      ${escapeHTML(name)}<br>
-      ${Number(price)} Coins
+      ${gift.icon || "🎁"}<br>
+      ${escapeHTML(gift.name)}<br>
+      ${Number(gift.price)} Coins
     `;
 
     button.addEventListener("click", () => {
 
-      selectedGift = name;
+      selectedGift = gift.id;
 
       box.querySelectorAll("button")
         .forEach(item => item.classList.remove("selected"));
@@ -916,14 +915,20 @@ function renderGiftList() {
 }
 
 $("giftButton").addEventListener("click", () => {
+
   selectedGift = "";
 
   $("giftCoins").textContent = currentCoins;
 
   showModal("giftModal");
+
+  if (!giftPrices.length) {
+    loadGifts();
+  }
 });
 
 $("sendGiftButton").addEventListener("click", async () => {
+
   if (!selectedGift) {
     toast("Pehle gift select karo.");
     return;
@@ -936,8 +941,12 @@ $("sendGiftButton").addEventListener("click", async () => {
     to: receiver
   });
 
-  if (!result.ok) {
-    toast(result.message || result.error || "Gift send nahi hua.");
+  if (!result || !result.ok) {
+    toast(
+      result?.message ||
+      result?.error ||
+      "Gift send nahi hua."
+    );
     return;
   }
 
