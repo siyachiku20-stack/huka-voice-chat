@@ -1863,9 +1863,10 @@ socket.on("youtube-link", event => {
 
 socket.on("voice-existing-peers", peerIds => {
   (peerIds || []).forEach(peerId => {
-    if (micStream) {
-      const pc = createPeer(peerId);
-      makeOffer(peerId, pc);
+    const pc = createPeer(peerId);
+      
+     if (micStream) {
+     makeOffer(peerId, pc);
     }
   });
 });
@@ -1873,9 +1874,7 @@ socket.on("voice-existing-peers", peerIds => {
 socket.on("voice-peer-joined", data => {
   if (!data?.socketId) return;
 
-  if (micStream) {
-    createPeer(data.socketId);
-  }
+  createPeer(data.socketId);
 });
 
 socket.on("voice-offer", data => {
