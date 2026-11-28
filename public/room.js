@@ -863,7 +863,7 @@ function showEmojiEvent(data) {
 ========================================== */
 
 function loadGifts() {
-  socket.emit("get-gifts", response => {
+  socket.emit("get-gifts", {}, response => {
 
     if (!response || !response.ok) {
       toast("Gifts load nahi hue.");
