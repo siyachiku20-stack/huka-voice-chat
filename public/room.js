@@ -2069,6 +2069,85 @@ function updateMemberFollowButton() {
 }
 
 /* ==========================================
+   BLOCK USER BUTTON
+========================================== */
+
+function ensureMemberBlockButton() {
+  const actions = $("memberProfileFollowActions");
+
+  if (!actions) return null;
+
+  let button = $("memberProfileBlockButton");
+
+  if (button) return button;
+
+  actions.style.gap = "10px";
+  actions.style.flexWrap = "wrap";
+
+  const followButton = $("memberProfileFollowButton");
+
+  if (followButton) {
+    followButton.style.width = "48%";
+  }
+
+  button = document.createElement("button");
+
+  button.id = "memberProfileBlockButton";
+  button.type = "button";
+  button.textContent = "🚫 Block";
+
+  button.style.cssText = `
+    width:48%;
+    padding:13px 10px;
+    border:0;
+    border-radius:25px;
+    background:linear-gradient(135deg,#ef4444,#be123c);
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+  `;
+
+  button.addEventListener("click", toggleMemberBlock);
+
+  actions.appendChild(button);
+
+  return button;
+}
+
+async function toggleMemberBlock() {
+  if (!activeMemberProfileId) return;
+
+  if (String(activeMemberProfileId) === String(userId)) {
+    return;
+  }
+
+  const button = $("memberProfileBlockButton");
+
+  if (!button || button.disabled) return;
+
+  if (!confirm("Kya aap is user ko block karna chahte hain?")) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Please wait...";
+
+  const result = await emitWithReply("block-user", {
+    userId: activeMemberProfileId
+  });
+
+  if (result.ok) {
+    button.textContent = "✓ Blocked";
+    toast("User Blocked Users list mein add ho gaya.");
+  } else {
+    button.disabled = false;
+    button.textContent = "🚫 Block";
+    toast(result.message || result.error || "Block nahi hua.");
+  }
+}
+
+/* ==========================================
    FOLLOW / UNFOLLOW ACTION
 ========================================== */
 
