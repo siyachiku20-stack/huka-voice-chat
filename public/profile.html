@@ -6234,90 +6234,169 @@ if (socket.connected) {
 
 <script>
 
-/* ---------- VISITORS LIST ---------- */
+/* ---------- FULL SCREEN VISITORS ---------- */
 
-function openVisitors() {
-    const profileSection = document.querySelector(".profile-header")?.parentElement;
-    const stats = document.querySelector(".stats");
-    const listSection = document.getElementById("profileListSection");
+async function openVisitors() {
+    const page = document.getElementById("profileListSection");
+    if (!page) return;
 
-    if (!listSection) return;
+    page.style.cssText = `
+        display:flex;
+        position:fixed;
+        inset:0;
+        width:100%;
+        height:100%;
+        z-index:999999;
+        background:#fff5dc;
+        flex-direction:column;
+        overflow:hidden;
+        padding:0;
+        margin:0;
+    `;
 
-    document.querySelectorAll("body > *").forEach(el => {
-        if (el.contains(listSection) || el === listSection) return;
+    page.innerHTML = `
+        <div style="
+            height:55px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            position:relative;
+            background:#fff5dc;
+            flex-shrink:0;
+        ">
+            <button onclick="closeProfileList()" style="
+                position:absolute;
+                left:15px;
+                border:0;
+                background:none;
+                font-size:30px;
+                color:#333;
+            ">‹</button>
+
+            <h2 style="margin:0;color:#29202e;">Visitors</h2>
+        </div>
+
+        <div id="profileListContent" style="
+            flex:1;
+            overflow-y:auto;
+            padding:10px 15px;
+        ">
+            Loading...
+        </div>
+    `;
+
+    const result = await emitRequest("get-profile", {
+        userId: getUserId()
     });
 
-    document.querySelectorAll("section").forEach(el => {
-        if (el !== listSection && !el.contains(listSection)) {
-            el.dataset.visitorHidden = el.style.display;
-            el.style.display = "none";
-        }
-    });
-
-    listSection.style.display = "block";
-
-    const title = document.getElementById("profileListTitle");
     const content = document.getElementById("profileListContent");
 
-    title.textContent = "👀 My Visitors";
-    content.innerHTML = "Loading visitors...";
+    if (!result || result.ok === false) {
+        content.textContent = "Visitors load nahi hue.";
+        return;
+    }
 
-    emitRequest("get-profile", {
-        userId: getUserId()
-    }).then(result => {
-        const visitors = result?.profile?.visitors || [];
-        content.innerHTML = "";
+    const visitors = result.profile?.visitors || [];
 
-        if (!visitors.length) {
-            content.textContent = "Abhi koi visitor nahi hai.";
-            return;
-        }
+    content.innerHTML = "";
 
-        visitors.forEach(visitor => {
-            const ago = Date.now() - Number(visitor.lastSeenAt || Date.now());
-            const minutes = Math.floor(ago / 60000);
-            const hours = Math.floor(ago / 3600000);
-            const days = Math.floor(ago / 86400000);
+    if (!visitors.length) {
+        content.textContent = "Abhi koi visitor nahi hai.";
+        return;
+    }
 
-            let timeText = "Abhi";
-            if (days > 0) timeText = days + " day ago";
-            else if (hours > 0) timeText = hours + " hours ago";
-            else if (minutes > 0) timeText = minutes + " minutes ago";
+    visitors.slice().reverse().forEach(visitor => {
+        const ago = Date.now() - Number(visitor.lastSeenAt || Date.now());
 
-            const row = document.createElement("div");
-            row.className = "visitor-item";
-            row.style.cssText = "display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #ddd;";
+        const minutes = Math.floor(ago / 60000);
+        const hours = Math.floor(ago / 3600000);
+        const days = Math.floor(ago / 86400000);
 
-            const img = document.createElement("img");
-            img.src = visitor.avatar || "https://placehold.co/50";
-            img.style.cssText = "width:50px;height:50px;border-radius:50%;object-fit:cover;";
+        let timeText = "Just now";
 
-            const details = document.createElement("div");
-            const name = document.createElement("strong");
-            name.textContent = visitor.name || "User";
+        if (days > 30) timeText = "30+ days ago";
+        else if (days > 0) timeText = days + (days === 1 ? " day ago" : " days ago");
+        else if (hours > 0) timeText = hours + (hours === 1 ? " hour ago" : " hours ago");
+        else if (minutes > 0) timeText = minutes + (minutes === 1 ? " minute ago" : " minutes ago");
 
-            const id = document.createElement("p");
-            id.textContent = "Huka ID: " + visitor.userId;
+        const row = document.createElement("div");
 
-            const time = document.createElement("p");
-            time.textContent = timeText + " · " + (visitor.count || 1) + " visits";
+        row.style.cssText = `
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-height:105px;
+            border-bottom:1px solid #eadfc9;
+            padding:10px 0;
+        `;
 
-            details.append(name, id, time);
-            row.append(img, details);
-            content.appendChild(row);
-        });
+        const avatar = document.createElement("img");
+        avatar.src = visitor.avatar || "https://placehold.co/100";
+        avatar.style.cssText = `
+            width:68px;
+            height:68px;
+            border-radius:50%;
+            object-fit:cover;
+            flex-shrink:0;
+        `;
+
+        const details = document.createElement("div");
+        details.style.cssText = `
+            flex:1;
+            min-width:0;
+        `;
+
+        const name = document.createElement("div");
+        name.textContent = visitor.name || "User";
+        name.style.cssText = `
+            font-size:16px;
+            font-weight:bold;
+            color:#30233b;
+            overflow-wrap:anywhere;
+        `;
+
+        const id = document.createElement("div");
+        id.textContent = "ID: " + visitor.userId;
+        id.style.cssText = `
+            font-size:12px;
+            color:#8c8192;
+            margin-top:5px;
+        `;
+
+        details.append(name, id);
+
+        const right = document.createElement("div");
+        right.style.cssText = `
+            text-align:right;
+            min-width:90px;
+            color:#514653;
+            font-size:13px;
+        `;
+
+        const time = document.createElement("div");
+        time.textContent = timeText;
+
+        const count = document.createElement("div");
+        count.textContent = (visitor.count || 1) + " times";
+        count.style.cssText = `
+            color:#a59a9b;
+            font-size:12px;
+            margin-top:5px;
+        `;
+
+        right.append(time, count);
+        row.append(avatar, details, right);
+        content.appendChild(row);
     });
 }
 
 function closeProfileList() {
-    const listSection = document.getElementById("profileListSection");
-    if (listSection) listSection.style.display = "none";
+    const page = document.getElementById("profileListSection");
 
-    document.querySelectorAll("[data-visitor-hidden]").forEach(el => {
-        el.style.display = el.dataset.visitorHidden;
-        delete el.dataset.visitorHidden;
-    });
-}
+    if (page) {
+        page.style.display = "none";
+    }
+  }
   
 </script>
   
