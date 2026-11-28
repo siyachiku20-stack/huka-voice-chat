@@ -57,6 +57,7 @@ let db = {
   nextRoomId: 100001,
   profiles: {},
   inbox: {},
+  blockedUsers: {},
   families: {},
   cpRequests: {},
   cdKeys: { HUKA100: { reward: 100000, usedBy: [] } }
@@ -73,6 +74,7 @@ try {
       ...saved,
       profiles: saved.profiles || {},
       inbox: saved.inbox || {},
+      blockedUsers: saved.blockedUsers || {},
       families: saved.families || {},
       cpRequests: saved.cpRequests || {},
       cdKeys: saved.cdKeys || { HUKA100: { reward: 100000, usedBy: [] } }
