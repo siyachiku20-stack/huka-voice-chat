@@ -1880,7 +1880,119 @@ result.followers = String(user.id) === targetProfileId
     profile: result
   });
 });
+   
+  /* =====================================
+     BLOCKED USERS SYSTEM
+  ===================================== */
 
+  // BLOCK USER
+  socket.on("block-user", (data, callback) => {
+    const user = getUser(socket);
+
+    if (!user) {
+      return reply(callback, {
+        ok: false,
+        message: "Register first"
+      });
+    }
+
+    const targetId = clean(data?.userId, 20);
+
+    if (!targetId || targetId === String(user.id)) {
+      return reply(callback, {
+        ok: false,
+        message: "Invalid user"
+      });
+    }
+
+    if (!db.profiles[targetId]) {
+      return reply(callback, {
+        ok: false,
+        message: "User not found"
+      });
+    }
+
+    db.blockedUsers ||= {};
+    db.blockedUsers[user.id] ||= [];
+
+    if (!db.blockedUsers[user.id].map(String).includes(targetId)) {
+      db.blockedUsers[user.id].push(targetId);
+    }
+
+    saveDB();
+
+    reply(callback, {
+      ok: true,
+      message: "User blocked successfully"
+    });
+  });
+
+
+  // GET BLOCKED USERS
+  socket.on("get-blocked-users", (data, callback) => {
+    const user = getUser(socket);
+
+    if (!user) {
+      return reply(callback, {
+        ok: false,
+        message: "Register first"
+      });
+    }
+
+    db.blockedUsers ||= {};
+
+    const blockedIds = db.blockedUsers[user.id] || [];
+
+    const blockedList = blockedIds
+      .map(id => {
+        const profile = db.profiles[String(id)];
+
+        if (!profile) return null;
+
+        return {
+          userId: String(profile.id),
+          name: profile.name || "User",
+          avatar: profile.avatar || ""
+        };
+      })
+      .filter(Boolean);
+
+    reply(callback, {
+      ok: true,
+      users: blockedList
+    });
+  });
+
+
+  // UNBLOCK USER
+  socket.on("unblock-user", (data, callback) => {
+    const user = getUser(socket);
+
+    if (!user) {
+      return reply(callback, {
+        ok: false,
+        message: "Register first"
+      });
+    }
+
+    const targetId = clean(data?.userId, 20);
+
+    db.blockedUsers ||= {};
+    db.blockedUsers[user.id] ||= [];
+
+    db.blockedUsers[user.id] =
+      db.blockedUsers[user.id].filter(
+        id => String(id) !== targetId
+      );
+
+    saveDB();
+
+    reply(callback, {
+      ok: true,
+      message: "User unblocked successfully"
+    });
+  });
+   
   socket.on("profile-update", (data, callback) => {
     const user = getUser(socket);
 
