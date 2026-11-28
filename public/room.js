@@ -862,9 +862,6 @@ function showEmojiEvent(data) {
    GIFT SYSTEM
 ========================================== */
 
-let giftPrices = [];
-let selectedGift = "";
-
 function loadGifts() {
   socket.emit("get-gifts", response => {
 
