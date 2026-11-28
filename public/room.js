@@ -2044,7 +2044,8 @@ function ensureMemberFollowButton() {
 function updateMemberFollowButton() {
   const button = ensureMemberFollowButton();
   const actions = $("memberProfileFollowActions");
-
+  ensureMemberBlockButton();
+   
   if (!button || !actions) return;
 
   // Apni profile par Follow button nahi dikhega.
