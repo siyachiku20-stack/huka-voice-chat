@@ -1035,7 +1035,7 @@ function showLiveGiftAnimation(event) {
   sender.textContent =
     (event.senderName || event.from || "Someone") + " sent a gift";
 
-  icon.textContent = giftIcons[giftName] || "🎁";
+  icon.textContent = event.giftIcon || giftIcons[giftName] || "🎁";
 
   name.textContent = giftName;
 
