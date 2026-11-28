@@ -637,3 +637,52 @@ a {
     align-items: center !important;
     white-space: normal !important;
 }
+
+/* =====================================
+   HUKA RESPONSIVE SETTINGS - ALL PHONES
+===================================== */
+
+#settingsFullPage,
+#settingSubPage {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+#settingsFullPage .huka-settings-list {
+    width: 100%;
+    padding: clamp(8px, 2.5vw, 18px) !important;
+    box-sizing: border-box !important;
+}
+
+#settingsFullPage .huka-settings-list > button {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: clamp(48px, 8vw, 65px) !important;
+    height: auto !important;
+    padding: clamp(9px, 2.5vw, 16px) !important;
+    gap: 8px;
+    font-size: clamp(11px, 3.5vw, 16px) !important;
+    line-height: 1.35;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    box-sizing: border-box !important;
+}
+
+#settingsFullPage .huka-settings-list button span {
+    flex-shrink: 0;
+}
+
+#settingsFullPage .huka-settings-list button span:first-child {
+    min-width: 0;
+}
+
+#settingsFullPage .huka-settings-list button span:last-child {
+    margin-left: auto;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
