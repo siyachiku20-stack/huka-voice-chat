@@ -5735,11 +5735,66 @@ async function contactManager() {
 /* ---------- SETTINGS ---------- */
 
 function openSettings() {
-    if ($("settingsId")) {
-        $("settingsId").textContent = getUserId();
-    }
+    $("settingsFullPage").style.display = "block";
+    $("settingSubPage").style.display = "none";
 
-    showModal("settingsModal");
+    document.querySelector("main").style.display = "none";
+
+    window.scrollTo(0, 0);
+}
+
+function closeSettings() {
+    $("settingsFullPage").style.display = "none";
+    $("settingSubPage").style.display = "none";
+
+    document.querySelector("main").style.display = "block";
+}
+
+function backToSettings() {
+    $("settingSubPage").style.display = "none";
+    $("settingsFullPage").style.display = "block";
+}
+
+function openSettingPage(type) {
+    const titles = {
+        blocked: "Blocked Users",
+        about: "About Huka Voice Chat",
+        logout: "Logout",
+        mobile: "Mobile Number Login",
+        google: "Google Login",
+        backup: "Permanent Account & Data Backup"
+    };
+
+    $("settingsFullPage").style.display = "none";
+    $("settingSubPage").style.display = "block";
+
+    $("settingSubTitle").textContent = titles[type] || "Settings";
+
+    const content = $("settingSubContent");
+    content.innerHTML = "";
+
+    const descriptions = {
+        blocked: "Your blocked users will appear here.",
+        about: "Welcome to Huka Voice Chat 💜 Connect, play and make friends.",
+        logout: "Logout will not delete your Huka account or your saved progress.",
+        mobile: "Mobile number login setup will be added here.",
+        google: "Google login setup will be added here.",
+        backup: "Your Huka ID, level, coins, diamonds and profile data should remain محفوظ."
+    };
+
+    const message = document.createElement("p");
+    message.textContent = descriptions[type] || "";
+    message.style.cssText = "padding:20px;color:#55445f;font-size:15px;";
+
+    content.appendChild(message);
+
+    if (type === "logout") {
+        const button = document.createElement("button");
+        button.textContent = "Log Out";
+        button.style.cssText = "margin:20px;padding:14px;width:calc(100% - 40px);border:0;border-radius:12px;background:#d9468f;color:white;font-weight:bold;";
+        button.onclick = logout;
+        content.appendChild(button);
+    }
 }
 
 function logout() {
