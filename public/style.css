@@ -486,3 +486,91 @@ a {
     color: #ffd2f1;
     font-size: 12px;
 }
+
+/* =================================
+   HUKA FULL SCREEN SETTINGS
+================================= */
+
+#settingsFullPage,
+#settingSubPage {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background: linear-gradient(145deg, #fff5fc, #f3e8ff);
+    z-index: 99999;
+    overflow-y: auto;
+    font-family: Arial, sans-serif;
+}
+
+.huka-page-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(90deg, #8738d5, #e34b9b);
+    color: white;
+    box-shadow: 0 3px 12px #0002;
+}
+
+.huka-page-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.huka-back {
+    position: absolute;
+    left: 14px;
+    top: 10px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff30;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.huka-settings-list {
+    padding: 15px;
+}
+
+.huka-settings-list button {
+    width: 100%;
+    min-height: 60px;
+    margin: 8px 0;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #efd8fa;
+    border-radius: 14px;
+    background: white;
+    color: #51316c;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: left;
+    box-shadow: 0 3px 10px #8d45b51a;
+    cursor: pointer;
+}
+
+.huka-settings-list button:active {
+    background: #fce7f5;
+    transform: scale(.98);
+}
+
+#settingSubContent {
+    padding: 10px;
+}
+
+#settingSubContent p {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    line-height: 1.7;
+}
