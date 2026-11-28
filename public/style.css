@@ -611,3 +611,29 @@ a {
     clear: both !important;
     box-sizing: border-box !important;
 }
+
+/* HUKA SETTINGS - FORCE VERTICAL LAYOUT */
+
+#settingsFullPage .huka-settings-list {
+    display: block !important;
+    width: 100% !important;
+    padding: 15px !important;
+    box-sizing: border-box !important;
+}
+
+#settingsFullPage .huka-settings-list > button {
+    display: flex !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 16px !important;
+    float: none !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+    flex: none !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    white-space: normal !important;
+}
